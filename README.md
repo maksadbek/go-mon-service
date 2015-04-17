@@ -16,9 +16,13 @@ the sample config file:
 ```
 
 To add any sub-info into config file
+
 1. Create struct with the same subtree name in conf/conf.go
     i.e: 
-    ```
+  
+```
+#!go
+
     type Datastore struct {
         Redis struct {
             Port string
@@ -30,16 +34,21 @@ To add any sub-info into config file
             passwd string
         }
     }
-    ```
+```
+
 2. Add info in config.toml
-    ```
-    [ds]
-        [ds.redis]
-            port = "6379"
-            chan = "orders"
-        [ds.postgres]
-            login = "superuser"
-            passwd = "p@$$"
-    [srv]
-        port = "1234"
-    ```
+    
+```
+
+[ds]
+    [ds.redis]
+        port = "6379"
+        chan = "orders"
+    [ds.postgres]
+         login = "superuser"
+         passwd = "p@$$"
+[srv]
+    port = "1234"
+
+```
+
