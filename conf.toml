@@ -1,0 +1,7 @@
+[ds]
+    [ds.redis]
+        port = ":6379"
+[srv]
+    port = "1234"
+[log]
+    path = "info.log"

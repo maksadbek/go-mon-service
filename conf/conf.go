@@ -7,7 +7,7 @@ import (
 
 type Datastore struct {
 	Redis struct {
-		Port string
+		Host string
 		Chan string
 	}
 }
@@ -24,7 +24,7 @@ type App struct {
 }
 
 type Log struct {
-	Attrs []string
+	Path string
 }
 
 func Read(r io.Reader) (config App, err error) {

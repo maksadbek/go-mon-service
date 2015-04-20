@@ -9,11 +9,12 @@ func TestRead(t *testing.T) {
 
 	mockConf := `
 [ds]
-	[ds.redis]
-		port = "6379"
-		chan = "orders"
+    [ds.redis]
+		host = ":6379"
 [srv]
-	port = "1234"
+    port = "1234"
+[log]
+    path = "info.log"
 `
 
 	r := strings.NewReader(mockConf)
@@ -21,17 +22,19 @@ func TestRead(t *testing.T) {
 	if err != nil {
 		t.Errorf("Read error: %s", err)
 	}
-	want := "6379"
-	if got := app.DS.Redis.Port; got != want {
-		t.Errorf("Datastore Redis Port %d, want %d", got, want)
+
+	want := ":6379"
+	if got := app.DS.Redis.Host; got != want {
+		t.Errorf("Datastore Redis Host %d, want %d", got, want)
 	}
 
 	want = "1234"
-	t.Logf("%+v\n %+v\n", app.SRV.Port, want)
-	/*
-		if got := app.SRV.Port; got != want {
-			t.Log(got, want)
-			t.Errorf("Websocket Port %d, want %d", got, want)
-		}
-	*/
+	if got := app.SRV.Port; got != want {
+		t.Errorf("Server Port %d, want %d", got, want)
+	}
+
+	want = "info.log"
+	if got := app.Log.Path; got != want {
+		t.Errorf("got %s, want %s", got, want)
+	}
 }
