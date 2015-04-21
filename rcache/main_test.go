@@ -30,9 +30,8 @@ func TestMain(m *testing.M) {
 		panic(err)
 	}
 
-	trackers := []string{"id123", "id456", "id789"}
-	for _, x := range trackers {
-		rc.Do("LPUSH", "fleet_202", x)
+	for _, x := range FleetTest.Trackers {
+		rc.Do("RPUSH", FleetTest.FleetName, x)
 	}
 	rc.Close()
 	m.Run()

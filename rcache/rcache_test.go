@@ -58,26 +58,24 @@ func TestFleetTrackers(t *testing.T) {
 	if err != nil {
 		t.Error(err)
 	}
-	fleet := "fleet_202"
-	trackers := []string{"id789", "id456", "id123"}
 
 	// get trackers
-	trackersTest, err := GetTrackers(fleet, 0, 100)
+	trackersTest, err := GetTrackers(FleetTest.FleetName, 0, 100)
 	if err != nil {
 		t.Error(err)
 	}
 
 	// check tracker's id
-	for index, val := range trackers {
+	for index, val := range FleetTest.Trackers {
 		got := trackersTest[index]
 		if val != got {
-			t.Errorf("Want %s, got %s\n", val, got)
+			t.Errorf("want %s, got %s\n", val, got)
 		}
 	}
 
 	// remove tracker data from redis
-	for range trackers {
-		rc.Do("LPOP", "fleet_202")
+	for range FleetTest.Trackers {
+		rc.Do("LPOP", FleetTest.FleetName)
 	}
 	defer rc.Close()
 }
