@@ -17,3 +17,15 @@ func Initialize(c conf.App) (err error) {
 	}
 	return
 }
+
+func GetTrackers(fleet string, start, stop int) (trackers []string, err error) {
+	v, err := redis.Strings(rc.Do("LRANGE", fleet, start, stop))
+	if err != nil {
+		return
+	}
+
+	for _, val := range v {
+		trackers = append(trackers, val)
+	}
+	return
+}
