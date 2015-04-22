@@ -9,16 +9,8 @@ import (
 )
 
 func TestInit(t *testing.T) {
-	mockConf := `
-[ds]
-    [ds.redis]
-		host = ":6379"
-[srv]
-    port = "1234"
-[log]
-    path = "info.log"
-`
-
+	// close the connection
+	defer rc.Close()
 	r := strings.NewReader(mockConf)
 	app, err := conf.Read(r)
 	err = Initialize(app)
@@ -37,11 +29,10 @@ func TestInit(t *testing.T) {
 	if fmt.Sprintf("%s", v) != test {
 		t.Errorf("want %s, got %s\n", v, test)
 	}
-	// close the connection
-	defer rc.Close()
 }
 
 func TestFleetTrackers(t *testing.T) {
+	defer rc.Close()
 	mockConf := `
 [ds]
     [ds.redis]
@@ -77,5 +68,13 @@ func TestFleetTrackers(t *testing.T) {
 	for range FleetTest.Trackers {
 		rc.Do("LPOP", FleetTest.FleetName)
 	}
-	defer rc.Close()
+}
+
+func TestPushToRedis(t *testing.T) {
+	// push mock data into redis
+
+	err := PushRedis(testFleet)
+	if err != nil {
+		t.Error(err)
+	}
 }
