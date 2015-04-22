@@ -7,8 +7,8 @@ import (
 
 type Datastore struct {
 	Redis struct {
-		Host string
-		Chan string
+		Host    string // host of the redis server
+		FPrefix string // prefix for fleet name in redis, i.e: in fleet_202, fleet is the prefix
 	}
 }
 
