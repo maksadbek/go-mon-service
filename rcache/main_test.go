@@ -26,8 +26,11 @@ func TestMain(m *testing.M) {
 	}
 	retCode := m.Run()
 
-	for range FleetTest.Trackers {
+	// clean up messed redis test zone
+	for _, x := range FleetTest.Trackers {
 		rc.Do("LPOP", FleetTest.FleetName)
+		rc.Do("SPOP", x)
 	}
+
 	os.Exit(retCode)
 }

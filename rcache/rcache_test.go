@@ -1,7 +1,6 @@
 package rcache
 
 import (
-	"encoding/json"
 	"fmt"
 	"strings"
 	"testing"
@@ -79,6 +78,9 @@ func TestGetPositions(t *testing.T) {
 	if err != nil {
 		t.Error(err)
 	}
-	js, err := json.MarshalIndent(flt, "", "\t")
-	t.Logf("\n%s\n", js)
+	for _, x := range FleetTest.Trackers {
+		if flt.Update[x].Id != testFleet.Update[x].Id {
+			t.Errorf("want %+v, got %+v", testFleet.Update[x], flt.Update[x])
+		}
+	}
 }
