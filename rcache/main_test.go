@@ -1,6 +1,7 @@
 package rcache
 
 import (
+	"os"
 	"strings"
 	"testing"
 
@@ -23,6 +24,10 @@ func TestMain(m *testing.M) {
 	for _, x := range FleetTest.Trackers {
 		rc.Do("RPUSH", FleetTest.FleetName, x)
 	}
+	retCode := m.Run()
 
-	m.Run()
+	for range FleetTest.Trackers {
+		rc.Do("LPOP", FleetTest.FleetName)
+	}
+	os.Exit(retCode)
 }

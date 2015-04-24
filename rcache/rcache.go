@@ -2,6 +2,7 @@ package rcache
 
 import (
 	"encoding/json"
+	"fmt"
 
 	"bitbucket.org/maksadbek/go-mon-service/conf"
 	"github.com/garyburd/redigo/redis"
@@ -51,7 +52,34 @@ func PushRedis(fleet Fleet) (err error) {
 		if err != nil {
 			return err
 		}
-		rc.Do("SADD", config.DS.Redis.FPrefix+fleet.Id+":"+k, jpos)
+		rc.Do("SADD", k, jpos)
 	}
 	return
+}
+func GetPositions(fleetNum string, start, stop int) (Fleet, error) {
+	fleet := Fleet{}
+	fleet.Id = fleetNum
+	fleet.Update = make(map[string]Pos)
+	trackers, err := GetTrackers(fleetNum, start, stop)
+	if err != nil {
+		return fleet, err
+	}
+
+	for _, v := range trackers {
+		pBytes, err := redis.Values(rc.Do("SMEMBERS", v))
+		if err != nil {
+			return fleet, err
+		}
+		for _, x := range pBytes {
+			p := fmt.Sprintf("%s", x)
+			var pos Pos
+			err = json.Unmarshal([]byte(p), &pos)
+			if err != nil {
+				return fleet, err
+			}
+
+			fleet.Update[v] = pos
+		}
+	}
+	return fleet, err
 }

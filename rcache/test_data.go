@@ -5,7 +5,7 @@ var FleetTest = struct {
 	Trackers  []string
 }{
 	"fleet_202",
-	[]string{"id123", "id456", "id789"},
+	[]string{"106206", "107749"},
 }
 var mockConf string = `
 [ds]

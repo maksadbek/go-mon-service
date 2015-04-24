@@ -1,6 +1,7 @@
 package rcache
 
 import (
+	"encoding/json"
 	"fmt"
 	"strings"
 	"testing"
@@ -63,18 +64,21 @@ func TestFleetTrackers(t *testing.T) {
 			t.Errorf("want %s, got %s\n", val, got)
 		}
 	}
-
-	// remove tracker data from redis
-	for range FleetTest.Trackers {
-		rc.Do("LPOP", FleetTest.FleetName)
-	}
 }
 
 func TestPushToRedis(t *testing.T) {
 	// push mock data into redis
-
 	err := PushRedis(testFleet)
 	if err != nil {
 		t.Error(err)
 	}
+}
+
+func TestGetPositions(t *testing.T) {
+	flt, err := GetPositions(FleetTest.FleetName, 0, 100)
+	if err != nil {
+		t.Error(err)
+	}
+	js, err := json.MarshalIndent(flt, "", "\t")
+	t.Logf("\n%s\n", js)
 }
