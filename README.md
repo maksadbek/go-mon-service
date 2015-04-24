@@ -52,3 +52,44 @@ To add any sub-info into config file
 
 ```
 
+## Rcache(redis cache) ##
+Each fleet is save in the following structure
+
+```
+    #!go
+
+type Pos struct {
+	Id        int
+	Latitude  string
+	Longitude string
+	Time      string
+}
+
+type Fleet struct {
+	Id     string
+	Update map[string]Pos
+}
+```
+
+This stucture becomes to the following JSON format
+
+
+```
+{
+	"Id": "fleet_202",
+	"Update": {
+		"106206": {
+			"Id": 106206,
+			"Latitude": "41.260006",
+			"Longitude": "69.145340",
+			"Time": "2015-04-21 17:59:59"
+		},
+		"107749": {
+			"Id": 107749,
+			"Latitude": "41.293964",
+			"Longitude": "69.245811",
+			"Time": "2015-03-26 13:29:06"
+		}
+	}
+}
+```
