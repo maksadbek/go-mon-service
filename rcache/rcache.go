@@ -14,10 +14,26 @@ var (
 )
 
 type Pos struct {
-	Id        int
-	Latitude  string
-	Longitude string
-	Time      string
+	Id            int    `json:"id"`
+	Latitude      string `json:"latitude"`
+	Longitude     string `json:"longitude"`
+	Time          string `json:"time"`
+	Owner         string `json:"owner"`
+	Number        string `json:"number"`
+	Name          string `json:"name"`
+	Direction     int    `json:"direction"`
+	Speed         int    `json:"speed"`
+	Sat           int    `json:"sat"`
+	Ignition      int    `json:"ignition"`
+	GsmSignal     int    `json:"gsmsignal"`
+	Battery       int    `json:"battery66"`
+	Seat          int    `json:"seat"`
+	BatteryLvl    int    `json:"batterylvl"`
+	Fuel          int    `json:"fuel"`
+	FuelVal       int    `json:"fuel_val"`
+	MuAdditional  string `json:"mu_additional"`
+	Customization string `json:"customization"`
+	Additional    string `json:"additional"`
 }
 
 type Fleet struct {
