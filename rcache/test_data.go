@@ -22,11 +22,11 @@ var testFleet Fleet = Fleet{
 	Update: map[string]Pos{
 		"106206": Pos{
 			Id:            106206,
-			Longitude:     "69.145340",
+			Longitude:     69.145340,
 			Owner:         "Ozodbek",
 			Number:        "01 S 775 JS",
 			Name:          "Lacetti",
-			Latitude:      "41.260006",
+			Latitude:      41.260006,
 			Direction:     47,
 			Speed:         10,
 			Sat:           9,
@@ -44,8 +44,8 @@ var testFleet Fleet = Fleet{
 		},
 		"107749": Pos{
 			Id:            107749,
-			Latitude:      "41.260006",
-			Longitude:     "69.245811",
+			Latitude:      41.260006,
+			Longitude:     69.245811,
 			Owner:         "Odil",
 			Number:        "Acer Test",
 			Name:          "Personal Acer",
@@ -66,11 +66,11 @@ var testFleet Fleet = Fleet{
 		},
 		"107699": Pos{
 			Id:            107699,
-			Longitude:     "69.245926",
+			Longitude:     69.245926,
+			Latitude:      41.293530,
 			Owner:         "Odil",
 			Number:        "01 048 QA",
 			Name:          "PersonalAndroid",
-			Latitude:      "41.293530",
 			Direction:     225,
 			Speed:         10,
 			Sat:           99,

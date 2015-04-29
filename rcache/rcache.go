@@ -14,26 +14,26 @@ var (
 )
 
 type Pos struct {
-	Id            int    `json:"id"`
-	Latitude      string `json:"latitude"`
-	Longitude     string `json:"longitude"`
-	Time          string `json:"time"`
-	Owner         string `json:"owner"`
-	Number        string `json:"number"`
-	Name          string `json:"name"`
-	Direction     int    `json:"direction"`
-	Speed         int    `json:"speed"`
-	Sat           int    `json:"sat"`
-	Ignition      int    `json:"ignition"`
-	GsmSignal     int    `json:"gsmsignal"`
-	Battery       int    `json:"battery66"`
-	Seat          int    `json:"seat"`
-	BatteryLvl    int    `json:"batterylvl"`
-	Fuel          int    `json:"fuel"`
-	FuelVal       int    `json:"fuel_val"`
-	MuAdditional  string `json:"mu_additional"`
-	Customization string `json:"customization"`
-	Additional    string `json:"additional"`
+	Id            int     `json:"id"`
+	Latitude      float32 `json:"latitude"`
+	Longitude     float32 `json:"longitude"`
+	Time          string  `json:"time"`
+	Owner         string  `json:"owner"`
+	Number        string  `json:"number"`
+	Name          string  `json:"name"`
+	Direction     int     `json:"direction"`
+	Speed         int     `json:"speed"`
+	Sat           int     `json:"sat"`
+	Ignition      int     `json:"ignition"`
+	GsmSignal     int     `json:"gsmsignal"`
+	Battery       int     `json:"battery66"`
+	Seat          int     `json:"seat"`
+	BatteryLvl    int     `json:"batterylvl"`
+	Fuel          int     `json:"fuel"`
+	FuelVal       int     `json:"fuel_val"`
+	MuAdditional  string  `json:"mu_additional"`
+	Customization string  `json:"customization"`
+	Additional    string  `json:"additional"`
 }
 
 type Fleet struct {
@@ -68,7 +68,7 @@ func PushRedis(fleet Fleet) (err error) {
 		if err != nil {
 			return err
 		}
-		rc.Do("SADD", k, jpos)
+		rc.Do("LPUSH", "tracker:"+k, jpos)
 	}
 	return
 }
@@ -82,20 +82,29 @@ func GetPositions(fleetNum string, start, stop int) (Fleet, error) {
 	}
 
 	for _, v := range trackers {
-		pBytes, err := redis.Values(rc.Do("SMEMBERS", v))
+		pBytes, err := rc.Do("LINDEX", "tracker:"+v, -1)
 		if err != nil {
 			return fleet, err
 		}
-		for _, x := range pBytes {
-			p := fmt.Sprintf("%s", x)
-			var pos Pos
-			err = json.Unmarshal([]byte(p), &pos)
-			if err != nil {
-				return fleet, err
-			}
-
-			fleet.Update[v] = pos
+		p := fmt.Sprintf("%s", pBytes)
+		fmt.Println(p)
+		var pos Pos
+		err = json.Unmarshal([]byte(p), &pos)
+		if err != nil {
+			return fleet, err
 		}
+
+		fleet.Update[v] = pos
 	}
 	return fleet, err
+}
+
+func GetLindex() error {
+	p, err := rc.Do("LINDEX", "fleet_202", -1)
+	if err != nil {
+		return err
+	}
+
+	fmt.Printf("%s", p)
+	return nil
 }
