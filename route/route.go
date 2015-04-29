@@ -18,19 +18,7 @@ func Initialize(c conf.App) error {
 	return err
 }
 func GetPositionHandler(w http.ResponseWriter, r *http.Request) {
-	pos, err := rcache.GetPositions("fleet_202", 0, 100)
-	if err != nil {
-		panic(err)
-	}
-	jpos, err := json.Marshal(pos)
-	if err != nil {
-		panic(err)
-	}
-
-	w.Write([]byte(jpos))
-
 	rand.Seed(time.Now().UTC().UnixNano())
-
 	var testFleet rcache.Fleet = rcache.Fleet{
 		Id: "202",
 		Update: map[string]rcache.Pos{
@@ -102,11 +90,28 @@ func GetPositionHandler(w http.ResponseWriter, r *http.Request) {
 			},
 		},
 	}
+	pos, err := rcache.GetPositions("fleet_202", 0, 100)
+	if err != nil {
+		panic(err)
+	}
+
+	for key, x := range pos.Update {
+		pos := testFleet.Update[key]
+		pos.Latitude = x.Latitude + float32(0.00001)
+		pos.Longitude = x.Longitude + float32(0.00001)
+		testFleet.Update[key] = pos
+	}
+	jpos, err := json.Marshal(pos)
+	if err != nil {
+		panic(err)
+	}
 
 	err = rcache.PushRedis(testFleet)
 	if err != nil {
 		panic(err)
 	}
+
+	w.Write([]byte(jpos))
 }
 func randInt(min int, max int) int {
 	return min + rand.Intn(max-min)

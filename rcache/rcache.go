@@ -68,7 +68,7 @@ func PushRedis(fleet Fleet) (err error) {
 		if err != nil {
 			return err
 		}
-		rc.Do("LPUSH", "tracker:"+k, jpos)
+		rc.Do("RPUSH", "tracker:"+k, jpos)
 	}
 	return
 }
@@ -87,7 +87,6 @@ func GetPositions(fleetNum string, start, stop int) (Fleet, error) {
 			return fleet, err
 		}
 		p := fmt.Sprintf("%s", pBytes)
-		fmt.Println(p)
 		var pos Pos
 		err = json.Unmarshal([]byte(p), &pos)
 		if err != nil {
@@ -97,14 +96,4 @@ func GetPositions(fleetNum string, start, stop int) (Fleet, error) {
 		fleet.Update[v] = pos
 	}
 	return fleet, err
-}
-
-func GetLindex() error {
-	p, err := rc.Do("LINDEX", "fleet_202", -1)
-	if err != nil {
-		return err
-	}
-
-	fmt.Printf("%s", p)
-	return nil
 }

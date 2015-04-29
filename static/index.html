@@ -116,8 +116,6 @@ function setMarkerPos()
         dataType: 'text',
         success: function(data) {
             var jpos = JSON.parse(data);
-            jpos.Update[106206].latitude = 41.319298;
-            jpos.Update[106206].longitude = 69.299599;
             jpos.Update[106206].customization='a:1:{s:9:"fillcolor";s:7:"#FF0000";}';
             jpos.Update[106206].additional='69:1;66:13864;70:281;67:3627;199:0;';
             console.log(jpos.Update[106206]);
@@ -128,6 +126,8 @@ function setMarkerPos()
         }.bind(this)
     });
 }
+
+setInterval(setMarkerPos(), 3000)
 </script>
 </head> 
 <body onload="initialize()">
