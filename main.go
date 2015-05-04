@@ -28,5 +28,5 @@ func main() {
 	route.Initialize(app)
 	http.Handle("/", http.FileServer(http.Dir("static/")))
 	http.HandleFunc("/positions", route.GetPositionHandler)
-	http.ListenAndServe(":8088", nil)
+	http.ListenAndServe(app.SRV.Port, nil)
 }

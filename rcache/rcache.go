@@ -1,3 +1,9 @@
+// @author: Maksadbek
+// @email: a.maksadbek@gmail.com:
+/*
+   пакет для кеширования данных 
+*/
+
 package rcache
 
 import (
@@ -13,6 +19,7 @@ var (
 	rc     redis.Conn // redis client
 )
 
+// структура для позиции трекера
 type Pos struct {
 	Id            int     `json:"id"`
 	Latitude      float32 `json:"latitude"`
@@ -34,13 +41,17 @@ type Pos struct {
 	MuAdditional  string  `json:"mu_additional"`
 	Customization string  `json:"customization"`
 	Additional    string  `json:"additional"`
+	Action        int     `json:"action"`
 }
 
+// структура для флита
 type Fleet struct {
 	Id     string
 	Update map[string]Pos
 }
 
+// функция для инициализации пакета
+// оно должна вызыватся первые перед исползованием пакета
 func Initialize(c conf.App) (err error) {
 	config = c
 	rc, err = redis.Dial("tcp", c.DS.Redis.Host)
@@ -50,6 +61,7 @@ func Initialize(c conf.App) (err error) {
 	return
 }
 
+// функция используется для получения трекеров флита
 func GetTrackers(fleet string, start, stop int) (trackers []string, err error) {
 	v, err := redis.Strings(rc.Do("LRANGE", fleet, start, stop))
 	if err != nil {
@@ -62,16 +74,19 @@ func GetTrackers(fleet string, start, stop int) (trackers []string, err error) {
 	return
 }
 
+// функция исползуется для вставления данный в редис
 func PushRedis(fleet Fleet) (err error) {
 	for k, x := range fleet.Update {
 		jpos, err := json.Marshal(x)
 		if err != nil {
 			return err
 		}
-		rc.Do("RPUSH", "tracker:"+k, jpos)
+		rc.Do("RPUSH", config.DS.Redis.TPrefix+":"+k, jpos)
 	}
 	return
 }
+
+// исползуется для получения позиции трекеров флита
 func GetPositions(fleetNum string, start, stop int) (Fleet, error) {
 	fleet := Fleet{}
 	fleet.Id = fleetNum
@@ -82,7 +97,10 @@ func GetPositions(fleetNum string, start, stop int) (Fleet, error) {
 	}
 
 	for _, v := range trackers {
-		pBytes, err := rc.Do("LINDEX", "tracker:"+v, -1)
+		pBytes, err := rc.Do(
+			"LINDEX",
+			config.DS.Redis.TPrefix+":"+v,
+			-1)
 		if err != nil {
 			return fleet, err
 		}

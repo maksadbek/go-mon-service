@@ -106,11 +106,11 @@ function setMapMode(pos)
     }
     
     MonitoringTools.MonitoringInit([]);	
-    mon.obj_array(tmpData, true);	
+    mon.obj_array(pos, true);	
 }
 
-function setMarkerPos()
-{
+    setInterval(
+function setMarkerPos() {
     $.ajax({
         url: "/positions",
         dataType: 'text',
@@ -118,16 +118,19 @@ function setMarkerPos()
             var jpos = JSON.parse(data);
             jpos.Update[106206].customization='a:1:{s:9:"fillcolor";s:7:"#FF0000";}';
             jpos.Update[106206].additional='69:1;66:13864;70:281;67:3627;199:0;';
-            console.log(jpos.Update[106206]);
-            setMapMode(jpos.Update[106206]);
+            jpos.Update[106206].action=2;
+            jpos.Update[107699].action=2;
+            var positions = [];
+            positions.push(jpos.Update[106206]);
+            positions.push(jpos.Update[107699]);
+            console.log(positions);
+            setMapMode(positions);
         }.bind(this),
         error: function(xhr, status, err) {
             console.err(err.toString());
         }.bind(this)
     });
-}
-
-setInterval(setMarkerPos(), 3000)
+} , 3000);
 </script>
 </head> 
 <body onload="initialize()">

@@ -43,6 +43,7 @@ func GetPositionHandler(w http.ResponseWriter, r *http.Request) {
 				MuAdditional:  "",
 				Customization: "a:1:{s:9:\"fillcolor\";s:7:\"#FF0000\";}",
 				Additional:    "additional",
+				Action:        1,
 			},
 			"107749": rcache.Pos{
 				Id:            107749,
@@ -65,6 +66,7 @@ func GetPositionHandler(w http.ResponseWriter, r *http.Request) {
 				MuAdditional:  "",
 				Customization: "a:1:{s:9:\"fillcolor\";s:7:\"#FF0000\";}",
 				Additional:    "additional",
+				Action:        1,
 			},
 			"107699": rcache.Pos{
 				Id:            107699,
@@ -87,6 +89,7 @@ func GetPositionHandler(w http.ResponseWriter, r *http.Request) {
 				MuAdditional:  "",
 				Customization: "a:1:{s:9:\"fillcolor\";s:7:\"#FF0000\";}",
 				Additional:    "",
+				Action:        1,
 			},
 		},
 	}
@@ -97,8 +100,8 @@ func GetPositionHandler(w http.ResponseWriter, r *http.Request) {
 
 	for key, x := range pos.Update {
 		pos := testFleet.Update[key]
-		pos.Latitude = x.Latitude + float32(0.00001)
-		pos.Longitude = x.Longitude + float32(0.00001)
+		pos.Latitude = x.Latitude + float32(0.00011)
+		pos.Longitude = x.Longitude + float32(0.00011)
 		testFleet.Update[key] = pos
 	}
 	jpos, err := json.Marshal(pos)

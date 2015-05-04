@@ -37,8 +37,10 @@ func TestFleetTrackers(t *testing.T) {
 [ds]
     [ds.redis]
 		host = ":6379"
+		fprefix = "fleet"
+        tprefix = "tracker"
 [srv]
-    port = "1234"
+	port = ":1234"
 [log]
     path = "info.log"
 `

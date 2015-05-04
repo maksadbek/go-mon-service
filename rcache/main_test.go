@@ -10,8 +10,8 @@ import (
 )
 
 func TestMain(m *testing.M) {
-	r := strings.NewReader(mockConf)
-	app, err := conf.Read(r)
+	r := strings.NewReader(mockConf) // читает мок-данные из testdata.go
+	app, err := conf.Read(r)         // 
 	if err != nil {
 		panic(err)
 	}
@@ -27,10 +27,12 @@ func TestMain(m *testing.M) {
 	retCode := m.Run()
 
 	// clean up messed redis test zone
-	for _, x := range FleetTest.Trackers {
-		rc.Do("LPOP", FleetTest.FleetName)
-		rc.Do("SPOP", x)
-	}
+	/*
+		for _, x := range FleetTest.Trackers {
+			rc.Do("LPOP", FleetTest.FleetName)
+			rc.Do("LPOP", x)
+		}
+	*/
 
 	os.Exit(retCode)
 }
