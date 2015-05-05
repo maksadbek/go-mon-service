@@ -1,7 +1,7 @@
 // @author: Maksadbek
 // @email: a.maksadbek@gmail.com:
 /*
-   пакет для кеширования данных 
+   пакет для кеширования данных
 */
 
 package rcache
@@ -11,6 +11,8 @@ import (
 	"fmt"
 
 	"bitbucket.org/maksadbek/go-mon-service/conf"
+	log "bitbucket.org/maksadbek/go-mon-service/logger"
+	"github.com/Sirupsen/logrus"
 	"github.com/garyburd/redigo/redis"
 )
 
@@ -53,9 +55,19 @@ type Fleet struct {
 // функция для инициализации пакета
 // оно должна вызыватся первые перед исползованием пакета
 func Initialize(c conf.App) (err error) {
+	log.Log.WithFields(logrus.Fields{
+		"package": "rcache",
+		"config":  fmt.Sprintf("%+v", c),
+	}).Info("Initialization")
+
 	config = c
 	rc, err = redis.Dial("tcp", c.DS.Redis.Host)
 	if err != nil {
+		log.Log.WithFields(logrus.Fields{
+			"package":         "rcache",
+			"Redis Dial host": c.DS.Redis.Host,
+			"Error":           err.Error(),
+		}).Fatal("Redis.Dial")
 		return err
 	}
 	return
@@ -63,8 +75,19 @@ func Initialize(c conf.App) (err error) {
 
 // функция используется для получения трекеров флита
 func GetTrackers(fleet string, start, stop int) (trackers []string, err error) {
+	log.Log.WithFields(logrus.Fields{
+		"package": "rcache",
+		"fleet":   fleet,
+		"start":   start,
+		"stop":    stop,
+	}).Info("GetTrackers")
+
 	v, err := redis.Strings(rc.Do("LRANGE", fleet, start, stop))
 	if err != nil {
+		log.Log.WithFields(logrus.Fields{
+			"package": "rcache",
+			"Error":   err.Error(),
+		}).Warn("GetTrackers")
 		return
 	}
 
@@ -76,9 +99,16 @@ func GetTrackers(fleet string, start, stop int) (trackers []string, err error) {
 
 // функция исползуется для вставления данный в редис
 func PushRedis(fleet Fleet) (err error) {
+	log.Log.WithFields(logrus.Fields{
+		"package": "rcache",
+	}).Info("PushRedis")
 	for k, x := range fleet.Update {
 		jpos, err := json.Marshal(x)
 		if err != nil {
+			log.Log.WithFields(logrus.Fields{
+				"package": "rcache",
+				"error":   err.Error(),
+			}).Warn("PushRedis")
 			return err
 		}
 		rc.Do("RPUSH", config.DS.Redis.TPrefix+":"+k, jpos)
@@ -88,11 +118,21 @@ func PushRedis(fleet Fleet) (err error) {
 
 // исползуется для получения позиции трекеров флита
 func GetPositions(fleetNum string, start, stop int) (Fleet, error) {
+	log.Log.WithFields(logrus.Fields{
+		"package":     "rcache",
+		"fleetNumber": fleetNum,
+		"start":       start,
+		"stop":        stop,
+	}).Info("GetPositions")
 	fleet := Fleet{}
 	fleet.Id = fleetNum
 	fleet.Update = make(map[string]Pos)
 	trackers, err := GetTrackers(fleetNum, start, stop)
 	if err != nil {
+		log.Log.WithFields(logrus.Fields{
+			"package": "rcache",
+			"error":   err.Error(),
+		}).Warn("GetPositions")
 		return fleet, err
 	}
 
@@ -102,12 +142,20 @@ func GetPositions(fleetNum string, start, stop int) (Fleet, error) {
 			config.DS.Redis.TPrefix+":"+v,
 			-1)
 		if err != nil {
+			log.Log.WithFields(logrus.Fields{
+				"package": "rcache",
+				"error":   err.Error(),
+			}).Warn("GetPositions")
 			return fleet, err
 		}
 		p := fmt.Sprintf("%s", pBytes)
 		var pos Pos
 		err = json.Unmarshal([]byte(p), &pos)
 		if err != nil {
+			log.Log.WithFields(logrus.Fields{
+				"package": "rcache",
+				"error":   err.Error(),
+			}).Warn("GetPositions")
 			return fleet, err
 		}
 

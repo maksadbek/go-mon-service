@@ -7,7 +7,9 @@ import (
 	"time"
 
 	"bitbucket.org/maksadbek/go-mon-service/conf"
+	log "bitbucket.org/maksadbek/go-mon-service/logger"
 	"bitbucket.org/maksadbek/go-mon-service/rcache"
+	"github.com/Sirupsen/logrus"
 )
 
 func Initialize(c conf.App) error {
@@ -18,6 +20,10 @@ func Initialize(c conf.App) error {
 	return err
 }
 func GetPositionHandler(w http.ResponseWriter, r *http.Request) {
+	log.Log.WithFields(logrus.Fields{
+		"GET Request": "/positions",
+	}).Info("Request")
+
 	rand.Seed(time.Now().UTC().UnixNano())
 	var testFleet rcache.Fleet = rcache.Fleet{
 		Id: "202",
