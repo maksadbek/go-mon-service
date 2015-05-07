@@ -1,4 +1,6 @@
 [ds]
+    [ds.mysql]
+        dsl = "root@toor/maxtrack"
     [ds.redis]
 		host = ":6379"
 		fprefix = "fleet"

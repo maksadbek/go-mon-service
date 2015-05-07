@@ -12,7 +12,10 @@ import (
 
 // структура для конф. данных
 type Datastore struct {
-        // анонимная структура для конфигурации для редис
+	Mysql struct {
+		DSL string
+	}
+	// анонимная структура для конфигурации для редис
 	Redis struct {
 		Host    string // хост для редис сервера
 		FPrefix string // флит префикс, так будет сохранятся в редис. Например: fleet_202, flit_202, ...
@@ -29,8 +32,8 @@ type Server struct {
 // главный структура для конф.
 type App struct {
 	DS  Datastore // база данных
-	SRV Server // сервер
-	Log Log // логирования
+	SRV Server    // сервер
+	Log Log       // логирования
 }
 
 // структура для логирования

@@ -7,6 +7,7 @@ import (
 	"strings"
 
 	"bitbucket.org/maksadbek/go-mon-service/conf"
+	"bitbucket.org/maksadbek/go-mon-service/datastore"
 	"bitbucket.org/maksadbek/go-mon-service/logger"
 	"bitbucket.org/maksadbek/go-mon-service/route"
 	"github.com/Sirupsen/logrus"
@@ -38,6 +39,9 @@ func main() {
 	} else {
 		logger.Log.Formatter = new(logrus.TextFormatter)
 	}
+
+	// mysql setup
+	datastore.Initialize(app.DS)
 
 	// route setup
 	route.Initialize(app)
