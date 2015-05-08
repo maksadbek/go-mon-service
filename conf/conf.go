@@ -13,7 +13,8 @@ import (
 // структура для конф. данных
 type Datastore struct {
 	Mysql struct {
-		DSL string
+		DSN string
+        Interval int
 	}
 	// анонимная структура для конфигурации для редис
 	Redis struct {
