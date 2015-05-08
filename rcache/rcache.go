@@ -116,8 +116,17 @@ func PushRedis(fleet Fleet) (err error) {
 	return
 }
 
+func PutRawHash(hashName, field, data string){
+	log.Log.WithFields(logrus.Fields{
+		"package": "rcache",
+	}).Info("PushRawData")
+    rc.Do("HSET",hashName,field, data)
+	return
+}
+
 // исползуется для получения позиции трекеров флита
 func GetPositions(fleetNum string, start, stop int) (Fleet, error) {
+    // log
 	log.Log.WithFields(logrus.Fields{
 		"package":     "rcache",
 		"fleetNumber": fleetNum,
@@ -137,10 +146,7 @@ func GetPositions(fleetNum string, start, stop int) (Fleet, error) {
 	}
 
 	for _, v := range trackers {
-		pBytes, err := rc.Do(
-			"LINDEX",
-			config.DS.Redis.TPrefix+":"+v,
-			-1)
+		pBytes, err := rc.Do( "LINDEX", config.DS.Redis.TPrefix+":"+v, -1)
 		if err != nil {
 			log.Log.WithFields(logrus.Fields{
 				"package": "rcache",
@@ -162,4 +168,8 @@ func GetPositions(fleetNum string, start, stop int) (Fleet, error) {
 		fleet.Update[v] = pos
 	}
 	return fleet, err
+}
+
+func FillPositions(p Pos) error {
+    
 }

@@ -5,6 +5,7 @@ import (
 	"net/http"
 	"os"
 	"strings"
+	"time"
 
 	"bitbucket.org/maksadbek/go-mon-service/conf"
 	"bitbucket.org/maksadbek/go-mon-service/datastore"
@@ -42,6 +43,12 @@ func main() {
 
 	// mysql setup
 	datastore.Initialize(app.DS)
+	go func() {
+        datastore.CacheData()
+		for _ = range time.Tick(time.Duration(app.DS.Mysql.Interval) * time.Minute) {
+			datastore.CacheData()
+		}
+	}()
 
 	// route setup
 	route.Initialize(app)
