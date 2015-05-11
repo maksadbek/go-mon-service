@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"strings"
 	"testing"
+    "strconv"
 
 	"bitbucket.org/maksadbek/go-mon-service/conf"
 )
@@ -76,8 +77,8 @@ func TestPushToRedis(t *testing.T) {
 	}
 }
 
-func TestGetPositions(t *testing.T) {
-	flt, err := GetPositions(FleetTest.FleetName, 0, 100)
+func TestGetPositionsByFleet(t *testing.T) {
+	flt, err := GetPositionsByFleet(FleetTest.FleetName, 0, 100)
 	if err != nil {
 		t.Error(err)
 	}
@@ -86,4 +87,23 @@ func TestGetPositions(t *testing.T) {
 			t.Errorf("want %+v, got %+v", testFleet.Update[x], flt.Update[x])
 		}
 	}
+}
+
+func TestGetPostions(t *testing.T){
+    pos, err := GetPositions(FleetTest.Trackers[0], FleetTest.Trackers[1])
+    if err != nil {
+            t.Error(err)
+    }
+    for _, tracker := range pos{
+            idStr := strconv.Itoa(tracker.Id)
+            if(idStr != FleetTest.Trackers[0] && 
+               idStr != FleetTest.Trackers[1]){
+                    t.Errorf(
+                            "want %s or %s, got %s\n",
+                            FleetTest.Trackers[0],
+                            FleetTest.Trackers[1],
+                            idStr,
+                    )
+            }
+    }
 }

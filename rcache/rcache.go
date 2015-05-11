@@ -1,4 +1,4 @@
-// @author: Maksadbek
+﻿// @author: Maksadbek
 // @email: a.maksadbek@gmail.com:
 /*
    пакет для кеширования данных
@@ -73,6 +73,36 @@ func Initialize(c conf.App) (err error) {
 	return
 }
 
+func GetPositions(trackerId ...string)(trackers []Pos, err error){
+	log.Log.WithFields(logrus.Fields{
+		"package": "rcache",
+		"trackers": trackerId,
+	}).Info("GetPositions")
+
+    for _, tracker := range trackerId {
+		pBytes, err := rc.Do( "LINDEX", config.DS.Redis.TPrefix+":"+tracker, -1)
+		if err != nil {
+			log.Log.WithFields(logrus.Fields{
+				"package": "rcache",
+				"error":   err.Error(),
+			}).Warn("GetPositions")
+			return trackers, err
+		}
+		p := fmt.Sprintf("%s", pBytes)
+		var pos Pos
+		err = json.Unmarshal([]byte(p), &pos)
+		if err != nil {
+			log.Log.WithFields(logrus.Fields{
+				"package": "rcache",
+				"error":   err.Error(),
+			}).Warn("GetPositions")
+			return trackers, err
+		}
+		trackers = append(trackers, pos)
+	}
+    return
+}
+
 // функция используется для получения трекеров флита
 func GetTrackers(fleet string, start, stop int) (trackers []string, err error) {
 	log.Log.WithFields(logrus.Fields{
@@ -125,14 +155,14 @@ func PutRawHash(hashName, field, data string){
 }
 
 // исползуется для получения позиции трекеров флита
-func GetPositions(fleetNum string, start, stop int) (Fleet, error) {
+func GetPositionsByFleet(fleetNum string, start, stop int) (Fleet, error) {
     // log
 	log.Log.WithFields(logrus.Fields{
 		"package":     "rcache",
 		"fleetNumber": fleetNum,
 		"start":       start,
 		"stop":        stop,
-	}).Info("GetPositions")
+	}).Info("GetPositionsByFleet")
 	fleet := Fleet{}
 	fleet.Id = fleetNum
 	fleet.Update = make(map[string]Pos)
@@ -141,7 +171,7 @@ func GetPositions(fleetNum string, start, stop int) (Fleet, error) {
 		log.Log.WithFields(logrus.Fields{
 			"package": "rcache",
 			"error":   err.Error(),
-		}).Warn("GetPositions")
+		}).Warn("GetPositionsByFleet")
 		return fleet, err
 	}
 
@@ -151,7 +181,7 @@ func GetPositions(fleetNum string, start, stop int) (Fleet, error) {
 			log.Log.WithFields(logrus.Fields{
 				"package": "rcache",
 				"error":   err.Error(),
-			}).Warn("GetPositions")
+			}).Warn("GetPositionsByFleet")
 			return fleet, err
 		}
 		p := fmt.Sprintf("%s", pBytes)
@@ -161,7 +191,7 @@ func GetPositions(fleetNum string, start, stop int) (Fleet, error) {
 			log.Log.WithFields(logrus.Fields{
 				"package": "rcache",
 				"error":   err.Error(),
-			}).Warn("GetPositions")
+			}).Warn("GetPositionsByFleet")
 			return fleet, err
 		}
 
@@ -171,5 +201,6 @@ func GetPositions(fleetNum string, start, stop int) (Fleet, error) {
 }
 
 func FillPositions(p Pos) error {
-    
+        var err error
+        return err
 }
