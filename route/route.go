@@ -99,7 +99,7 @@ func GetPositionHandler(w http.ResponseWriter, r *http.Request) {
 			},
 		},
 	}
-	pos, err := rcache.GetPositions("fleet_202", 0, 100)
+	pos, err := rcache.GetPositionsByFleet("fleet_202", 0, 100)
 	if err != nil {
 		panic(err)
 	}

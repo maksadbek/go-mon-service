@@ -133,7 +133,7 @@ func CacheData() error {
 			typeField := st.Type().Field(i)
 			key := fmt.Sprintf("%v", valueField.Interface())
 			value := typeField.Name
-			rcache.PutRawData(hashName, key, value)
+			rcache.PutRawHash(hashName, key, value)
 		}
 	}
 	return err
