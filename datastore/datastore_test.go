@@ -11,7 +11,8 @@ import (
 func TestGetTrackers(t *testing.T) {
 	mockConf := `[ds]
     [ds.mysql]
-        dsl = "root:toor@tcp(localhost:3306)/maxtrack"
+        dsn = "root:toor@tcp(localhost:3306)/maxtrack"
+        interval = 1
     [ds.redis]
 		host = ":6379"
 		fprefix = "fleet"
@@ -34,4 +35,24 @@ func TestGetTrackers(t *testing.T) {
 	}
 	pos, err := GetTrackers("202")
 	fmt.Println(pos)
+}
+
+func TestUsrTrackersPartialCars(t *testing.T){
+   usr, err := UsrTrackers("Kamilka") 
+   if err != nil {
+           t.Error(err)
+   }
+   if usr.Trackers[0] == "0" {
+        t.Errorf("want %s, got %s", "0", usr.Trackers[0])
+   }
+}
+
+func TestUsrTrackersAllCars(t *testing.T){
+   usr, err := UsrTrackers("newmax") 
+   if err != nil {
+           t.Error(err)
+   }
+   if usr.Trackers[0] != "0" {
+        t.Errorf("want %s, got %s", "0", usr.Trackers[0])
+   }
 }

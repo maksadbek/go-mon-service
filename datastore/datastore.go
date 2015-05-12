@@ -11,6 +11,7 @@ import (
 	"bitbucket.org/maksadbek/go-mon-service/rcache"
 	"github.com/Sirupsen/logrus"
 	_ "github.com/go-sql-driver/mysql"
+	"github.com/kovetskiy/go-php-serialize"
 )
 
 var db *sql.DB
@@ -48,6 +49,12 @@ type Vehicle struct {
 	What_class          int    `json=what_class`
 }
 
+type Usr struct {
+	Login    string
+	Fleet    string
+	Trackers []string
+}
+
 func Initialize(c conf.Datastore) error {
 	log.Log.WithFields(logrus.Fields{
 		"package": "datastore",
@@ -75,9 +82,8 @@ func GetTrackers(fleet string) (map[int]Vehicle, error) {
 		"package": "datastore",
 		"fleet":   fleet,
 	}).Info("GetTrackers")
-	var pos map[int]Vehicle
-	pos = make(map[int]Vehicle)
-	query := ` select id, fleet, imei,               number,             tracker_type,       tracker_type_id,    device_type_id,     name,               owner,              active,             additional,         customization,      group_id,           detector_fuel_id,   detector_motion_id, detector_dinamik_id, pid,                installed_sensor,   detector_agro_id,   car_health,         color,              what_class         from max_units ` + queryFilter
+	var pos map[int]Vehicle = make(map[int]Vehicle)
+	query := queries["getTrackers"] + queryFilter
 	rows, err := db.Query(query)
 	if err != nil {
 		log.Log.WithFields(logrus.Fields{
@@ -121,8 +127,15 @@ func GetTrackers(fleet string) (map[int]Vehicle, error) {
 }
 
 func CacheData() error {
+	log.Log.WithFields(logrus.Fields{
+		"package": "datastore",
+	}).Info("CacheData")
 	trackers, err := GetTrackers("")
 	if err != nil {
+		log.Log.WithFields(logrus.Fields{
+			"package": "datastore",
+			"error":   err.Error(),
+		}).Warn("CacheData")
 		return err
 	}
 	for id, x := range trackers {
@@ -137,4 +150,44 @@ func CacheData() error {
 		}
 	}
 	return err
+}
+
+func UsrTrackers(name string) (usr Usr, err error) {
+	log.Log.WithFields(logrus.Fields{
+		"package": "datastore",
+		"name":    name,
+	}).Info("UsrTrackers")
+	rows, err := db.Query(queries["usrTrackers"], name)
+	if err != nil {
+		log.Log.WithFields(logrus.Fields{
+			"package": "datastore",
+			"error":   err.Error(),
+		}).Warn("UsrTrackers")
+		return usr, err
+	}
+
+	for rows.Next() {
+		var cars string
+		rows.Scan(
+			&usr.Login,
+			&usr.Fleet,
+			&cars,
+		)
+        if cars == "all" {
+                usr.Trackers = append(usr.Trackers, "0")
+                return usr, err
+        }
+		tr, err := phpserialize.Decode(cars)
+		if err != nil {
+			return usr, err
+		}
+		for _, x := range tr.(map[interface{}]interface{}) {
+			usr.Trackers = append(usr.Trackers, fmt.Sprintf("%v", x))
+		}
+	}
+	log.Log.WithFields(logrus.Fields{
+		"package": "datastore",
+		"user":    usr,
+	}).Info("UsrTrackers")
+	return
 }
