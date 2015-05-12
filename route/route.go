@@ -9,6 +9,7 @@ import (
 	"bitbucket.org/maksadbek/go-mon-service/conf"
 	log "bitbucket.org/maksadbek/go-mon-service/logger"
 	"bitbucket.org/maksadbek/go-mon-service/rcache"
+	"bitbucket.org/maksadbek/go-mon-service/datastore"
 	"github.com/Sirupsen/logrus"
 )
 
@@ -20,9 +21,35 @@ func Initialize(c conf.App) error {
 	return err
 }
 func GetPositionHandler(w http.ResponseWriter, r *http.Request) {
+    fleetName, user, groups := r.PostFormValue("fleet"), r.PostFormValue("user"), r.PostFormValue("groups")
 	log.Log.WithFields(logrus.Fields{
 		"GET Request": "/positions",
+        "fleet": fleetName,
+        "user": user,
+        "groups": groups,
 	}).Info("Request")
+
+
+    trackers, err := datastore.UsrTrackers(user)
+    if err != nil {
+            panic(err)
+    }
+
+    var fleet rcache.Fleet
+    fleet.Update = make(map[string]rcache.Pos)
+    if trackers.Trackers[0] == "0" {
+       fleet, err = rcache.GetPositionsByFleet(fleetName, 0, 100)
+       if err != nil {
+               panic(err)
+       }
+    }else{
+       pos, err := rcache.GetPositions(trackers.Trackers)
+       if err  != nil {
+               panic(err)
+       }
+        fleet.Update = pos
+        fleet.Id = fleetName
+    }
 
 	rand.Seed(time.Now().UTC().UnixNano())
 	var testFleet rcache.Fleet = rcache.Fleet{
