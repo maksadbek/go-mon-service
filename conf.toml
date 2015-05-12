@@ -1,6 +1,6 @@
 [ds.mysql]
     dsn = "root:toor@tcp(localhost:3306)/maxtrack"
-    interval = 1 # cache interval in minutes
+    interval = 10 # cache interval in minutes
 [ds.redis]
 	host = ":6379"
 	fprefix = "fleet"
