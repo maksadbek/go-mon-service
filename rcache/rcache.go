@@ -73,7 +73,8 @@ func Initialize(c conf.App) (err error) {
 	return
 }
 
-func GetPositions(trackerId ...string)(trackers []Pos, err error){
+func GetPositions(trackerId ...string)(trackers map[string]Pos, err error){
+    trackers = make(map[string]Pos)
 	log.Log.WithFields(logrus.Fields{
 		"package": "rcache",
 		"trackers": trackerId,
@@ -98,7 +99,7 @@ func GetPositions(trackerId ...string)(trackers []Pos, err error){
 			}).Warn("GetPositions")
 			return trackers, err
 		}
-		trackers = append(trackers, pos)
+		trackers[tracker] =  pos
 	}
     return
 }
