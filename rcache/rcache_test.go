@@ -90,7 +90,7 @@ func TestGetPositionsByFleet(t *testing.T) {
 }
 
 func TestGetPostions(t *testing.T){
-    pos, err := GetPositions(FleetTest.Trackers[0], FleetTest.Trackers[1])
+    pos, err := GetPositions(FleetTest.Trackers)
     if err != nil {
             t.Error(err)
     }

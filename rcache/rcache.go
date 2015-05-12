@@ -1,4 +1,4 @@
-﻿// @author: Maksadbek
+// @author: Maksadbek
 // @email: a.maksadbek@gmail.com:
 /*
    пакет для кеширования данных
@@ -9,6 +9,7 @@ package rcache
 import (
 	"encoding/json"
 	"fmt"
+    "errors"
 
 	"bitbucket.org/maksadbek/go-mon-service/conf"
 	log "bitbucket.org/maksadbek/go-mon-service/logger"
@@ -73,23 +74,28 @@ func Initialize(c conf.App) (err error) {
 	return
 }
 
-func GetPositions(trackerId ...string)(trackers map[string]Pos, err error){
-    trackers = make(map[string]Pos)
+func GetPositions(trackerId []string) (trackers map[string]Pos, err error) {
+	trackers = make(map[string]Pos)
 	log.Log.WithFields(logrus.Fields{
-		"package": "rcache",
+		"package":  "rcache",
 		"trackers": trackerId,
 	}).Info("GetPositions")
 
-    for _, tracker := range trackerId {
-		pBytes, err := rc.Do( "LINDEX", config.DS.Redis.TPrefix+":"+tracker, -1)
+	for _, tracker := range trackerId {
+		fmt.Println(tracker)
+		pBytes, err := rc.Do("LINDEX", config.DS.Redis.TPrefix+":"+tracker, -1)
 		if err != nil {
 			log.Log.WithFields(logrus.Fields{
-				"package": "rcache",
-				"error":   err.Error(),
+				"package":       "rcache",
+				"redis command": config.DS.Redis.TPrefix + ":" + tracker,
+				"error":         err.Error(),
 			}).Warn("GetPositions")
 			return trackers, err
 		}
 		p := fmt.Sprintf("%s", pBytes)
+        if fmt.Sprintf("%v", pBytes) == "<nil>" {
+                return trackers, errors.New("nil value")
+        }
 		var pos Pos
 		err = json.Unmarshal([]byte(p), &pos)
 		if err != nil {
@@ -99,9 +105,9 @@ func GetPositions(trackerId ...string)(trackers map[string]Pos, err error){
 			}).Warn("GetPositions")
 			return trackers, err
 		}
-		trackers[tracker] =  pos
+		trackers[tracker] = pos
 	}
-    return
+	return
 }
 
 // функция используется для получения трекеров флита
@@ -147,17 +153,17 @@ func PushRedis(fleet Fleet) (err error) {
 	return
 }
 
-func PutRawHash(hashName, field, data string){
+func PutRawHash(hashName, field, data string) {
 	log.Log.WithFields(logrus.Fields{
 		"package": "rcache",
 	}).Info("PushRawData")
-    rc.Do("HSET",hashName,field, data)
+	rc.Do("HSET", hashName, field, data)
 	return
 }
 
 // исползуется для получения позиции трекеров флита
 func GetPositionsByFleet(fleetNum string, start, stop int) (Fleet, error) {
-    // log
+	// log
 	log.Log.WithFields(logrus.Fields{
 		"package":     "rcache",
 		"fleetNumber": fleetNum,
@@ -177,7 +183,7 @@ func GetPositionsByFleet(fleetNum string, start, stop int) (Fleet, error) {
 	}
 
 	for _, v := range trackers {
-		pBytes, err := rc.Do( "LINDEX", config.DS.Redis.TPrefix+":"+v, -1)
+		pBytes, err := rc.Do("LINDEX", config.DS.Redis.TPrefix+":"+v, -1)
 		if err != nil {
 			log.Log.WithFields(logrus.Fields{
 				"package": "rcache",
@@ -202,6 +208,6 @@ func GetPositionsByFleet(fleetNum string, start, stop int) (Fleet, error) {
 }
 
 func FillPositions(p Pos) error {
-        var err error
-        return err
+	var err error
+	return err
 }
