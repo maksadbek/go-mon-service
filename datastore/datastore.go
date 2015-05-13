@@ -175,6 +175,10 @@ func UsrTrackers(name string) (usr Usr, err error) {
 		)
         if cars == "all" {
                 usr.Trackers = append(usr.Trackers, "0")
+                log.Log.WithFields(logrus.Fields{
+                    "package": "datastore",
+                    "user":    usr,
+                }).Info("UsrTrackers")
                 return usr, err
         }
 		tr, err := phpserialize.Decode(cars)
