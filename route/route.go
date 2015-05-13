@@ -30,7 +30,16 @@ func GetPositionHandler(w http.ResponseWriter, r *http.Request) {
 
 	trackers, err := datastore.UsrTrackers(user)
 	if err != nil {
-		panic(err)
+        log.Log.WithFields(logrus.Fields{
+            "GET Request": "/positions",
+            "fleet":       fleetName,
+            "user":        user,
+            "groups":      groups,
+            "error":      err.Error(),
+            "http status": 404,
+        }).Warn("Request Error")
+        http.Error(w, err.Error(), 404)
+        return
 	}
 
 	var fleet rcache.Fleet
@@ -38,12 +47,30 @@ func GetPositionHandler(w http.ResponseWriter, r *http.Request) {
 	if trackers.Trackers[0] == "0" {
 		fleet, err = rcache.GetPositionsByFleet(fleetName, 0, 100)
 		if err != nil {
-			panic(err)
+            log.Log.WithFields(logrus.Fields{
+                "GET Request": "/positions",
+                "fleet":       fleetName,
+                "user":        user,
+                "groups":      groups,
+                "error":      err.Error(),
+                "http status": 404,
+            }).Warn("Request Error")
+            http.Error(w, err.Error(), 404)
+            return
 		}
 	} else {
 		pos, err := rcache.GetPositions(trackers.Trackers)
 		if err != nil {
-			panic(err)
+            log.Log.WithFields(logrus.Fields{
+                "GET Request": "/positions",
+                "fleet":       fleetName,
+                "user":        user,
+                "groups":      groups,
+                "error":      err.Error(),
+                "http status": 404,
+            }).Warn("Request Error")
+            http.Error(w, err.Error(), 404)
+            return
 		}
 		fleet.Update = pos
 		fleet.Id = fleetName
@@ -51,7 +78,16 @@ func GetPositionHandler(w http.ResponseWriter, r *http.Request) {
 
 	jpos, err := json.Marshal(fleet)
 	if err != nil {
-		panic(err)
+        log.Log.WithFields(logrus.Fields{
+            "GET Request": "/positions",
+            "fleet":       fleetName,
+            "user":        user,
+            "groups":      groups,
+            "error":      err.Error(),
+            "http status": 404,
+        }).Warn("Request Error")
+        http.Error(w, err.Error(), 404)
+        return
 	}
 
 	w.Write([]byte(jpos))
