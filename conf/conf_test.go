@@ -15,6 +15,9 @@ func TestRead(t *testing.T) {
     port = "1234"
 [log]
     path = "info.log"
+[errors]
+    [errors.NotExistInCache]
+    msg = "such record does not exist"
 `
 
 	r := strings.NewReader(mockConf)
@@ -37,4 +40,9 @@ func TestRead(t *testing.T) {
 	if got := app.Log.Path; got != want {
 		t.Errorf("got %s, want %s", got, want)
 	}
+
+    want = "such record does not exist"
+    if got := app.ErrorMsg["NotExistInCache"].Msg; got != want {
+        t.Errorf("got '%s', want '%s'", got, want)
+    }
 }

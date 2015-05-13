@@ -10,6 +10,9 @@ import (
 	"io"
 )
 
+type ErrorStr struct {
+    Msg string
+}
 // структура для конф. данных
 type Datastore struct {
 	Mysql struct {
@@ -35,6 +38,7 @@ type App struct {
 	DS  Datastore // база данных
 	SRV Server    // сервер
 	Log Log       // логирования
+    ErrorMsg map[string]ErrorStr `toml:"errors"`
 }
 
 // структура для логирования
