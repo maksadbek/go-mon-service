@@ -4,12 +4,11 @@ import (
 	"encoding/json"
 	"math/rand"
 	"net/http"
-	"time"
 
 	"bitbucket.org/maksadbek/go-mon-service/conf"
+	"bitbucket.org/maksadbek/go-mon-service/datastore"
 	log "bitbucket.org/maksadbek/go-mon-service/logger"
 	"bitbucket.org/maksadbek/go-mon-service/rcache"
-	"bitbucket.org/maksadbek/go-mon-service/datastore"
 	"github.com/Sirupsen/logrus"
 )
 
@@ -21,128 +20,36 @@ func Initialize(c conf.App) error {
 	return err
 }
 func GetPositionHandler(w http.ResponseWriter, r *http.Request) {
-    fleetName, user, groups := r.PostFormValue("fleet"), r.PostFormValue("user"), r.PostFormValue("groups")
+	fleetName, user, groups := r.PostFormValue("fleet"), r.PostFormValue("user"), r.PostFormValue("groups")
 	log.Log.WithFields(logrus.Fields{
 		"GET Request": "/positions",
-        "fleet": fleetName,
-        "user": user,
-        "groups": groups,
+		"fleet":       fleetName,
+		"user":        user,
+		"groups":      groups,
 	}).Info("Request")
 
-
-    trackers, err := datastore.UsrTrackers(user)
-    if err != nil {
-            panic(err)
-    }
-
-    var fleet rcache.Fleet
-    fleet.Update = make(map[string]rcache.Pos)
-    if trackers.Trackers[0] == "0" {
-       fleet, err = rcache.GetPositionsByFleet(fleetName, 0, 100)
-       if err != nil {
-               panic(err)
-       }
-    }else{
-       pos, err := rcache.GetPositions(trackers.Trackers)
-       if err  != nil {
-               panic(err)
-       }
-        fleet.Update = pos
-        fleet.Id = fleetName
-    }
-
-	rand.Seed(time.Now().UTC().UnixNano())
-	var testFleet rcache.Fleet = rcache.Fleet{
-		Id: "202",
-		Update: map[string]rcache.Pos{
-			"106206": rcache.Pos{
-				Id:            106206,
-				Longitude:     69.145340,
-				Latitude:      41.260006,
-				Owner:         "Ozodbek",
-				Number:        "01 S 775 JS",
-				Name:          "Lacetti",
-				Direction:     47,
-				Speed:         10,
-				Sat:           9,
-				Time:          "2015-04-21 17:59:59",
-				Ignition:      0,
-				GsmSignal:     -1,
-				Battery:       randInt(12000, 14000),
-				Seat:          1000,
-				BatteryLvl:    -1,
-				Fuel:          randInt(40, 80),
-				FuelVal:       randInt(10, 150),
-				MuAdditional:  "",
-				Customization: "a:1:{s:9:\"fillcolor\";s:7:\"#FF0000\";}",
-				Additional:    "additional",
-				Action:        1,
-			},
-			"107749": rcache.Pos{
-				Id:            107749,
-				Latitude:      41.260006,
-				Longitude:     69.245811,
-				Owner:         "Odil",
-				Number:        "Acer Test",
-				Name:          "Personal Acer",
-				Direction:     243,
-				Speed:         0,
-				Sat:           99,
-				Time:          "2015-03-26 13:29:06",
-				Ignition:      0,
-				GsmSignal:     -1,
-				Battery:       randInt(12000, 14000),
-				Seat:          1000,
-				BatteryLvl:    -1,
-				Fuel:          randInt(40, 80),
-				FuelVal:       randInt(10, 150),
-				MuAdditional:  "",
-				Customization: "a:1:{s:9:\"fillcolor\";s:7:\"#FF0000\";}",
-				Additional:    "additional",
-				Action:        1,
-			},
-			"107699": rcache.Pos{
-				Id:            107699,
-				Longitude:     69.245926,
-				Latitude:      41.293530,
-				Owner:         "Odil",
-				Number:        "01 048 QA",
-				Name:          "PersonalAndroid",
-				Direction:     225,
-				Speed:         10,
-				Sat:           99,
-				Time:          "2015-04-01 18:00:13",
-				Ignition:      0,
-				GsmSignal:     -1,
-				Battery:       randInt(12000, 14000),
-				Seat:          1000,
-				BatteryLvl:    -1,
-				Fuel:          randInt(40, 80),
-				FuelVal:       randInt(10, 150),
-				MuAdditional:  "",
-				Customization: "a:1:{s:9:\"fillcolor\";s:7:\"#FF0000\";}",
-				Additional:    "",
-				Action:        1,
-			},
-		},
-	}
-	pos, err := rcache.GetPositionsByFleet("fleet_202", 0, 100)
+	trackers, err := datastore.UsrTrackers(user)
 	if err != nil {
 		panic(err)
 	}
 
-	for key, x := range pos.Update {
-		pos := testFleet.Update[key]
-		pos.Latitude = x.Latitude + float32(0.00011)
-		pos.Longitude = x.Longitude + float32(0.00011)
-		testFleet.Update[key] = pos
-	}
-	jpos, err := json.Marshal(pos)
-	if err != nil {
-		panic(err)
+	var fleet rcache.Fleet
+	fleet.Update = make(map[string]rcache.Pos)
+	if trackers.Trackers[0] == "0" {
+		fleet, err = rcache.GetPositionsByFleet(fleetName, 0, 100)
+		if err != nil {
+			panic(err)
+		}
+	} else {
+		pos, err := rcache.GetPositions(trackers.Trackers)
+		if err != nil {
+			panic(err)
+		}
+		fleet.Update = pos
+		fleet.Id = fleetName
 	}
 
-	err = rcache.PushRedis(testFleet)
+	jpos, err := json.Marshal(fleet)
 	if err != nil {
 		panic(err)
 	}
