@@ -94,7 +94,17 @@ func GetPositions(trackerId []string) (trackers map[string]Pos, err error) {
 		}
 		p := fmt.Sprintf("%s", pBytes)
         if fmt.Sprintf("%v", pBytes) == "<nil>" {
-                return trackers, errors.New("nil value")
+                errorMsg := fmt.Sprintf(
+                    "%s : '%s:%s'",
+                    config.ErrorMsg["NotExistInCache"].Msg,
+                    config.DS.Redis.FPrefix,
+                    tracker,
+                )
+                log.Log.WithFields(logrus.Fields{
+                    "package":       "rcache",
+                    "error":         errorMsg,
+                }).Warn("GetPositions")
+                return trackers, errors.New(config.ErrorMsg["NotExistInCache"].Msg)
         }
 		var pos Pos
 		err = json.Unmarshal([]byte(p), &pos)
