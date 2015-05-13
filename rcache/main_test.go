@@ -22,7 +22,7 @@ func TestMain(m *testing.M) {
 	}
 
 	for _, x := range FleetTest.Trackers {
-		rc.Do("RPUSH", FleetTest.FleetName, x)
+		rc.Do("SADD", "fleet"+":"+FleetTest.FleetName, x)
 	}
 	retCode := m.Run()
 

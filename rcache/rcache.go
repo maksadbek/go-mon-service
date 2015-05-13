@@ -87,7 +87,7 @@ func GetPositions(trackerId []string) (trackers map[string]Pos, err error) {
 		if err != nil {
 			log.Log.WithFields(logrus.Fields{
 				"package":       "rcache",
-				"redis command": config.DS.Redis.TPrefix + ":" + tracker,
+				"redis command": config.DS.Redis.FPrefix + ":" + tracker,
 				"error":         err.Error(),
 			}).Warn("GetPositions")
 			return trackers, err
@@ -119,7 +119,7 @@ func GetTrackers(fleet string, start, stop int) (trackers []string, err error) {
 		"stop":    stop,
 	}).Info("GetTrackers")
 
-	v, err := redis.Strings(rc.Do("LRANGE", fleet, start, stop))
+	v, err := redis.Strings(rc.Do("SMEMBERS", config.DS.Redis.FPrefix+":"+fleet))
 	if err != nil {
 		log.Log.WithFields(logrus.Fields{
 			"package": "rcache",
