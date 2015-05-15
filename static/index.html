@@ -111,25 +111,29 @@ function setMapMode(pos)
 
     setInterval(
 function setMarkerPos() {
-    $.ajax({
-        url: "/positions",
-        dataType: 'text',
-        success: function(data) {
-            var jpos = JSON.parse(data);
-            jpos.Update[106206].customization='a:1:{s:9:"fillcolor";s:7:"#FF0000";}';
-            jpos.Update[106206].additional='69:1;66:13864;70:281;67:3627;199:0;';
-            jpos.Update[106206].action=2;
-            jpos.Update[107699].action=2;
-            var positions = [];
-            positions.push(jpos.Update[106206]);
-            positions.push(jpos.Update[107699]);
-            console.log(positions);
-            setMapMode(positions);
-        }.bind(this),
-        error: function(xhr, status, err) {
-            console.err(err.toString());
-        }.bind(this)
-    });
+    var login = 'newmax',
+        groups = '1,2,3',
+        fleet = '202',
+        xhr = new XMLHttpRequest();
+
+    xhr.open('POST', encodeURI('/positions'));
+    xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
+    xhr.onload = function() {
+            if (xhr.status === 200 ) {
+                var jpos = JSON.parse(xhr.responseText);
+                var positions = [];
+                positions.push(jpos.Update[106206]);
+                positions.push(jpos.Update[107699]);
+                positions.push(jpos.Update[107749]);
+                setMapMode(positions);
+            }
+            else if (xhr.status !== 200) {
+                console.log("http error");
+            }
+    };
+    var params = 'user='+login + '&' + 'groups=' + groups + '&' + 'fleet=' +
+        fleet;
+    xhr.send(params);
 } , 3000);
 </script>
 </head> 
