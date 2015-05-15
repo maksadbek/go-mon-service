@@ -41,6 +41,7 @@ var testFleet Fleet = Fleet{
 			MuAdditional:  "",
 			Customization: "",
 			Additional:    "additional",
+            Action: 2,
 		},
 		"107749": Pos{
 			Id:            107749,
@@ -63,6 +64,7 @@ var testFleet Fleet = Fleet{
 			MuAdditional:  "",
 			Customization: "",
 			Additional:    "additional",
+            Action: 2,
 		},
 		"107699": Pos{
 			Id:            107699,
@@ -85,6 +87,7 @@ var testFleet Fleet = Fleet{
 			MuAdditional:  "",
 			Customization: "a:1:{s:9:fillcolor;s:7:#993300;}",
 			Additional:    "",
+            Action: 2,
 		},
 	},
 }
