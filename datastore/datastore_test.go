@@ -1,7 +1,6 @@
 package datastore
 
 import (
-	"fmt"
 	"strings"
 	"testing"
 
@@ -33,26 +32,25 @@ func TestGetTrackers(t *testing.T) {
 	if err != nil {
 		t.Error(err)
 	}
-	pos, err := GetTrackers("202")
-	fmt.Println(pos)
+	_, err = GetTrackers("202")
 }
 
-func TestUsrTrackersPartialCars(t *testing.T){
-   usr, err := UsrTrackers("Kamilka") 
-   if err != nil {
-           t.Error(err)
-   }
-   if usr.Trackers[0] == "0" {
-        t.Errorf("want %s, got %s", "0", usr.Trackers[0])
-   }
+func TestUsrTrackersPartialCars(t *testing.T) {
+	usr, err := UsrTrackers("Kamilka")
+	if err != nil {
+		t.Error(err)
+	}
+	if usr.Trackers[0] == "0" {
+		t.Errorf("want %s, got %s", "0", usr.Trackers[0])
+	}
 }
 
-func TestUsrTrackersAllCars(t *testing.T){
-   usr, err := UsrTrackers("newmax") 
-   if err != nil {
-           t.Error(err)
-   }
-   if usr.Trackers[0] != "0" {
-        t.Errorf("want %s, got %s", "0", usr.Trackers[0])
-   }
+func TestUsrTrackersAllCars(t *testing.T) {
+	usr, err := UsrTrackers("newmax")
+	if err != nil {
+		t.Error(err)
+	}
+	if usr.Trackers[0] != "0" {
+		t.Errorf("want %s, got %s", "0", usr.Trackers[0])
+	}
 }

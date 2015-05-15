@@ -85,6 +85,7 @@ func GetTrackers(fleet string) (map[int]Vehicle, error) {
 	var pos map[int]Vehicle = make(map[int]Vehicle)
 	query := queries["getTrackers"] + queryFilter
 	rows, err := db.Query(query)
+    defer rows.Close();
 	if err != nil {
 		log.Log.WithFields(logrus.Fields{
 			"package": "datastore",
@@ -158,6 +159,7 @@ func UsrTrackers(name string) (usr Usr, err error) {
 		"name":    name,
 	}).Info("UsrTrackers")
 	rows, err := db.Query(queries["usrTrackers"], name)
+    defer rows.Close();
 	if err != nil {
 		log.Log.WithFields(logrus.Fields{
 			"package": "datastore",
