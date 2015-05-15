@@ -12,8 +12,10 @@ import (
 	"github.com/Sirupsen/logrus"
 )
 
+var config conf.App
 func Initialize(c conf.App) error {
-	err := rcache.Initialize(c)
+    config = c
+	err := rcache.Initialize(config)
 	if err != nil {
 		return err
 	}
@@ -21,6 +23,18 @@ func Initialize(c conf.App) error {
 }
 func GetPositionHandler(w http.ResponseWriter, r *http.Request) {
 	fleetName, user, groups := r.PostFormValue("fleet"), r.PostFormValue("user"), r.PostFormValue("groups")
+
+    if fleetName == "" || user == "" || groups == "" {
+        log.Log.WithFields(logrus.Fields{
+            "GET Request": "/positions",
+            "fleet":       fleetName,
+            "user":        user,
+            "groups":      groups,
+            "http status": 404,
+        }).Warn("Request Error")
+        http.Error(w, config.ErrorMsg["NotExistInCache"].Msg, 404)
+        return
+    }
 	log.Log.WithFields(logrus.Fields{
 		"GET Request": "/positions",
 		"fleet":       fleetName,
