@@ -1,6 +1,7 @@
 package rcache
 
 import (
+	"encoding/json"
 	"os"
 	"strings"
 	"testing"
@@ -11,7 +12,7 @@ import (
 
 func TestMain(m *testing.M) {
 	r := strings.NewReader(mockConf) // читает мок-данные из testdata.go
-	app, err := conf.Read(r)         // 
+	app, err := conf.Read(r)         //
 	if err != nil {
 		panic(err)
 	}
@@ -24,6 +25,18 @@ func TestMain(m *testing.M) {
 	for _, x := range FleetTest.Trackers {
 		rc.Do("SADD", "fleet"+":"+FleetTest.FleetName, x)
 	}
+
+	// add mock user
+	jusr, err := json.Marshal(testUsr[0])
+	if err != nil {
+		panic(err)
+	}
+	rc.Do(
+		"SET",
+		app.DS.Redis.UPrefix+":"+testUsr[0].Login,
+		string(jusr),
+	)
+
 	retCode := m.Run()
 
 	// clean up messed redis test zone

@@ -53,6 +53,11 @@ type Fleet struct {
 	Update map[string]Pos
 }
 
+type Usr struct {
+	Login    string
+	Fleet    string
+	Trackers []string
+}
 // функция для инициализации пакета
 // оно должна вызыватся первые перед исползованием пакета
 func Initialize(c conf.App) (err error) {
@@ -82,7 +87,6 @@ func GetPositions(trackerId []string) (trackers map[string]Pos, err error) {
 	}).Info("GetPositions")
 
 	for _, tracker := range trackerId {
-		fmt.Println(tracker)
 		pBytes, err := rc.Do("LINDEX", config.DS.Redis.TPrefix+":"+tracker, -1)
 		if err != nil {
 			log.Log.WithFields(logrus.Fields{
@@ -220,4 +224,61 @@ func GetPositionsByFleet(fleetNum string, start, stop int) (Fleet, error) {
 func FillPositions(p Pos) error {
 	var err error
 	return err
+}
+
+func UsrTrackers(name string)(Usr, error){
+    usr := Usr{}
+    log.Log.WithFields(logrus.Fields{
+        "package": "rcache",
+        "name": name,
+    }).Info("UsrTrackers")
+    userb, err := rc.Do("GET", config.DS.Redis.UPrefix+":"+name)
+    if err != nil {
+		log.Log.WithFields(logrus.Fields{
+			"package": "rcache",
+			"error":   err.Error(),
+            "user from redis" : fmt.Sprintf("%s", userb),
+		}).Warn("UsrTrackers")
+        return usr, err
+    }
+    //сравнение на нил
+    if fmt.Sprintf("%v", userb) == "<nil>" {
+            errorMsg := fmt.Sprintf(
+                "%s : '%s:%s'",
+                config.ErrorMsg["NotExistInCache"].Msg,
+                config.DS.Redis.UPrefix,
+                name,
+            )
+            log.Log.WithFields(logrus.Fields{
+                "package":       "rcache",
+                "error":         errorMsg,
+            }).Warn("UsrTrackers")
+            return usr, errors.New(config.ErrorMsg["NotExistInCache"].Msg)
+    }
+    err = json.Unmarshal([]byte(fmt.Sprintf("%s", userb)), &usr)
+    if err != nil {
+		log.Log.WithFields(logrus.Fields{
+			"package": "rcache",
+			"error":   err.Error(),
+		}).Warn("UsrTrackers")
+        return usr, err
+    }
+    return usr, nil
+}
+
+func SetUsrTrackers(usr Usr) error {
+    log.Log.WithFields(logrus.Fields{
+        "package": "rcache",
+        "usr": fmt.Sprintf("%v", usr),
+    }).Info("SetUsrTrackers")
+    jusr, err := json.Marshal(usr)
+    if err != nil {
+        return err
+    }
+	rc.Do(
+		"SET",
+		config.DS.Redis.UPrefix+":"+usr.Login,
+		string(jusr),
+	)
+    return nil
 }

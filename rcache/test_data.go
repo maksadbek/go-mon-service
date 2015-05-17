@@ -12,10 +12,15 @@ var mockConf string = `
     [ds.redis]
 		host = ":6379"
 		fprefix = "fleet"
+        tprefix = "tracker"
+        uprefix = "user"
 [srv]
     port = "1234"
 [log]
     path = "info.log"
+[errors]
+    [errors.NotExistInCache]
+    msg = "such record does not exist"
 `
 var testFleet Fleet = Fleet{
 	Id: "202",
@@ -90,4 +95,16 @@ var testFleet Fleet = Fleet{
             Action: 2,
 		},
 	},
+}
+var testUsr []Usr = []Usr{
+    Usr{
+        Login : "oldmin",
+        Fleet : "666",
+        Trackers : []string{"1", "2", "3"},
+    },
+    Usr{
+        Login: "testLogin",
+        Fleet: "testFleet",
+        Trackers: []string{"4","5","6"},
+    },
 }
