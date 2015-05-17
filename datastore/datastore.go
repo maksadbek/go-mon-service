@@ -49,12 +49,6 @@ type Vehicle struct {
 	What_class          int    `json=what_class`
 }
 
-type Usr struct {
-	Login    string
-	Fleet    string
-	Trackers []string
-}
-
 func Initialize(c conf.Datastore) error {
 	log.Log.WithFields(logrus.Fields{
 		"package": "datastore",
@@ -153,7 +147,7 @@ func CacheData() error {
 	return err
 }
 
-func UsrTrackers(name string) (usr Usr, err error) {
+func UsrTrackers(name string) (usr rcache.Usr, err error) {
 	log.Log.WithFields(logrus.Fields{
 		"package": "datastore",
 		"name":    name,
