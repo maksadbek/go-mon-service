@@ -24,6 +24,7 @@ type Datastore struct {
 		Host    string // хост для редис сервера
 		FPrefix string // флит префикс, так будет сохранятся в редис. Например: fleet_202, flit_202, ...
 		TPrefix string // трекер префикс, так же как флит префикс. Например: tracker_512341, another_2131
+        UPrefix string
 	}
 }
 
