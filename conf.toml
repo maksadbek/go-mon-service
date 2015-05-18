@@ -5,6 +5,7 @@
 	host = ":6379"
 	fprefix = "fleet"
     tprefix = "tracker"
+    uprefix = "user"
 [srv]
 	port = ":1234"
 [log]

@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"math/rand"
 	"net/http"
+    "fmt"
 
 	"bitbucket.org/maksadbek/go-mon-service/conf"
 	"bitbucket.org/maksadbek/go-mon-service/datastore"
@@ -42,20 +43,16 @@ func GetPositionHandler(w http.ResponseWriter, r *http.Request) {
 		"groups":      groups,
 	}).Info("Request")
 
-	trackers, err := datastore.UsrTrackers(user)
-	if err != nil {
+    trackers, err := GetTrackers(user)
+    if err != nil{
         log.Log.WithFields(logrus.Fields{
             "GET Request": "/positions",
-            "fleet":       fleetName,
-            "user":        user,
-            "groups":      groups,
             "error":      err.Error(),
             "http status": 404,
         }).Warn("Request Error")
         http.Error(w, err.Error(), 404)
         return
-	}
-
+    }
 	var fleet rcache.Fleet
 	fleet.Update = make(map[string]rcache.Pos)
 	if trackers.Trackers[0] == "0" {
@@ -108,4 +105,37 @@ func GetPositionHandler(w http.ResponseWriter, r *http.Request) {
 }
 func randInt(min int, max int) int {
 	return min + rand.Intn(max-min)
+}
+
+func GetTrackers(name string) (rcache.Usr, error){
+    trackers, err := rcache.UsrTrackers(name) 
+    log.Log.WithFields(logrus.Fields{
+        "user":        fmt.Sprintf("%v", trackers),
+        "package": "route",
+    }).Info("GetTrackers")
+    if err != nil {
+        if err.Error() == config.ErrorMsg["NotExistInCache"].Msg {
+            trackersDS, err := datastore.UsrTrackers(name)
+            if err != nil {
+                log.Log.WithFields(logrus.Fields{
+                    "error": err.Error(),
+                    "package": "route",
+                }).Warn("Request Error")
+                //TODO http.Error(w, err.Error(), 404)
+                return trackers, err
+            }
+            err = rcache.SetUsrTrackers(trackersDS)
+            if err != nil {
+                log.Log.WithFields(logrus.Fields{
+                    "error":      err.Error(),
+                    "package": "route",
+                }).Warn("GetTrackers")
+                return trackersDS, err
+            }
+            return trackersDS, nil
+        }else{
+            return trackers, err
+        }
+    }
+    return trackers, nil
 }
