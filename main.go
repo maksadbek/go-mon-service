@@ -28,7 +28,8 @@ var (
 		`send signal to the daemon
          start: start daemon
          stop: shutdown
-         restart: reload `)
+         restart: reload 
+         status: check the status`)
 	confPath = flag.String(
 		"conf",
 		"conf.toml",
@@ -85,6 +86,14 @@ func readPid(fileName string) (int, error) {
 	return pid, nil
 }
 
+func checkPidFile(fileName string) bool {
+        _, err := os.Stat(fileName)
+        if err != nil {
+            return false
+        }
+        return true
+}
+
 var server Server
 
 func main() {
@@ -115,12 +124,31 @@ func main() {
 			os.Exit(1)
 		}
 		os.Exit(0)
+    case "status":
+        if checkPidFile("pid") {
+                pid, err := readPid("pid")
+                if err != nil {
+                        panic(err)
+                }
+                fmt.Println("daemon is running, pid is: ", strconv.Itoa(pid))
+        } else {
+                fmt.Println("daemon is not running")
+        }
+        os.Exit(0)
+
 	case "start":
+        if checkPidFile("pid") {
+           fmt.Println("daemon is already running, stop it or restart")
+           os.Exit(0)
+        }
 		break
 	default:
-		fmt.Println(`  send signal to the daemon
-                       stop  - stop the daemon
-                       restart - restart the daemon`)
+            fmt.Println(`  
+                        send : signal to the daemon
+                        stop : stop the daemon
+                        restart : restart the daemon
+                        status : check the status
+                        `)
 		os.Exit(1)
 	}
 	signal.Notify(sig, syscall.SIGTERM, syscall.SIGHUP)
@@ -210,6 +238,12 @@ func sigCatch() {
 }
 func stopd() {
 	<-stop
+    if checkPidFile("pid"){
+            err := os.Remove("pid")
+            if err != nil {
+                    panic(err)
+            }
+    }
 	log.Log.Info("terminating")
 	os.Exit(0)
 }
