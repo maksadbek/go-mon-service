@@ -156,10 +156,12 @@ func PushRedis(fleet Fleet) (err error) {
 	for k, x := range fleet.Update {
 		jpos, err := json.Marshal(x)
 		if err != nil {
+            /*
 			log.Log.WithFields(logrus.Fields{
 				"package": "rcache",
 				"error":   err.Error(),
 			}).Warn("PushRedis")
+            */
 			return err
 		}
 		rc.Do("RPUSH", config.DS.Redis.TPrefix+":"+k, jpos)
@@ -168,9 +170,11 @@ func PushRedis(fleet Fleet) (err error) {
 }
 
 func PutRawHash(hashName, field, data string) {
+    /*
 	log.Log.WithFields(logrus.Fields{
 		"package": "rcache",
 	}).Info("PushRawData")
+    */
 	rc.Do("HSET", hashName, field, data)
 	return
 }
