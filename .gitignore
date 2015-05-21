@@ -1,1 +1,7 @@
 go-mon-service
+go-ws-daemon.pid
+gomon_log
+logs
+nohup.out
+pid
+
