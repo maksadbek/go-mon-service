@@ -13,3 +13,10 @@ var mockConf string = `[ds]
 [log]
 	path = "info.log"
 `
+var FleetTest = struct {
+	FleetName string
+	Trackers  []string
+}{
+	"202",
+	[]string{"106206", "107749", "107699"},
+}

@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"reflect"
 	"strconv"
+    "strings"
 
 	"bitbucket.org/maksadbek/go-mon-service/conf"
 	log "bitbucket.org/maksadbek/go-mon-service/logger"
@@ -190,4 +191,34 @@ func UsrTrackers(name string) (usr rcache.Usr, err error) {
 		"user":    usr,
 	}).Info("UsrTrackers")
 	return
+}
+
+func CacheFleetTrackers() ([]rcache.FleetTracker,error) {
+	log.Log.WithFields(logrus.Fields{
+		"package": "datastore",
+	}).Info("CacheFleetTrackers")
+    var fleetTrackers []rcache.FleetTracker
+	rows, err := db.Query(queries["fleetTrackers"])
+    if err != nil {
+            log.Log.WithFields(logrus.Fields{
+                "package": "datastore",
+                "error":   err.Error(),
+            }).Warn("CacheFleetTrackers")
+            return fleetTrackers, err
+    }
+
+    defer rows.Close()
+    for rows.Next(){
+            var (
+                    trackers rcache.FleetTracker
+                    t string
+            )
+            rows.Scan(
+                    &trackers.Fleet,
+                    &t,
+            )
+            trackers.Trackers = strings.Split(t, ",")
+            fleetTrackers = append(fleetTrackers, trackers)
+    }
+    return fleetTrackers, nil
 }

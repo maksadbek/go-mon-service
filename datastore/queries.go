@@ -33,5 +33,11 @@ var queries map[string]string = map[string]string{
                                  what_class
                          from
                          max_units `,
+      "fleetTrackers":`
+                      SELECT fleet, GROUP_CONCAT(id) cars
+                      FROM max_units
+                      WHERE active = '1' and fleet > 0
+                      GROUP BY fleet
+                      `,
 }
 

@@ -54,3 +54,11 @@ func TestUsrTrackersAllCars(t *testing.T) {
 		t.Errorf("want %s, got %s", "0", usr.Trackers[0])
 	}
 }
+
+func TestCacheFleetTrackers(t *testing.T){
+    fleetTrackers, err := CacheFleetTrackers()
+    if err != nil {
+            t.Error(err)
+    }
+    t.Logf("%+v\n", fleetTrackers)
+}
