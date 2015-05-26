@@ -58,6 +58,12 @@ type Usr struct {
 	Fleet    string
 	Trackers []string
 }
+
+type FleetTracker struct {
+    Fleet string
+    Trackers []string
+}
+
 // функция для инициализации пакета
 // оно должна вызыватся первые перед исползованием пакета
 func Initialize(c conf.App) (err error) {
@@ -284,5 +290,14 @@ func SetUsrTrackers(usr Usr) error {
 		config.DS.Redis.UPrefix+":"+usr.Login,
 		string(jusr),
 	)
+    return nil
+}
+
+func AddFleetTrackers(ftracker []FleetTracker) error {
+    for _, tracker := range ftracker {
+            for _, x := range tracker.Trackers {
+                rc.Do("SADD", "fleet"+":"+tracker.Fleet, x)
+            }
+    }
     return nil
 }

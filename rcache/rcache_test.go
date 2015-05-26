@@ -143,3 +143,10 @@ func TestSetUsrTrackers(t *testing.T){
         t.Error("got %s, want %s", usr.Login, want)
     }
 }
+
+func TestAddFleetTrackers(t *testing.T) {
+       err := AddFleetTrackers(FleetTrackersTestData)
+       if err != nil {
+               t.Error(err)
+       }
+}

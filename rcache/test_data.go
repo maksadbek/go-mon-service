@@ -7,6 +7,12 @@ var FleetTest = struct {
 	"202",
 	[]string{"106206", "107749", "107699"},
 }
+
+var FleetTrackersTestData FleetTracker = FleetTracker {
+    Fleet: "666",
+    Trackers: []string{"106384", "107862", "108141"},
+}
+
 var mockConf string = `
 [ds]
     [ds.redis]
