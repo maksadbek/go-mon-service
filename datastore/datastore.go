@@ -3,9 +3,7 @@ package datastore
 import (
 	"database/sql"
 	"fmt"
-	"reflect"
-	"strconv"
-    "strings"
+	"strings"
 
 	"bitbucket.org/maksadbek/go-mon-service/conf"
 	log "bitbucket.org/maksadbek/go-mon-service/logger"
@@ -16,39 +14,6 @@ import (
 )
 
 var db *sql.DB
-
-type Vehicle struct {
-	Id                  int    `json=id`
-	Fleet               int    `json=fleet`
-	Imei                string `json=imei`
-	Number              string `json=number`
-	Tracker_type        string `json=tracker_type`
-	Tracker_type_id     int    `json=tracker_type_id`
-	Device_type_id      int    `json=device_type_id`
-	Name                string `json=name`
-	Owner               string `json=owner`
-	Active              string `json=active`
-	DateCreated         string `json=dateCreated`
-	Additional          string `json=additional`
-	Customization       string `json=customization`
-	Motor               int    `json=motor`
-	MotorKoef           []byte `json=motorKoefbyte`
-	CarSort             int    `json=carSort`
-	Group_id            int    `json=group_id`
-	YearOfManufac       int    `json=yearOfManufac`
-	MarkerTypeId        int    `json=markerTypeId`
-	ObjectTypeId        int    `json=objectTypeId`
-	ScheduleId          int    `json=scheduleId`
-	Detector_fuel_id    int    `json=detector_fuel_id`
-	Detector_motion_id  int    `json=detector_motion_id`
-	Detector_dinamik_id int    `json=detector_dinamik_id`
-	Pid                 int    `json=pid`
-	Installed_sensor    string `json=installed_sensor`
-	Detector_agro_id    int    `json=detector_agro_id`
-	Car_health          string `json=car_health`
-	Color               string `json=color`
-	What_class          int    `json=what_class`
-}
 
 func Initialize(c conf.Datastore) error {
 	log.Log.WithFields(logrus.Fields{
@@ -68,7 +33,7 @@ func Initialize(c conf.Datastore) error {
 	return nil
 }
 
-func GetTrackers(fleet string) (map[int]Vehicle, error) {
+func GetTrackers(fleet string) (map[int]rcache.Vehicle, error) {
 	queryFilter := " where fleet = " + fleet
 	if fleet == "" {
 		queryFilter = ""
@@ -77,10 +42,10 @@ func GetTrackers(fleet string) (map[int]Vehicle, error) {
 		"package": "datastore",
 		"fleet":   fleet,
 	}).Info("GetTrackers")
-	var pos map[int]Vehicle = make(map[int]Vehicle)
+	var pos map[int]rcache.Vehicle = make(map[int]rcache.Vehicle)
 	query := queries["getTrackers"] + queryFilter
 	rows, err := db.Query(query)
-    defer rows.Close();
+	defer rows.Close()
 	if err != nil {
 		log.Log.WithFields(logrus.Fields{
 			"package": "datastore",
@@ -89,7 +54,7 @@ func GetTrackers(fleet string) (map[int]Vehicle, error) {
 		return pos, err
 	}
 	for rows.Next() {
-		var v Vehicle
+		var v rcache.Vehicle
 		rows.Scan(
 			&v.Id,
 			&v.Fleet,
@@ -122,39 +87,13 @@ func GetTrackers(fleet string) (map[int]Vehicle, error) {
 	return pos, err
 }
 
-func CacheData() error {
-	log.Log.WithFields(logrus.Fields{
-		"package": "datastore",
-	}).Info("CacheData")
-	trackers, err := GetTrackers("")
-	if err != nil {
-		log.Log.WithFields(logrus.Fields{
-			"package": "datastore",
-			"error":   err.Error(),
-		}).Warn("CacheData")
-		return err
-	}
-	for id, x := range trackers {
-		st := reflect.ValueOf(x)
-		hashName := "max_unit_" + strconv.Itoa(id)
-		for i := 0; i < st.NumField(); i++ {
-			valueField := st.Field(i)
-			typeField := st.Type().Field(i)
-			key := fmt.Sprintf("%v", valueField.Interface())
-			value := typeField.Name
-			rcache.PutRawHash(hashName, key, value)
-		}
-	}
-	return err
-}
-
 func UsrTrackers(name string) (usr rcache.Usr, err error) {
 	log.Log.WithFields(logrus.Fields{
 		"package": "datastore",
 		"name":    name,
 	}).Info("UsrTrackers")
 	rows, err := db.Query(queries["usrTrackers"], name)
-    defer rows.Close();
+	defer rows.Close()
 	if err != nil {
 		log.Log.WithFields(logrus.Fields{
 			"package": "datastore",
@@ -170,14 +109,14 @@ func UsrTrackers(name string) (usr rcache.Usr, err error) {
 			&usr.Fleet,
 			&cars,
 		)
-        if cars == "all" {
-                usr.Trackers = append(usr.Trackers, "0")
-                log.Log.WithFields(logrus.Fields{
-                    "package": "datastore",
-                    "user":    usr,
-                }).Info("UsrTrackers")
-                return usr, err
-        }
+		if cars == "all" {
+			usr.Trackers = append(usr.Trackers, "0")
+			log.Log.WithFields(logrus.Fields{
+				"package": "datastore",
+				"user":    usr,
+			}).Info("UsrTrackers")
+			return usr, err
+		}
 		tr, err := phpserialize.Decode(cars)
 		if err != nil {
 			return usr, err
@@ -193,32 +132,32 @@ func UsrTrackers(name string) (usr rcache.Usr, err error) {
 	return
 }
 
-func CacheFleetTrackers() ([]rcache.FleetTracker,error) {
+func CacheFleetTrackers() ([]rcache.FleetTracker, error) {
 	log.Log.WithFields(logrus.Fields{
 		"package": "datastore",
 	}).Info("CacheFleetTrackers")
-    var fleetTrackers []rcache.FleetTracker
+	var fleetTrackers []rcache.FleetTracker
 	rows, err := db.Query(queries["fleetTrackers"])
-    if err != nil {
-            log.Log.WithFields(logrus.Fields{
-                "package": "datastore",
-                "error":   err.Error(),
-            }).Warn("CacheFleetTrackers")
-            return fleetTrackers, err
-    }
+	if err != nil {
+		log.Log.WithFields(logrus.Fields{
+			"package": "datastore",
+			"error":   err.Error(),
+		}).Warn("CacheFleetTrackers")
+		return fleetTrackers, err
+	}
 
-    defer rows.Close()
-    for rows.Next(){
-            var (
-                    trackers rcache.FleetTracker
-                    t string
-            )
-            rows.Scan(
-                    &trackers.Fleet,
-                    &t,
-            )
-            trackers.Trackers = strings.Split(t, ",")
-            fleetTrackers = append(fleetTrackers, trackers)
-    }
-    return fleetTrackers, nil
+	defer rows.Close()
+	for rows.Next() {
+		var (
+			trackers rcache.FleetTracker
+			t        string
+		)
+		rows.Scan(
+			&trackers.Fleet,
+			&t,
+		)
+		trackers.Trackers = strings.Split(t, ",")
+		fleetTrackers = append(fleetTrackers, trackers)
+	}
+	return fleetTrackers, nil
 }

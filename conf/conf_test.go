@@ -41,8 +41,8 @@ func TestRead(t *testing.T) {
 		t.Errorf("got %s, want %s", got, want)
 	}
 
-    want = "such record does not exist"
-    if got := app.ErrorMsg["NotExistInCache"].Msg; got != want {
-        t.Errorf("got '%s', want '%s'", got, want)
-    }
+	want = "such record does not exist"
+	if got := app.ErrorMsg["NotExistInCache"].Msg; got != want {
+		t.Errorf("got '%s', want '%s'", got, want)
+	}
 }

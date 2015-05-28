@@ -55,10 +55,10 @@ func TestUsrTrackersAllCars(t *testing.T) {
 	}
 }
 
-func TestCacheFleetTrackers(t *testing.T){
-    fleetTrackers, err := CacheFleetTrackers()
-    if err != nil {
-            t.Error(err)
-    }
-    t.Logf("%+v\n", fleetTrackers)
+func TestCacheFleetTrackers(t *testing.T) {
+	fleetTrackers, err := CacheFleetTrackers()
+	if err != nil {
+		t.Error(err)
+	}
+	t.Logf("%+v\n", fleetTrackers)
 }

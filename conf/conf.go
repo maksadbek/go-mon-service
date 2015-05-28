@@ -6,25 +6,27 @@
 package conf
 
 import (
-	"github.com/BurntSushi/toml"
 	"io"
+
+	"github.com/BurntSushi/toml"
 )
 
 type ErrorStr struct {
-    Msg string
+	Msg string
 }
+
 // структура для конф. данных
 type Datastore struct {
 	Mysql struct {
-		DSN string
-        Interval int
+		DSN      string
+		Interval int
 	}
 	// анонимная структура для конфигурации для редис
 	Redis struct {
 		Host    string // хост для редис сервера
 		FPrefix string // флит префикс, так будет сохранятся в редис. Например: fleet_202, flit_202, ...
 		TPrefix string // трекер префикс, так же как флит префикс. Например: tracker_512341, another_2131
-        UPrefix string
+		UPrefix string
 	}
 }
 
@@ -36,10 +38,10 @@ type Server struct {
 
 // главный структура для конф.
 type App struct {
-	DS  Datastore // база данных
-	SRV Server    // сервер
-	Log Log       // логирования
-    ErrorMsg map[string]ErrorStr `toml:"errors"`
+	DS       Datastore           // база данных
+	SRV      Server              // сервер
+	Log      Log                 // логирования
+	ErrorMsg map[string]ErrorStr `toml:"errors"`
 }
 
 // структура для логирования

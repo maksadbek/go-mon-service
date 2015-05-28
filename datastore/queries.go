@@ -1,14 +1,14 @@
 package datastore
 
 var queries map[string]string = map[string]string{
-        "usrTrackers": `SELECT 
+	"usrTrackers": `SELECT 
                             login, 
                             fleet, 
                             cars
                         FROM max_users
                         WHERE login = ?
                         LIMIT 1`,
-        "getTrackers": ` select 
+	"getTrackers": ` select 
                                  id,
                                  fleet,
                                  imei,
@@ -33,11 +33,10 @@ var queries map[string]string = map[string]string{
                                  what_class
                          from
                          max_units `,
-      "fleetTrackers":`
+	"fleetTrackers": `
                       SELECT fleet, GROUP_CONCAT(id) cars
                       FROM max_units
                       WHERE active = '1' and fleet > 0
                       GROUP BY fleet
                       `,
 }
-
