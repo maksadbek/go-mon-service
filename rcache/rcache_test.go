@@ -1,11 +1,11 @@
 package rcache
 
 import (
+	"encoding/json"
 	"fmt"
+	"strconv"
 	"strings"
 	"testing"
-    "strconv"
-    "encoding/json"
 
 	"bitbucket.org/maksadbek/go-mon-service/conf"
 )
@@ -43,26 +43,26 @@ func TestFleetTrackers(t *testing.T) {
 
 	// get trackers
 	trackersTest, err := GetTrackers(
-        FleetTest.FleetName,
-        0,
-        100,
-    )
+		FleetTest.FleetName,
+		0,
+		100,
+	)
 	if err != nil {
 		t.Error(err)
 	}
 
 	// check tracker's id
-    for _, track := range trackersTest{
-        found := false
-        for _, val := range FleetTest.Trackers {
-            if val == track {
-                found = true
-                break
-            }
-        }
-        if !found {
-            t.Error("%s not found", track)
-        }
+	for _, track := range trackersTest {
+		found := false
+		for _, val := range FleetTest.Trackers {
+			if val == track {
+				found = true
+				break
+			}
+		}
+		if !found {
+			t.Error("%s not found", track)
+		}
 	}
 }
 
@@ -87,66 +87,59 @@ func TestGetPositionsByFleet(t *testing.T) {
 	}
 }
 
-func TestGetPostions(t *testing.T){
-    pos, err := GetPositions(FleetTest.Trackers)
-    if err != nil {
-            t.Error(err)
-    }
-    for _, tracker := range pos{
-            idStr := strconv.Itoa(tracker.Id)
-            if(idStr != FleetTest.Trackers[0] &&
-               idStr != FleetTest.Trackers[1] &&
-               idStr != FleetTest.Trackers[2]  ){
-                    t.Errorf(
-                            "want %s or %s or %s, got %s\n",
-                            FleetTest.Trackers[0],
-                            FleetTest.Trackers[1],
-                            FleetTest.Trackers[2],
-                            idStr,
-                    )
-            }
-    }
+func TestGetPostions(t *testing.T) {
+	pos, err := GetPositions(FleetTest.Trackers)
+	if err != nil {
+		t.Error(err)
+	}
+	for _, tracker := range pos {
+		idStr := strconv.Itoa(tracker.Id)
+		if idStr != FleetTest.Trackers[0] &&
+			idStr != FleetTest.Trackers[1] &&
+			idStr != FleetTest.Trackers[2] {
+			t.Errorf(
+				"want %s or %s or %s, got %s\n",
+				FleetTest.Trackers[0],
+				FleetTest.Trackers[1],
+				FleetTest.Trackers[2],
+				idStr,
+			)
+		}
+	}
 }
 
-func TestUsrTrackers(t *testing.T){
-    usr, err := UsrTrackers(testUsr[0].Login)
-    if err != nil {
-        t.Error(err)
-    }
+func TestUsrTrackers(t *testing.T) {
+	usr, err := UsrTrackers(testUsr[0].Login)
+	if err != nil {
+		t.Error(err)
+	}
 
-    want := testUsr[0].Login
-    if usr.Login != want {
-        t.Error("want %s, got %s", want, usr.Login)
-    }
+	want := testUsr[0].Login
+	if usr.Login != want {
+		t.Error("want %s, got %s", want, usr.Login)
+	}
 }
 
-func TestSetUsrTrackers(t *testing.T){
-    err := SetUsrTrackers(testUsr[1])
-    if err != nil {
-        t.Error(err)
-    }
-    userb, err := rc.Do(
-        "GET",
-        config.DS.Redis.UPrefix+":"+testUsr[1].Login,
-    )
-    if fmt.Sprintf("%v", userb) == "<nil>" {
-        t.Error("got nil")
-    }
-    usr := Usr{}
-    err = json.Unmarshal([]byte(fmt.Sprintf("%s", userb)), &usr)
-    if err != nil {
-        t.Error(err)
-    }
+func TestSetUsrTrackers(t *testing.T) {
+	err := SetUsrTrackers(testUsr[1])
+	if err != nil {
+		t.Error(err)
+	}
+	userb, err := rc.Do(
+		"GET",
+		config.DS.Redis.UPrefix+":"+testUsr[1].Login,
+	)
+	if fmt.Sprintf("%v", userb) == "<nil>" {
+		t.Error("got nil")
+	}
+	usr := Usr{}
+	err = json.Unmarshal([]byte(fmt.Sprintf("%s", userb)), &usr)
+	if err != nil {
+		t.Error(err)
+	}
 
-    want := testUsr[1].Login
-    if usr.Login != want {
-        t.Error("got %s, want %s", usr.Login, want)
-    }
-}
-
-func TestAddFleetTrackers(t *testing.T) {
-       err := AddFleetTrackers(FleetTrackersTestData)
-       if err != nil {
-               t.Error(err)
-       }
+	want := testUsr[1].Login
+	if usr.Login != want {
+		t.Error("got %s, want %s", usr.Login, want)
+	}
 }

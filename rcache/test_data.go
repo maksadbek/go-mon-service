@@ -8,9 +8,9 @@ var FleetTest = struct {
 	[]string{"106206", "107749", "107699"},
 }
 
-var FleetTrackersTestData FleetTracker = FleetTracker {
-    Fleet: "666",
-    Trackers: []string{"106384", "107862", "108141"},
+var FleetTrackersTestData FleetTracker = FleetTracker{
+	Fleet:    "666",
+	Trackers: []string{"106384", "107862", "108141"},
 }
 
 var mockConf string = `
@@ -52,7 +52,7 @@ var testFleet Fleet = Fleet{
 			MuAdditional:  "",
 			Customization: "",
 			Additional:    "additional",
-            Action: 2,
+			Action:        2,
 		},
 		"107749": Pos{
 			Id:            107749,
@@ -75,7 +75,7 @@ var testFleet Fleet = Fleet{
 			MuAdditional:  "",
 			Customization: "",
 			Additional:    "additional",
-            Action: 2,
+			Action:        2,
 		},
 		"107699": Pos{
 			Id:            107699,
@@ -98,19 +98,19 @@ var testFleet Fleet = Fleet{
 			MuAdditional:  "",
 			Customization: "a:1:{s:9:fillcolor;s:7:#993300;}",
 			Additional:    "",
-            Action: 2,
+			Action:        2,
 		},
 	},
 }
 var testUsr []Usr = []Usr{
-    Usr{
-        Login : "oldmin",
-        Fleet : "666",
-        Trackers : []string{"1", "2", "3"},
-    },
-    Usr{
-        Login: "testLogin",
-        Fleet: "testFleet",
-        Trackers: []string{"4","5","6"},
-    },
+	Usr{
+		Login:    "oldmin",
+		Fleet:    "666",
+		Trackers: []string{"1", "2", "3"},
+	},
+	Usr{
+		Login:    "testLogin",
+		Fleet:    "testFleet",
+		Trackers: []string{"4", "5", "6"},
+	},
 }
