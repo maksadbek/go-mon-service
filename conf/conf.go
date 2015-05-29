@@ -27,6 +27,7 @@ type Datastore struct {
 		FPrefix string // флит префикс, так будет сохранятся в редис. Например: fleet_202, flit_202, ...
 		TPrefix string // трекер префикс, так же как флит префикс. Например: tracker_512341, another_2131
 		UPrefix string
+        MUPrefix string //max_units prefix
 	}
 }
 
@@ -36,12 +37,30 @@ type Server struct {
 	Port string // порт
 }
 
+type Defaults struct {
+   Lat float64
+   Lng float64
+   Direction int
+   Speed int
+   Sat int
+   Ignition int
+   GsmSignal int
+   Battery int
+   Seat int
+   BatteryLvl int
+   Fuel int
+   FuelVal int
+   MuAdditional string
+   Action int
+}
+
 // главный структура для конф.
 type App struct {
 	DS       Datastore           // база данных
 	SRV      Server              // сервер
 	Log      Log                 // логирования
 	ErrorMsg map[string]ErrorStr `toml:"errors"`
+    Defaults Defaults
 }
 
 // структура для логирования
