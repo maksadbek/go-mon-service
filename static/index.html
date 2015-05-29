@@ -111,7 +111,7 @@ function setMapMode(pos)
 
     setInterval(
 function setMarkerPos() {
-    var login = 'newmax',
+    var login = 'ax',
         groups = '1,2,3',
         fleet = '202',
         xhr = new XMLHttpRequest();
@@ -122,9 +122,10 @@ function setMarkerPos() {
             if (xhr.status === 200 ) {
                 var jpos = JSON.parse(xhr.responseText);
                 var positions = [];
-                positions.push(jpos.Update[106206]);
-                positions.push(jpos.Update[107699]);
-                positions.push(jpos.Update[107749]);
+                for(var i in jpos.Update) {
+                        console.log(jpos.Update[i]);
+                    positions.push(jpos.Update[i]);
+                }
                 setMapMode(positions);
             }
             else if (xhr.status !== 200) {
