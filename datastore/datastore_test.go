@@ -62,3 +62,15 @@ func TestCacheFleetTrackers(t *testing.T) {
 	}
 	t.Logf("%+v\n", fleetTrackers)
 }
+
+func BenchmarkGetTrackers(b *testing.B) {
+	for i := 0; i < b.N; i++ {
+		_, _ = GetTrackers("")
+	}
+}
+
+func BenchmarkCacheFleetTrackers(b *testing.B) {
+	for i := 0; i < b.N; i++ {
+		_, _ = CacheFleetTrackers()
+	}
+}

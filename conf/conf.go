@@ -23,13 +23,20 @@ type Datastore struct {
 	}
 	// анонимная структура для конфигурации для редис
 	Redis struct {
-		Host    string // хост для редис сервера
-		FPrefix string // флит префикс, так будет сохранятся в редис. Например: fleet_202, flit_202, ...
-		TPrefix string // трекер префикс, так же как флит префикс. Например: tracker_512341, another_2131
-		UPrefix string
-        MUPrefix string //max_units prefix
+		Host     string // хост для редис сервера
+		FPrefix  string // флит префикс, так будет сохранятся в редис. Например: fleet_202, flit_202, ...
+		TPrefix  string // трекер префикс, так же как флит префикс. Например: tracker_512341, another_2131
+		UPrefix  string
+		MUPrefix string //max_units prefix
 	}
 }
+
+const (
+	ErrReq               = "request error"
+	ErrNotInCache        = "not exist in cache"
+	ErrGetListOfTrackers = "get list of tracker"
+	InfoListOfTrackers   = "get list of trackers"
+)
 
 // структура конф. для сервера
 type Server struct {
@@ -38,20 +45,20 @@ type Server struct {
 }
 
 type Defaults struct {
-   Lat float64
-   Lng float64
-   Direction int
-   Speed int
-   Sat int
-   Ignition int
-   GsmSignal int
-   Battery int
-   Seat int
-   BatteryLvl int
-   Fuel int
-   FuelVal int
-   MuAdditional string
-   Action int
+	Lat          float64
+	Lng          float64
+	Direction    int
+	Speed        int
+	Sat          int
+	Ignition     int
+	GsmSignal    int
+	Battery      int
+	Seat         int
+	BatteryLvl   int
+	Fuel         int
+	FuelVal      int
+	MuAdditional string
+	Action       int
 }
 
 // главный структура для конф.
@@ -60,7 +67,7 @@ type App struct {
 	SRV      Server              // сервер
 	Log      Log                 // логирования
 	ErrorMsg map[string]ErrorStr `toml:"errors"`
-    Defaults Defaults
+	Defaults Defaults
 }
 
 // структура для логирования
