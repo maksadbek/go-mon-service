@@ -1,14 +1,17 @@
 package main
 
 import (
+	"compress/gzip"
 	"flag"
 	"fmt"
+	"io"
 	"io/ioutil"
 	"net"
 	"net/http"
 	"os"
 	"os/exec"
 	"os/signal"
+	"runtime"
 	"strconv"
 	"strings"
 	"syscall"
@@ -17,6 +20,7 @@ import (
 	"bitbucket.org/maksadbek/go-mon-service/conf"
 	"bitbucket.org/maksadbek/go-mon-service/datastore"
 	log "bitbucket.org/maksadbek/go-mon-service/logger"
+	"bitbucket.org/maksadbek/go-mon-service/rcache"
 	"bitbucket.org/maksadbek/go-mon-service/route"
 	"github.com/Sirupsen/logrus"
 )
@@ -34,10 +38,11 @@ var (
 		"conf",
 		"conf.toml",
 		`configuration file for daemon`)
-	daemon = flag.Bool("d", true, "do not touch it")
-	sig  = make(chan os.Signal)
-	stop = make(chan bool)
-	res  = make(chan bool)
+	daemon    = flag.Bool("d", true, "do not touch it")
+	daemonize = flag.Bool("f", false, "daemonize or not")
+	sig       = make(chan os.Signal)
+	stop      = make(chan bool)
+	res       = make(chan bool)
 )
 
 type Server struct {
@@ -87,16 +92,17 @@ func readPid(fileName string) (int, error) {
 }
 
 func checkPidFile(fileName string) bool {
-        _, err := os.Stat(fileName)
-        if err != nil {
-            return false
-        }
-        return true
+	_, err := os.Stat(fileName)
+	if err != nil {
+		return false
+	}
+	return true
 }
 
 var server Server
 
 func main() {
+	runtime.GOMAXPROCS(4)
 	flag.Parse()
 	switch *control {
 	case "stop":
@@ -124,26 +130,26 @@ func main() {
 			os.Exit(1)
 		}
 		os.Exit(0)
-    case "status":
-        if checkPidFile("pid") {
-                pid, err := readPid("pid")
-                if err != nil {
-                        panic(err)
-                }
-                fmt.Println("daemon is running, pid is: ", strconv.Itoa(pid))
-        } else {
-                fmt.Println("daemon is not running")
-        }
-        os.Exit(0)
+	case "status":
+		if checkPidFile("pid") {
+			pid, err := readPid("pid")
+			if err != nil {
+				panic(err)
+			}
+			fmt.Println("daemon is running, pid is: ", strconv.Itoa(pid))
+		} else {
+			fmt.Println("daemon is not running")
+		}
+		os.Exit(0)
 
 	case "start":
-        if checkPidFile("pid") {
-           fmt.Println("daemon is already running, stop it or restart")
-           os.Exit(0)
-        }
+		if checkPidFile("pid") {
+			fmt.Println("daemon is already running, stop it or restart")
+			os.Exit(0)
+		}
 		break
 	default:
-            fmt.Println(`  
+		fmt.Println(`  
                         send : signal to the daemon
                         stop : stop the daemon
                         restart : restart the daemon
@@ -153,12 +159,13 @@ func main() {
 	}
 	signal.Notify(sig, syscall.SIGTERM, syscall.SIGHUP)
 	go sigCatch()
-
 	go stopd()
 	go resd()
-	if *daemon == true {
-		res <- true
-		stop <- true
+	if *daemonize == true {
+		if *daemon == true {
+			res <- true
+			stop <- true
+		}
 	}
 	Environment := os.Getenv("GOMON")
 
@@ -187,7 +194,8 @@ func main() {
 
 	route.Initialize(app)
 	datastore.Initialize(app.DS)
-    go CacheData(app)
+	rcache.Initialize(app)
+	go CacheData(app)
 	go worker(app)
 	err = WritePid()
 	if err != nil {
@@ -212,11 +220,28 @@ func WritePid() error {
 	return nil
 }
 func CacheData(app conf.App) {
-	datastore.CacheData()
-	for _ = range time.Tick(
-		time.Duration(app.DS.Mysql.Interval) * time.Minute) {
-		datastore.CacheData()
+	trackers, err := datastore.GetTrackers("")
+	if err != nil {
+		panic(err)
 	}
+	rcache.CacheDefaults(trackers)
+	CacheFleetTrackers()
+	for _ = range time.Tick(time.Duration(app.DS.Mysql.Interval) * time.Minute) {
+		trackers, err := datastore.GetTrackers("")
+		if err != nil {
+			panic(err)
+		}
+		rcache.CacheDefaults(trackers)
+		CacheFleetTrackers()
+	}
+}
+
+func CacheFleetTrackers() {
+	t, err := datastore.CacheFleetTrackers()
+	if err != nil {
+		panic(err)
+	}
+	rcache.AddFleetTrackers(t)
 }
 func sigCatch() {
 	for {
@@ -238,12 +263,12 @@ func sigCatch() {
 }
 func stopd() {
 	<-stop
-    if checkPidFile("pid"){
-            err := os.Remove("pid")
-            if err != nil {
-                    panic(err)
-            }
-    }
+	if checkPidFile("pid") {
+		err := os.Remove("pid")
+		if err != nil {
+			panic(err)
+		}
+	}
 	log.Log.Info("terminating")
 	os.Exit(0)
 }
@@ -272,7 +297,7 @@ func worker(app conf.App) {
 	if err != nil {
 		panic(err)
 	}
-	serve := &http.Server{Handler: webHandlers()}
+	serve := &http.Server{Handler: GzipHandler(webHandlers())}
 	serve.Serve(server.Listener)
 }
 
@@ -281,4 +306,35 @@ func webHandlers() http.Handler {
 	web.Handle("/", http.FileServer(http.Dir("static/")))
 	web.HandleFunc("/positions", route.GetPositionHandler)
 	return web
+}
+
+type gzipResponseWriter struct {
+	io.Writer
+	http.ResponseWriter
+	sniffDone bool
+}
+
+func (w *gzipResponseWriter) Write(b []byte) (int, error) {
+	if !w.sniffDone {
+		if w.Header().Get("Content-Type") == "" {
+			w.Header().Set("Content-Type", http.DetectContentType(b))
+		}
+		w.sniffDone = true
+	}
+	return w.Writer.Write(b)
+}
+
+// Wrap a http.Handler to support transparent gzip encoding.
+func GzipHandler(h http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Add("Vary", "Accept-Encoding")
+		if !strings.Contains(r.Header.Get("Accept-Encoding"), "gzip") {
+			h.ServeHTTP(w, r)
+			return
+		}
+		w.Header().Set("Content-Encoding", "gzip")
+		gz := gzip.NewWriter(w)
+		defer gz.Close()
+		h.ServeHTTP(&gzipResponseWriter{Writer: gz, ResponseWriter: w}, r)
+	})
 }
