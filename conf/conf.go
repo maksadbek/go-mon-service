@@ -35,7 +35,10 @@ const (
 	ErrReq               = "request error"
 	ErrNotInCache        = "not exist in cache"
 	ErrGetListOfTrackers = "get list of tracker"
+	ErrSetError          = "unable to set data into redis"
+	ErrRedisConn         = "unable to connect redis server"
 	InfoListOfTrackers   = "get list of trackers"
+	InfoPushFleet        = "pushing fleet info"
 )
 
 // структура конф. для сервера
