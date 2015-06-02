@@ -157,7 +157,7 @@ func main() {
                         `)
 		os.Exit(1)
 	}
-	signal.Notify(sig, syscall.SIGTERM, syscall.SIGHUP)
+	signal.Notify(sig, syscall.SIGTERM, syscall.SIGHUP, syscall.SIGINT)
 	go sigCatch()
 	go stopd()
 	go resd()
@@ -224,7 +224,10 @@ func CacheData(app conf.App) {
 	if err != nil {
 		panic(err)
 	}
-	rcache.CacheDefaults(trackers)
+	err = rcache.CacheDefaults(trackers)
+	if err != nil {
+		panic(err)
+	}
 	CacheFleetTrackers()
 	for _ = range time.Tick(time.Duration(app.DS.Mysql.Interval) * time.Minute) {
 		trackers, err := datastore.GetTrackers("")
@@ -241,13 +244,16 @@ func CacheFleetTrackers() {
 	if err != nil {
 		panic(err)
 	}
-	rcache.AddFleetTrackers(t)
+	err = rcache.AddFleetTrackers(t)
+	if err != nil {
+		panic(err)
+	}
 }
 func sigCatch() {
 	for {
 		select {
 		case s := <-sig:
-			if s == syscall.SIGTERM {
+			if s == syscall.SIGTERM || s == syscall.SIGINT {
 				log.Log.Info("got term signal")
 				stop <- true
 				break
