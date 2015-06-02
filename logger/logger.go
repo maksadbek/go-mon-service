@@ -1,6 +1,7 @@
 package logger
 
 import (
+	"fmt"
 	"net/http"
 
 	"github.com/Sirupsen/logrus"
@@ -38,8 +39,8 @@ func FuncLog(fn, msg string, msgs map[string]interface{}, err error) {
 
 	if err != nil {
 		m["error"] = err.Error()
-		Log.WithFields(logrus.Fields{"": m}).Warn(msg)
+		Log.WithFields(logrus.Fields{"": fmt.Sprintf("%+v", m)}).Warn(msg)
 	} else {
-		Log.WithFields(logrus.Fields{"": m}).Info(msg)
+		Log.WithFields(logrus.Fields{"": fmt.Sprintf("%+v", m)}).Info(msg)
 	}
 }
