@@ -10,7 +10,6 @@ import (
 
 	"bitbucket.org/maksadbek/go-mon-service/conf"
 	"bitbucket.org/maksadbek/go-mon-service/logger"
-	"github.com/Sirupsen/logrus"
 	"github.com/garyburd/redigo/redis"
 )
 
@@ -153,17 +152,7 @@ func GetPositions(trackerId []string) (trackers map[string]Pos, err error) {
 		p := fmt.Sprintf("%s", pBytes) // get string value of interface
 		// if the value is nil, then merge with default values from max_units
 		if fmt.Sprintf("%v", pBytes) == "<nil>" {
-			// prepare error message
-			errorMsg := fmt.Sprintf(
-				"%s : '%s:%s'",
-				config.ErrorMsg["NotExistInCache"].Msg,
-				config.DS.Redis.FPrefix,
-				tracker,
-			)
-			logger.Log.WithFields(logrus.Fields{
-				"function": "rcache.GetPositions",
-				"error":    errorMsg,
-			}).Warn("Record does not exist in redis, building it virtually")
+			logger.FuncLog("rcache.GetPositions", conf.ErrNotInCache, nil, nil)
 			pos.Latitude = config.Defaults.Lat
 			pos.Longitude = config.Defaults.Lng
 			pos.Direction = config.Defaults.Direction
@@ -178,64 +167,39 @@ func GetPositions(trackerId []string) (trackers map[string]Pos, err error) {
 			pos.FuelVal = config.Defaults.FuelVal
 			pos.MuAdditional = config.Defaults.MuAdditional
 			pos.Action = config.Defaults.Action
+
 			idInt, err := strconv.Atoi(tracker)
 			if err != nil {
-				logger.Log.WithFields(logrus.Fields{
-					"function": "rcache.GetPositions",
-					"error":    err.Error(),
-					"id":       tracker,
-				}).Warn("Cannot convert id to int")
+				logger.FuncLog("rcache.GetPositions", "", nil, err)
 			}
 			pos.Id = idInt
-
 			hashName := "max_unit_" + tracker
 			rOwner, err := rc.Do("HGET", hashName, "Owner")
 			if err != nil {
-				logger.Log.WithFields(logrus.Fields{
-					"function":      "rcache.GetPositions",
-					"error":         err.Error(),
-					"redis command": "max_unit_" + tracker + " " + "Owner",
-				}).Warn("Can't retrieve owner data from redis")
+				logger.FuncLog("rcache.GetPositions", conf.ErrNotInCache, nil, err)
 			}
 			pos.Owner = fmt.Sprintf("%s", rOwner)
-
 			rNumber, err := rc.Do("HGET", hashName, "Number")
 			if err != nil {
-				logger.Log.WithFields(logrus.Fields{
-					"function":      "rcache.GetPositions",
-					"error":         err.Error(),
-					"redis command": "max_unit_" + tracker + " " + "Number",
-				}).Warn("Can't retrieve number data from redis")
+				logger.FuncLog("rcache.GetPositions", conf.ErrNotInCache, nil, err)
 			}
 
 			pos.Number = fmt.Sprintf("%s", rNumber)
 			rName, err := rc.Do("HGET", hashName, "Name")
 			if err != nil {
-				logger.Log.WithFields(logrus.Fields{
-					"function":      "rcache.GetPositions",
-					"error":         err.Error(),
-					"redis command": "max_unit_" + tracker + " " + "Name",
-				}).Warn("Can't retrieve name data from redis")
+				logger.FuncLog("rcache.GetPositions", conf.ErrNotInCache, nil, err)
 			}
 			pos.Name = fmt.Sprintf("%s", rName)
 
 			rCustom, err := rc.Do("HGET", hashName, "Customization")
 			if err != nil {
-				logger.Log.WithFields(logrus.Fields{
-					"function":      "rcache.GetPositions",
-					"error":         err.Error(),
-					"redis command": "max_unit_" + tracker + " " + "Customization",
-				}).Warn("Can't retrieve customization data from redis")
+				logger.FuncLog("rcache.GetPositions", conf.ErrNotInCache, nil, err)
 			}
 			pos.Customization = fmt.Sprintf("%s", rCustom)
 
 			rAdditional, err := rc.Do("HGET", hashName, "Additional")
 			if err != nil {
-				logger.Log.WithFields(logrus.Fields{
-					"function":      "rcache.GetPositions",
-					"error":         err.Error(),
-					"redis command": "max_unit_" + tracker + " " + "Additional",
-				}).Warn("Can't retrieve additional data from redis")
+				logger.FuncLog("rcache.GetPositions", conf.ErrNotInCache, nil, err)
 			}
 			pos.Additional = fmt.Sprintf("%s", rAdditional)
 			//return trackers, errors.New(config.ErrorMsg["NotExistInCache"].Msg)
@@ -243,11 +207,7 @@ func GetPositions(trackerId []string) (trackers map[string]Pos, err error) {
 		} else {
 			err = json.Unmarshal([]byte(p), &pos)
 			if err != nil {
-				logger.Log.WithFields(logrus.Fields{
-					"package":             "rcache.GetPositions",
-					"error":               err.Error(),
-					"String to unmarshal": p,
-				}).Warn("Can't unmarshal this value")
+				logger.FuncLog("rcache.GetPositions", conf.ErrNotInCache, nil, err)
 				return trackers, err
 			}
 			trackers[tracker] = pos
@@ -259,15 +219,7 @@ func GetPositions(trackerId []string) (trackers map[string]Pos, err error) {
 // GetTrackers can be used to get array of tracker of particular fleet
 // start and stop are range values of list, default is 0,200, can be set from config
 func GetTrackers(fleet string, start, stop int) (trackers []string, err error) {
-
-	logger.Log.WithFields(logrus.Fields{
-		"package":  "rcache",
-		"fleet":    fleet,
-		"start":    start,
-		"stop":     stop,
-		"function": "rcache.GetTrackers",
-	}).Info("Get list of trackers")
-
+	logger.FuncLog("rcache.GetTrackers", conf.InfoListOfTrackers, nil, nil)
 	// get list of trackers ids from cache
 	v, err := redis.Strings(rc.Do("SMEMBERS", config.DS.Redis.FPrefix+":"+fleet)) //
 	if err != nil {
@@ -284,13 +236,13 @@ func GetTrackers(fleet string, start, stop int) (trackers []string, err error) {
 
 // PushRedis can be used to save fleet var into redis
 func PushRedis(fleet Fleet) (err error) {
-	logger.Log.WithFields(logrus.Fields{
-		"function": "rcache.PushRedis",
-	}).Info("Pushing data to redis")
+	logger.FuncLog("rcache.PushRedis", conf.InfoPushFleet, nil, nil)
+	// get list of trackers ids from cache
 	// range over map of Pos and push them
 	for k, x := range fleet.Update {
 		jpos, err := json.Marshal(x)
 		if err != nil {
+			logger.FuncLog("rcache.PushRedis", conf.ErrGetListOfTrackers, nil, err)
 			return err
 		}
 		rc.Do("RPUSH", config.DS.Redis.TPrefix+":"+k, jpos) // prefix can be set from conf
@@ -300,31 +252,20 @@ func PushRedis(fleet Fleet) (err error) {
 
 // GetPositionsByFleet can be used to tracker data by fleet id
 func GetPositionsByFleet(fleetNum string, start, stop int) (Fleet, error) {
-	logger.Log.WithFields(logrus.Fields{
-		"fleetNumber": fleetNum,
-		"start":       start,
-		"stop":        stop,
-		"function":    "rcache.GetPositionsByFleet",
-	}).Info("Getting tracker data from redis")
+	logger.FuncLog("rcache.PushRedis", "", nil, nil)
 	fleet := Fleet{}
 	fleet.Id = fleetNum
 	fleet.Update = make(map[string]Pos)
 	// get trackers of current fleet
 	trackers, err := GetTrackers(fleetNum, start, stop)
 	if err != nil {
-		logger.Log.WithFields(logrus.Fields{
-			"error":    err.Error(),
-			"function": "rcache.GetPositionsByFleet",
-		}).Warn("Unable to get list of tracker of fleet")
+		logger.FuncLog("rcache.GetPositionsByFleet", conf.ErrGetListOfTrackers, nil, err)
 		return fleet, err
 	}
 
 	fleet.Update, err = GetPositions(trackers)
 	if err != nil {
-		logger.Log.WithFields(logrus.Fields{
-			"error":    err.Error(),
-			"function": "rcache.GetPositionsByFleet",
-		}).Warn("Unable to get list of tracker of fleet")
+		logger.FuncLog("rcache.GetPositionsByFleet", conf.ErrGetListOfTrackers, nil, err)
 	}
 	return fleet, err
 }
@@ -332,41 +273,22 @@ func GetPositionsByFleet(fleetNum string, start, stop int) (Fleet, error) {
 // UsrTrackers can be used to get info of user and list of its trackers
 func UsrTrackers(name string) (Usr, error) {
 	usr := Usr{}
-	logger.Log.WithFields(logrus.Fields{
-		"function": "rcache.UsrTrackers",
-		"name":     name,
-	}).Info("Getting info about user")
+	logger.FuncLog("rcache.UsrTrackers", "", nil, nil)
 	// get user data
 	userb, err := rc.Do("GET", config.DS.Redis.UPrefix+":"+name) // prefix can be set from conf
 	if err != nil {
-		logger.Log.WithFields(logrus.Fields{
-			"function":        "rcache.UsrTrackers",
-			"error":           err.Error(),
-			"user from redis": fmt.Sprintf("%s", userb),
-		}).Warn("Unable to get the user data from redis")
+		logger.FuncLog("rcache.UsrTrackers", "", nil, err)
 		return usr, err
 	}
 	// check whether it is nil, if nil then warn and finish
 	if fmt.Sprintf("%v", userb) == "<nil>" {
 		// prepare error message
-		errorMsg := fmt.Sprintf(
-			"%s : '%s:%s'",
-			config.ErrorMsg["NotExistInCache"].Msg,
-			config.DS.Redis.UPrefix,
-			name,
-		)
-		logger.Log.WithFields(logrus.Fields{
-			"function": "rcache.UsrTrackers",
-			"error":    errorMsg,
-		}).Warn("This user record does not exist in redis")
+		logger.FuncLog("rcache.UsrTrackers", conf.ErrNotInCache, nil, err)
 		return usr, errors.New(config.ErrorMsg["NotExistInCache"].Msg)
 	}
 	err = json.Unmarshal([]byte(fmt.Sprintf("%s", userb)), &usr)
 	if err != nil {
-		logger.Log.WithFields(logrus.Fields{
-			"function": "rcache.UsrTrackers",
-			"error":    err.Error(),
-		}).Warn("unable to unmarshal user data to Usr var")
+		logger.FuncLog("rcache.UsrTrackers", "", nil, err)
 		return usr, err
 	}
 	return usr, nil
@@ -374,17 +296,10 @@ func UsrTrackers(name string) (Usr, error) {
 
 // SetUsrTrackers can be used to save user info in redis
 func SetUsrTrackers(usr Usr) error {
-	logger.Log.WithFields(logrus.Fields{
-		"function": "rcache.SetUsrTrackers",
-		"user":     fmt.Sprintf("%v", usr),
-	}).Info("Saving user info in redis")
+	logger.FuncLog("rcache.SetUsrTrackers", "", nil, nil)
 	jusr, err := json.Marshal(usr)
 	if err != nil {
-		logger.Log.WithFields(logrus.Fields{
-			"function": "rcache.SetUsrTrackers",
-			"user":     fmt.Sprintf("%v", usr),
-			"error":    err.Error(),
-		}).Warn("Unable to save user data to redis")
+		logger.FuncLog("rcache.SetUsrTrackers", "", nil, err)
 		return err
 	}
 	rc.Do(
@@ -396,10 +311,11 @@ func SetUsrTrackers(usr Usr) error {
 }
 
 // AddFleetTrackers can be used to save list of trackers to redis
-func AddFleetTrackers(ftracker []FleetTracker) {
+func AddFleetTrackers(ftracker []FleetTracker) error {
 	r, err := redis.Dial("tcp", config.DS.Redis.Host)
 	if err != nil {
-		panic(err)
+		logger.FuncLog("rcache.AddFleetTrackers", conf.ErrRedisConn, nil, err)
+		return err
 	}
 	defer r.Close()
 	// range over list
@@ -410,21 +326,20 @@ func AddFleetTrackers(ftracker []FleetTracker) {
 			r.Do("SADD", "fleet"+":"+tracker.Fleet, x)
 		}
 	}
+	return nil
 }
 
 // CacheDefaults can be used to move all data in max_units table
 // in mysql to redis
-func CacheDefaults(trackers map[int]Vehicle) {
+func CacheDefaults(trackers map[int]Vehicle) error {
 	// create separate connection for caching
 	r, err := redis.Dial("tcp", config.DS.Redis.Host)
 	if err != nil {
-		panic(err)
+		logger.FuncLog("rcache.AddFleetTrackers", conf.ErrRedisConn, nil, err)
+		return err
 	}
 	defer r.Close()
-	logger.Log.WithFields(logrus.Fields{
-		"package":  "datastore",
-		"function": "rcache.CacheDefaults",
-	}).Info("Caching max units")
+	logger.FuncLog("rcache.CacheDefaults", "", nil, nil)
 	// range over map of data
 	for id, x := range trackers {
 		st := reflect.ValueOf(x)
@@ -437,4 +352,5 @@ func CacheDefaults(trackers map[int]Vehicle) {
 			r.Do("HSET", hashName, value, key)
 		}
 	}
+	return nil
 }
