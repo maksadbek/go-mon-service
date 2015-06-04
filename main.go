@@ -299,7 +299,7 @@ func resd() {
 
 func worker(app conf.App) {
 	var err error
-	server.Listener, err = net.Listen("tcp", ":1234")
+	server.Listener, err = net.Listen("tcp", app.SRV.Port)
 	if err != nil {
 		panic(err)
 	}
