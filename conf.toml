@@ -7,7 +7,7 @@
     tprefix = "tracker"
     uprefix = "user"
 [srv]
-	port = ":1234"
+	port = ":8080"
 [log]
 	path = "info.log"
 [errors]

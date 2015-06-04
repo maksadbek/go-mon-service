@@ -28,7 +28,7 @@ func TestGetTrackers(t *testing.T) {
 	}
 
 	// mysql setup
-	err = Initialize(app.DS)
+	err = Initialize(app)
 	if err != nil {
 		t.Error(err)
 	}
@@ -73,4 +73,12 @@ func BenchmarkCacheFleetTrackers(b *testing.B) {
 	for i := 0; i < b.N; i++ {
 		_, _ = CacheFleetTrackers()
 	}
+}
+
+func TestGetLitrage(t *testing.T) {
+	c, err := GetLitrage(104953, 40)
+	if err != nil {
+		t.Error(err)
+	}
+	t.Logf("%v\n", c)
 }

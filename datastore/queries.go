@@ -8,6 +8,13 @@ var queries map[string]string = map[string]string{
                         FROM max_users
                         WHERE login = ?
                         LIMIT 1`,
+	"getCalibres": `
+					SELECT 
+						car_id,
+						fleet_id,
+						litr,
+						volt
+					FROM max_fuel_calibration`,
 	"getTrackers": ` select 
                                  id,
                                  fleet,

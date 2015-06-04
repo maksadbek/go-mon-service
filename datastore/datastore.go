@@ -2,6 +2,7 @@ package datastore
 
 import (
 	"database/sql"
+	"errors"
 	"fmt"
 	"strings"
 
@@ -13,21 +14,31 @@ import (
 	"github.com/kovetskiy/go-php-serialize"
 )
 
-var db *sql.DB
+var (
+	db       *sql.DB
+	calibres map[int][]Calibration
+	config   conf.App
+)
 
-func Initialize(c conf.Datastore) error {
-	log.Log.WithFields(logrus.Fields{
-		"package": "datastore",
-		"config":  fmt.Sprintf("%+v", c),
-	}).Info("Initialize")
+type Calibration struct {
+	ID      int
+	FleetID int
+	Litre   int
+	Volt    float32
+}
 
+func Initialize(c conf.App) error {
 	var err error
-	db, err = sql.Open("mysql", c.Mysql.DSN)
+	config = c
+	log.FuncLog("datastore.Initialize", "Initialization", nil, nil)
+	db, err = sql.Open("mysql", c.DS.Mysql.DSN)
 	if err != nil {
-		log.Log.WithFields(logrus.Fields{
-			"package": "datastore",
-			"Error":   err.Error(),
-		}).Warn("Initialize")
+		log.FuncLog("datastore.Initialize", "Initalization", nil, err)
+		return err
+	}
+	err = LoadCalibres()
+	if err != nil {
+		log.FuncLog("datastore.Initialize", "Initalization", nil, err)
 		return err
 	}
 	return nil
@@ -145,7 +156,6 @@ func CacheFleetTrackers() ([]rcache.FleetTracker, error) {
 		}).Warn("CacheFleetTrackers")
 		return fleetTrackers, err
 	}
-
 	defer rows.Close()
 	for rows.Next() {
 		var (
@@ -160,4 +170,50 @@ func CacheFleetTrackers() ([]rcache.FleetTracker, error) {
 		fleetTrackers = append(fleetTrackers, trackers)
 	}
 	return fleetTrackers, nil
+}
+
+func LoadCalibres() error {
+	log.FuncLog("datastore.LoadCalibres", "Loading calibration data", nil, nil)
+	calibres = make(map[int][]Calibration)
+	rows, err := db.Query(queries["getCalibres"])
+	if err != nil {
+		return err
+	}
+	for rows.Next() {
+		var c Calibration
+		rows.Scan(
+			&c.ID,
+			&c.FleetID,
+			&c.Litre,
+			&c.Volt,
+		)
+		calibres[c.ID] = append(calibres[c.ID], c)
+	}
+
+	return nil
+}
+
+func GetLitrage(id int, volt float32) (litre int, err error) {
+	c := calibres[id]
+	if c == nil {
+		err = errors.New(conf.ErrNotInCache)
+		return litre, err
+	}
+	for i, calibre := range c {
+		if calibre.Volt == volt {
+			litre = calibre.Litre
+			return
+		}
+		if calibre.Volt < volt && c[i+1].Volt > volt {
+			fmt.Printf("%v\n", calibre)
+			fmt.Printf("%v\n", c[i+1])
+			numer := (int(volt) - int(calibre.Volt)) * (c[i+1].Litre - calibre.Litre)
+			denom := int(c[i+1].Volt) - int(calibre.Volt)
+			fmt.Printf("numer is %d -> (%d - %d) * (%d - %d)\n", numer, int(volt), int(calibre.Volt), c[i+1].Litre, calibre.Litre)
+			fmt.Printf("denom is %d -> (%d - %d) + %d\n", denom, int(c[i+1].Volt), int(calibre.Volt), calibre.Litre)
+			litre = numer/denom + calibre.Litre
+			break
+		}
+	}
+	return litre, err
 }
