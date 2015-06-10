@@ -56,11 +56,10 @@ func TestUsrTrackersAllCars(t *testing.T) {
 }
 
 func TestCacheFleetTrackers(t *testing.T) {
-	fleetTrackers, err := CacheFleetTrackers()
+	_, err := CacheFleetTrackers()
 	if err != nil {
 		t.Error(err)
 	}
-	t.Logf("%+v\n", fleetTrackers)
 }
 
 func BenchmarkGetTrackers(b *testing.B) {
@@ -76,9 +75,8 @@ func BenchmarkCacheFleetTrackers(b *testing.B) {
 }
 
 func TestGetLitrage(t *testing.T) {
-	c, err := GetLitrage(104953, 40)
+	_, err := GetLitrage(104953, 40)
 	if err != nil {
 		t.Error(err)
 	}
-	t.Logf("%v\n", c)
 }

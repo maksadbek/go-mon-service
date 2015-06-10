@@ -23,6 +23,7 @@ import (
 	"bitbucket.org/maksadbek/go-mon-service/rcache"
 	"bitbucket.org/maksadbek/go-mon-service/route"
 	"github.com/Sirupsen/logrus"
+	"github.com/rs/cors"
 )
 
 var (
@@ -193,7 +194,7 @@ func main() {
 	}
 
 	route.Initialize(app)
-	datastore.Initialize(app.DS)
+	datastore.Initialize(app)
 	rcache.Initialize(app)
 	go CacheData(app)
 	go worker(app)
@@ -299,11 +300,19 @@ func resd() {
 
 func worker(app conf.App) {
 	var err error
+	c := cors.New(cors.Options{
+		AllowedOrigins:   []string{"*"},
+		AllowCredentials: true,
+		AllowedHeaders:   []string{"content-type", "x-requested-with"},
+		AllowedMethods:   []string{"post"},
+	})
 	server.Listener, err = net.Listen("tcp", app.SRV.Port)
 	if err != nil {
 		panic(err)
 	}
-	serve := &http.Server{Handler: GzipHandler(webHandlers())}
+
+	handler := c.Handler(webHandlers())
+	serve := &http.Server{Handler: GzipHandler(handler)}
 	serve.Serve(server.Listener)
 }
 

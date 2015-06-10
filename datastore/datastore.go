@@ -205,12 +205,8 @@ func GetLitrage(id int, volt float32) (litre int, err error) {
 			return
 		}
 		if calibre.Volt < volt && c[i+1].Volt > volt {
-			fmt.Printf("%v\n", calibre)
-			fmt.Printf("%v\n", c[i+1])
 			numer := (int(volt) - int(calibre.Volt)) * (c[i+1].Litre - calibre.Litre)
 			denom := int(c[i+1].Volt) - int(calibre.Volt)
-			fmt.Printf("numer is %d -> (%d - %d) * (%d - %d)\n", numer, int(volt), int(calibre.Volt), c[i+1].Litre, calibre.Litre)
-			fmt.Printf("denom is %d -> (%d - %d) + %d\n", denom, int(c[i+1].Volt), int(calibre.Volt), calibre.Litre)
 			litre = numer/denom + calibre.Litre
 			break
 		}
