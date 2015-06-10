@@ -7,7 +7,7 @@
     tprefix = "tracker"
     uprefix = "user"
 [srv]
-	port = ":8080"
+	port = "0.0.0.0:8080"
 [log]
 	path = "info.log"
 [errors]
@@ -29,3 +29,4 @@
    fuelVal = 0
    muAdditional = "0"
    action = 2
+   time = "2015-01-01 12:00:00"

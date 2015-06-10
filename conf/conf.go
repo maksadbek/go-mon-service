@@ -62,6 +62,7 @@ type Defaults struct {
 	FuelVal      int
 	MuAdditional string
 	Action       int
+	Time         string
 }
 
 // главный структура для конф.
