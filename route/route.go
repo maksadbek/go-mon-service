@@ -2,6 +2,7 @@ package route
 
 import (
 	"encoding/json"
+	"fmt"
 	"net/http"
 
 	"bitbucket.org/maksadbek/go-mon-service/conf"
@@ -21,8 +22,17 @@ func Initialize(c conf.App) error {
 	return err
 }
 func GetPositionHandler(w http.ResponseWriter, r *http.Request) {
-	fleetName, user, groups := r.PostFormValue("fleet"), r.PostFormValue("user"), r.PostFormValue("groups")
-
+	decoder := json.NewDecoder(r.Body)
+	req := make(map[string]string)
+	err := decoder.Decode(&req)
+	if err != nil {
+		logger.ReqWarn(r, conf.ErrReq)
+		http.Error(w, "invalid req body format", 500)
+		return
+	}
+	fmt.Printf("%+v\n", req)
+	//fleetName, user, groups := r.PostFormValue("selectedFleetJs"), r.PostFormValue("user"), r.PostFormValue("groups")
+	fleetName, user, groups := req["selectedFleetJs"], req["user"], req["groups"]
 	if fleetName == "" || user == "" || groups == "" {
 		logger.ReqWarn(r, conf.ErrReq)
 		http.Error(w, config.ErrorMsg["NotExistInCache"].Msg, 404)
