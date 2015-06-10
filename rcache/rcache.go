@@ -72,8 +72,8 @@ type Pos struct {
 
 // structure for fleet
 type Fleet struct {
-	Id     string         // unique id of fleet
-	Update map[string]Pos // and its tracker's info
+	Id     string         `json:"id"`     // unique id of fleet
+	Update map[string]Pos `json:"update"` // and its tracker's info
 }
 
 // structure for user
@@ -167,6 +167,7 @@ func GetPositions(trackerId []string) (trackers map[string]Pos, err error) {
 			pos.FuelVal = config.Defaults.FuelVal
 			pos.MuAdditional = config.Defaults.MuAdditional
 			pos.Action = config.Defaults.Action
+			pos.Time = config.Defaults.Time
 
 			idInt, err := strconv.Atoi(tracker)
 			if err != nil {
