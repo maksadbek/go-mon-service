@@ -1,5 +1,11 @@
 package rcache
 
+import (
+	"time"
+
+	"github.com/garyburd/redigo/redis"
+)
+
 type ConcurrentRedis struct {
 	p *redis.Pool
 }

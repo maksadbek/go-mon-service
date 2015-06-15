@@ -1,0 +1,33 @@
+{
+  "name": "todomvc-flux",
+  "version": "0.0.3",
+  "description": "Example Flux architecture.",
+  "repository": "https://github.com/facebook/flux",
+  "main": "js/app.js",
+  "dependencies": {
+    "material-ui": "0.8.0",
+    "flux": "^2.0.1",
+    "keymirror": "~0.1.0",
+    "object-assign": "^1.0.0",
+    "react": "^0.13.0"
+  },
+  "devDependencies": {
+    "envify": "^3.0.0",
+    "reactify": "^0.15.2",
+    "uglify-js": "~2.4.15"
+  },
+  "scripts": {
+    "start": "watchify -o js/bundle.js -v -d js/app.js",
+    "build": "browserify . -t [envify --NODE_ENV production] | uglifyjs -cm > js/bundle.min.js"
+  },
+  "author": "Bill Fisher",
+  "browserify": {
+    "transform": [
+      "reactify",
+      "envify"
+    ]
+  },
+  "jest": {
+    "rootDir": "./js"
+  }
+}
