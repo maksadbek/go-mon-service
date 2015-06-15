@@ -8,19 +8,6 @@ import (
 )
 
 func TestGetTrackers(t *testing.T) {
-	mockConf := `[ds]
-    [ds.mysql]
-        dsn = "root:toor@tcp(localhost:3306)/maxtrack"
-        interval = 1
-    [ds.redis]
-		host = ":6379"
-		fprefix = "fleet"
-        tprefix = "tracker"
-	[srv]
-		port = ":1234"
-	[log]
-		path = "info.log"
-	`
 	c := strings.NewReader(mockConf)
 	app, err := conf.Read(c)
 	if err != nil {
@@ -78,5 +65,12 @@ func TestGetLitrage(t *testing.T) {
 	_, err := GetLitrage(104953, 40)
 	if err != nil {
 		t.Error(err)
+	}
+}
+
+func TestCheckUser(t *testing.T) {
+	res := CheckUser(UserTest.Username, UserTest.Hash)
+	if !res {
+		t.Errorf("want %t, got %t", true, res)
 	}
 }

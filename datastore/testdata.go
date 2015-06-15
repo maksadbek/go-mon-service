@@ -20,3 +20,11 @@ var FleetTest = struct {
 	"202",
 	[]string{"106206", "107749", "107699"},
 }
+
+var UserTest = struct {
+	Username string
+	Hash     string
+}{
+	"newmax",
+	"f8cb56593dd08e04cd0f84d796b9cecd",
+}

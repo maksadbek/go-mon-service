@@ -46,4 +46,10 @@ var queries map[string]string = map[string]string{
                       WHERE active = '1' and fleet > 0
                       GROUP BY fleet
                       `,
+	"checkUser": `
+			SELECT *
+			FROM max_users
+			WHERE login = ?
+			AND pass = ?
+	`,
 }
