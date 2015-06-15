@@ -12,6 +12,7 @@ import (
 	"os/exec"
 	"os/signal"
 	"runtime"
+	"runtime/pprof"
 	"strconv"
 	"strings"
 	"syscall"
@@ -39,11 +40,12 @@ var (
 		"conf",
 		"conf.toml",
 		`configuration file for daemon`)
-	daemon    = flag.Bool("d", true, "do not touch it")
-	daemonize = flag.Bool("f", false, "daemonize or not")
-	sig       = make(chan os.Signal)
-	stop      = make(chan bool)
-	res       = make(chan bool)
+	daemon     = flag.Bool("d", true, "do not touch it")
+	daemonize  = flag.Bool("f", false, "daemonize or not")
+	cpuprofile = flag.String("cpuprofile", "", "write cpu profile to file")
+	sig        = make(chan os.Signal)
+	stop       = make(chan bool)
+	res        = make(chan bool)
 )
 
 type Server struct {
@@ -105,6 +107,17 @@ var server Server
 func main() {
 	runtime.GOMAXPROCS(4)
 	flag.Parse()
+
+	// set profiling file
+	if *cpuprofile != "" {
+		f, err := os.Create(*cpuprofile)
+		if err != nil {
+			log.Log.Fatal(err)
+		}
+		pprof.StartCPUProfile(f)
+		defer pprof.StopCPUProfile()
+	}
+
 	switch *control {
 	case "stop":
 		pid, err := readPid("pid")
@@ -320,6 +333,7 @@ func webHandlers() http.Handler {
 	web := http.NewServeMux()
 	web.Handle("/", http.FileServer(http.Dir("static/")))
 	web.HandleFunc("/positions", route.GetPositionHandler)
+	web.HandleFunc("/signup", route.SignUpHandler)
 	return web
 }
 

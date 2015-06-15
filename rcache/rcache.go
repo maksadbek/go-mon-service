@@ -18,33 +18,6 @@ var (
 	rc     ConcurrentRedis // redis client
 )
 
-type ConcurrentRedis struct {
-	p *redis.Pool
-}
-
-func (rc *ConcurrentRedis) Start(host string) error {
-	dialFunc := func() (c redis.Conn, err error) {
-		c, err = redis.Dial("tcp", host)
-		return
-	}
-
-	rc.p = &redis.Pool{
-		MaxIdle:     3,
-		IdleTimeout: 180 * time.Second,
-		Dial:        dialFunc,
-	}
-
-	c := rc.p.Get()
-	defer c.Close()
-	return c.Err()
-}
-
-func (rc *ConcurrentRedis) Do(commandName string, args ...interface{}) (interface{}, error) {
-	c := rc.p.Get()
-	defer c.Close()
-	return c.Do(commandName, args...)
-}
-
 // structure for Tracker info
 type Pos struct {
 	Id            int     `json:"id"`
@@ -72,8 +45,9 @@ type Pos struct {
 
 // structure for fleet
 type Fleet struct {
-	Id     string         `json:"id"`     // unique id of fleet
-	Update map[string]Pos `json:"update"` // and its tracker's info
+	Id      string         `json:"id"`           // unique id of fleet
+	Update  map[string]Pos `json:"update"`       // and its tracker's info
+	LastReq int64          `json:"last_request"` // current unix time
 }
 
 // structure for user
@@ -175,35 +149,61 @@ func GetPositions(trackerId []string) (trackers map[string]Pos, err error) {
 			}
 			pos.Id = idInt
 			hashName := "max_unit_" + tracker
+
+			// set default owner's name
 			rOwner, err := rc.Do("HGET", hashName, "Owner")
 			if err != nil {
 				logger.FuncLog("rcache.GetPositions", conf.ErrNotInCache, nil, err)
 			}
-			pos.Owner = fmt.Sprintf("%s", rOwner)
+			if fmt.Sprintf("%v", rOwner) == "<nil>" {
+				continue
+			} else {
+				pos.Owner = fmt.Sprintf("%s", rOwner)
+			}
+
+			// set default phone number
 			rNumber, err := rc.Do("HGET", hashName, "Number")
 			if err != nil {
 				logger.FuncLog("rcache.GetPositions", conf.ErrNotInCache, nil, err)
 			}
+			if fmt.Sprintf("%v", rNumber) == "<nil>" {
+				pos.Number = ""
+			} else {
+				pos.Number = fmt.Sprintf("%s", rNumber)
+			}
 
-			pos.Number = fmt.Sprintf("%s", rNumber)
+			// set default name
 			rName, err := rc.Do("HGET", hashName, "Name")
 			if err != nil {
 				logger.FuncLog("rcache.GetPositions", conf.ErrNotInCache, nil, err)
 			}
-			pos.Name = fmt.Sprintf("%s", rName)
+			if fmt.Sprintf("%v", rName) == "<nil>" {
+				pos.Name = ""
+			} else {
+				pos.Name = fmt.Sprintf("%s", rName)
+			}
 
+			// set default customization values
 			rCustom, err := rc.Do("HGET", hashName, "Customization")
 			if err != nil {
 				logger.FuncLog("rcache.GetPositions", conf.ErrNotInCache, nil, err)
 			}
-			pos.Customization = fmt.Sprintf("%s", rCustom)
+			if fmt.Sprintf("%v", rCustom) == "<nil>" {
+				pos.Customization = ""
+			} else {
+				pos.Customization = fmt.Sprintf("%s", rCustom)
+			}
 
+			// set default additional values
 			rAdditional, err := rc.Do("HGET", hashName, "Additional")
 			if err != nil {
 				logger.FuncLog("rcache.GetPositions", conf.ErrNotInCache, nil, err)
 			}
-			pos.Additional = fmt.Sprintf("%s", rAdditional)
-			//return trackers, errors.New(config.ErrorMsg["NotExistInCache"].Msg)
+			if fmt.Sprintf("%v", rAdditional) == "<nil>" {
+				pos.Additional = ""
+			} else {
+				pos.Additional = fmt.Sprintf("%s", rAdditional)
+			}
 			trackers[tracker] = pos
 		} else {
 			err = json.Unmarshal([]byte(p), &pos)
