@@ -1,9 +1,16 @@
 <!doctype html>
 <html lang="en">
 <head>
-<meta charset="utf-8">
-<title>Flux TodoApp</title>
-<link href="./style/primer.css" rel="stylesheet">
+    <meta charset="utf-8">
+    <title>Flux car monitoring</title>
+    <link href="./style/primer.css" rel="stylesheet">
+    <script type="text/javascript" src="https://maps.googleapis.com/maps/api/js?key=AIzaSyAZD1qyBXlIMnE8qujVYbyyXGAdo2fsmbg"></script>
+    <style>
+        #map-canvas{
+            height: 600px;
+            width: 600px;
+        }
+    </style>
 </head>
 <body>
 <div class="container">
@@ -12,7 +19,7 @@
         <div id="statusapp" class="one-third column">
         </div>
         <div class="two-thirds column">
-            .two-thirds
+            <div id="map-canvas"></div>
         </div>
     </div>
 </div>

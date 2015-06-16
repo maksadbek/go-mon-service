@@ -14,13 +14,29 @@ function setUserInfo(){
 function getAllStatuses(){
     return StatusStore.getAll()
 }
+
 var StatusApp = React.createClass({
     getInitialState: function(){
-        return {stats: {
+        var bounds = new google.maps.LatLngBounds();
+        var shape = {
+            coords: [1, 1, 1, 20, 18, 20, 18 , 1],
+            type: 'poly'
+        };
+        var myLatlng = new google.maps.LatLng(-25.363882,131.044922);
+        var mapOptions = { zoom: 10 };
+        var map = new google.maps.Map(
+                document.getElementById('map-canvas'), 
+                mapOptions);
+        map.fitBounds(bounds);
+        return {
+            map: map,
+            bounds: bounds,
+            stats: {
                 id: '',
                 update: {},
                 last_request: null
-            }}
+            }
+        }
     },
 
     componentDidMount: function(){
@@ -40,7 +56,7 @@ var StatusApp = React.createClass({
 
     render: function(){
         return (
-                <Sidebar stats={this.state.stats} />
+                <Sidebar bounds={this.state.bounds} stats={this.state.stats} map={this.state.map}/>
         )
     },
     _onChange: function(){
