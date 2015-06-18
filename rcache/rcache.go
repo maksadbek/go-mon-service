@@ -34,7 +34,7 @@ type Pos struct {
 	Battery       int     `json:"battery66"`
 	Seat          int     `json:"seat"`
 	BatteryLvl    int     `json:"batterylvl"`
-	Fuel          int     `json:"fuel"`
+	Fuel          float32 `json:"fuel"`
 	FuelVal       int     `json:"fuel_val"`
 	MuAdditional  string  `json:"mu_additional"`
 	Customization string  `json:"customization"`
@@ -69,7 +69,7 @@ type Vehicle struct {
 	Number              string `json=number`
 	Tracker_type        string `json=tracker_type`
 	Tracker_type_id     int    `json=tracker_type_id`
-	Device_type_id      int    `json=device_type_id`
+	Device_type_id      int    `json=device_type_id` // if this value is more than 0, then it has fuel sensor
 	Name                string `json=name`
 	Owner               string `json=owner`
 	Active              string `json=active`
@@ -136,7 +136,7 @@ func GetPositions(trackerId []string) (trackers map[string]Pos, err error) {
 			pos.Battery = config.Defaults.Battery
 			pos.Seat = config.Defaults.Seat
 			pos.BatteryLvl = config.Defaults.BatteryLvl
-			pos.Fuel = config.Defaults.Fuel
+			pos.Fuel = float32(config.Defaults.Fuel)
 			pos.FuelVal = config.Defaults.FuelVal
 			pos.MuAdditional = config.Defaults.MuAdditional
 			pos.Action = config.Defaults.Action
@@ -208,6 +208,11 @@ func GetPositions(trackerId []string) (trackers map[string]Pos, err error) {
 			err = json.Unmarshal([]byte(p), &pos)
 			if err != nil {
 				logger.FuncLog("rcache.GetPositions", conf.ErrNotInCache, nil, err)
+				return trackers, err
+			}
+
+			err = pos.SetLitrage()
+			if err != nil {
 				return trackers, err
 			}
 			trackers[tracker] = pos
