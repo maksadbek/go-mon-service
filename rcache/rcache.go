@@ -2,7 +2,6 @@ package rcache
 
 import (
 	"encoding/json"
-	"errors"
 	"fmt"
 	"reflect"
 	"strconv"
@@ -17,43 +16,11 @@ var (
 	rc     ConcurrentRedis // redis client
 )
 
-// structure for Tracker info
-type Pos struct {
-	Id            int     `json:"id"`
-	Latitude      float64 `json:"latitude"`
-	Longitude     float64 `json:"longitude"`
-	Time          string  `json:"time"`
-	Owner         string  `json:"owner"`
-	Number        string  `json:"number"`
-	Name          string  `json:"name"`
-	Direction     int     `json:"direction"`
-	Speed         int     `json:"speed"`
-	Sat           int     `json:"sat"`
-	Ignition      int     `json:"ignition"`
-	GsmSignal     int     `json:"gsmsignal"`
-	Battery       int     `json:"battery66"`
-	Seat          int     `json:"seat"`
-	BatteryLvl    int     `json:"batterylvl"`
-	Fuel          float32 `json:"fuel"`
-	FuelVal       int     `json:"fuel_val"`
-	MuAdditional  string  `json:"mu_additional"`
-	Customization string  `json:"customization"`
-	Additional    string  `json:"additional"`
-	Action        int     `json:"action"`
-}
-
 // structure for fleet
 type Fleet struct {
 	Id      string         `json:"id"`           // unique id of fleet
 	Update  map[string]Pos `json:"update"`       // and its tracker's info
 	LastReq int64          `json:"last_request"` // current unix time
-}
-
-// structure for user
-type Usr struct {
-	Login    string   // login of user
-	Fleet    string   // user's fleet id
-	Trackers []string // user's list of trackers
 }
 
 // structure for fleet
@@ -109,118 +76,6 @@ func Initialize(c conf.App) (err error) {
 	return
 }
 
-// GetPositions can be used to retrieve map of positions
-func GetPositions(trackerId []string) (trackers map[string]Pos, err error) {
-	trackers = make(map[string]Pos)
-	logger.FuncLog("rcache.GetPositions", "", nil, nil)
-	// range over ids of trackers
-	for _, tracker := range trackerId {
-		var pos Pos
-		// get tracker data
-		pBytes, err := rc.Do("LINDEX", config.DS.Redis.TPrefix+":"+tracker, -1) // tracker's name saved with prefix, can be set from conf
-		if err != nil {
-			logger.FuncLog("rcache.GetPositions", err.Error(), nil, err)
-			return trackers, err
-		}
-		p := fmt.Sprintf("%s", pBytes) // get string value of interface
-		// if the value is nil, then merge with default values from max_units
-		if fmt.Sprintf("%v", pBytes) == "<nil>" {
-			logger.FuncLog("rcache.GetPositions", conf.ErrNotInCache, nil, nil)
-			pos.Latitude = config.Defaults.Lat
-			pos.Longitude = config.Defaults.Lng
-			pos.Direction = config.Defaults.Direction
-			pos.Speed = config.Defaults.Speed
-			pos.Sat = config.Defaults.Sat
-			pos.Ignition = config.Defaults.Ignition
-			pos.GsmSignal = config.Defaults.GsmSignal
-			pos.Battery = config.Defaults.Battery
-			pos.Seat = config.Defaults.Seat
-			pos.BatteryLvl = config.Defaults.BatteryLvl
-			pos.Fuel = float32(config.Defaults.Fuel)
-			pos.FuelVal = config.Defaults.FuelVal
-			pos.MuAdditional = config.Defaults.MuAdditional
-			pos.Action = config.Defaults.Action
-			pos.Time = config.Defaults.Time
-
-			idInt, err := strconv.Atoi(tracker)
-			if err != nil {
-				logger.FuncLog("rcache.GetPositions", "", nil, err)
-			}
-			pos.Id = idInt
-			hashName := "max_unit_" + tracker
-
-			// set default owner's name
-			rOwner, err := rc.Do("HGET", hashName, "Owner")
-			if err != nil {
-				logger.FuncLog("rcache.GetPositions", conf.ErrNotInCache, nil, err)
-			}
-			if fmt.Sprintf("%v", rOwner) == "<nil>" {
-				continue
-			} else {
-				pos.Owner = fmt.Sprintf("%s", rOwner)
-			}
-
-			// set default phone number
-			rNumber, err := rc.Do("HGET", hashName, "Number")
-			if err != nil {
-				logger.FuncLog("rcache.GetPositions", conf.ErrNotInCache, nil, err)
-			}
-			if fmt.Sprintf("%v", rNumber) == "<nil>" {
-				pos.Number = ""
-			} else {
-				pos.Number = fmt.Sprintf("%s", rNumber)
-			}
-
-			// set default name
-			rName, err := rc.Do("HGET", hashName, "Name")
-			if err != nil {
-				logger.FuncLog("rcache.GetPositions", conf.ErrNotInCache, nil, err)
-			}
-			if fmt.Sprintf("%v", rName) == "<nil>" {
-				pos.Name = ""
-			} else {
-				pos.Name = fmt.Sprintf("%s", rName)
-			}
-
-			// set default customization values
-			rCustom, err := rc.Do("HGET", hashName, "Customization")
-			if err != nil {
-				logger.FuncLog("rcache.GetPositions", conf.ErrNotInCache, nil, err)
-			}
-			if fmt.Sprintf("%v", rCustom) == "<nil>" {
-				pos.Customization = ""
-			} else {
-				pos.Customization = fmt.Sprintf("%s", rCustom)
-			}
-
-			// set default additional values
-			rAdditional, err := rc.Do("HGET", hashName, "Additional")
-			if err != nil {
-				logger.FuncLog("rcache.GetPositions", conf.ErrNotInCache, nil, err)
-			}
-			if fmt.Sprintf("%v", rAdditional) == "<nil>" {
-				pos.Additional = ""
-			} else {
-				pos.Additional = fmt.Sprintf("%s", rAdditional)
-			}
-			trackers[tracker] = pos
-		} else {
-			err = json.Unmarshal([]byte(p), &pos)
-			if err != nil {
-				logger.FuncLog("rcache.GetPositions", conf.ErrNotInCache, nil, err)
-				return trackers, err
-			}
-
-			err = pos.SetLitrage()
-			if err != nil {
-				return trackers, err
-			}
-			trackers[tracker] = pos
-		}
-	}
-	return
-}
-
 // GetTrackers can be used to get array of tracker of particular fleet
 // start and stop are range values of list, default is 0,200, can be set from config
 func GetTrackers(fleet string, start, stop int) (trackers []string, err error) {
@@ -253,66 +108,6 @@ func PushRedis(fleet Fleet) (err error) {
 		rc.Do("RPUSH", config.DS.Redis.TPrefix+":"+k, jpos) // prefix can be set from conf
 	}
 	return
-}
-
-// GetPositionsByFleet can be used to tracker data by fleet id
-func GetPositionsByFleet(fleetNum string, start, stop int) (Fleet, error) {
-	logger.FuncLog("rcache.PushRedis", "", nil, nil)
-	fleet := Fleet{}
-	fleet.Id = fleetNum
-	fleet.Update = make(map[string]Pos)
-	// get trackers of current fleet
-	trackers, err := GetTrackers(fleetNum, start, stop)
-	if err != nil {
-		logger.FuncLog("rcache.GetPositionsByFleet", conf.ErrGetListOfTrackers, nil, err)
-		return fleet, err
-	}
-
-	fleet.Update, err = GetPositions(trackers)
-	if err != nil {
-		logger.FuncLog("rcache.GetPositionsByFleet", conf.ErrGetListOfTrackers, nil, err)
-	}
-	return fleet, err
-}
-
-// UsrTrackers can be used to get info of user and list of its trackers
-func UsrTrackers(name string) (Usr, error) {
-	usr := Usr{}
-	logger.FuncLog("rcache.UsrTrackers", "", nil, nil)
-	// get user data
-	userb, err := rc.Do("GET", config.DS.Redis.UPrefix+":"+name) // prefix can be set from conf
-	if err != nil {
-		logger.FuncLog("rcache.UsrTrackers", "", nil, err)
-		return usr, err
-	}
-	// check whether it is nil, if nil then warn and finish
-	if fmt.Sprintf("%v", userb) == "<nil>" {
-		// prepare error message
-		logger.FuncLog("rcache.UsrTrackers", conf.ErrNotInCache, nil, err)
-		return usr, errors.New(config.ErrorMsg["NotExistInCache"].Msg)
-	}
-	err = json.Unmarshal([]byte(fmt.Sprintf("%s", userb)), &usr)
-	if err != nil {
-		logger.FuncLog("rcache.UsrTrackers", "", nil, err)
-		return usr, err
-	}
-	return usr, nil
-}
-
-// SetUsrTrackers can be used to save user info in redis
-func SetUsrTrackers(usr Usr) error {
-	logger.FuncLog("rcache.SetUsrTrackers", "", nil, nil)
-	jusr, err := json.Marshal(usr)
-	if err != nil {
-		logger.FuncLog("rcache.SetUsrTrackers", "", nil, err)
-		return err
-	}
-	rc.Do(
-		"SET",
-		config.DS.Redis.UPrefix+":"+usr.Login,
-		string(jusr),
-	)
-	return nil
 }
 
 // AddFleetTrackers can be used to save list of trackers to redis
