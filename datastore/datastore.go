@@ -90,12 +90,12 @@ func GetTrackers(fleet string) (map[int]rcache.Vehicle, error) {
 }
 
 func UsrTrackers(name string) (usr rcache.Usr, err error) {
+	var cars string
 	log.Log.WithFields(logrus.Fields{
 		"package": "datastore",
 		"name":    name,
 	}).Info("UsrTrackers")
-	rows, err := db.Query(queries["usrTrackers"], name)
-	defer rows.Close()
+	err = db.QueryRow(queries["usrTrackers"], name).Scan(&usr.Login, &usr.Fleet, &cars)
 	if err != nil {
 		log.Log.WithFields(logrus.Fields{
 			"package": "datastore",
@@ -104,33 +104,23 @@ func UsrTrackers(name string) (usr rcache.Usr, err error) {
 		return usr, err
 	}
 
-	for rows.Next() {
-		var cars string
-		rows.Scan(
-			&usr.Login,
-			&usr.Fleet,
-			&cars,
-		)
-		if cars == "all" {
-			usr.Trackers = append(usr.Trackers, "0")
-			log.Log.WithFields(logrus.Fields{
-				"package": "datastore",
-				"user":    usr,
-			}).Info("UsrTrackers")
-			return usr, err
-		}
-		tr, err := phpserialize.Decode(cars)
-		if err != nil {
-			return usr, err
-		}
-		for _, x := range tr.(map[interface{}]interface{}) {
-			usr.Trackers = append(usr.Trackers, fmt.Sprintf("%v", x))
-		}
+	if cars == "all" {
+		usr.Trackers = append(usr.Trackers, "0")
+		log.Log.WithFields(logrus.Fields{
+			"package": "datastore",
+			"user":    usr,
+		}).Info("UsrTrackers")
+		return usr, err
 	}
-	log.Log.WithFields(logrus.Fields{
-		"package": "datastore",
-		"user":    usr,
-	}).Info("UsrTrackers")
+
+	// unserialize php-serialized array
+	tr, err := phpserialize.Decode(cars)
+	if err != nil {
+		return usr, err
+	}
+	for _, x := range tr.(map[interface{}]interface{}) {
+		usr.Trackers = append(usr.Trackers, fmt.Sprintf("%v", x))
+	}
 	return
 }
 
