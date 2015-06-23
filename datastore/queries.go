@@ -15,31 +15,37 @@ var queries map[string]string = map[string]string{
 						litr,
 						volt
 					FROM max_fuel_calibration`,
-	"getTrackers": ` select 
-                                 id,
-                                 fleet,
-                                 imei,
-                                 number,
-                                 tracker_type,
-                                 tracker_type_id,
-                                 device_type_id,
-                                 name,
-                                 owner,
-                                 active,
-                                 additional,
-                                 customization,
-                                 group_id,
-                                 detector_fuel_id,
-                                 detector_motion_id,
-                                 detector_dinamik_id,
-                                 pid,
-                                 installed_sensor,
-                                 detector_agro_id,
-                                 car_health,
-                                 color,
-                                 what_class
-                         from
-                         max_units `,
+	"getTrackers": `select 
+						u.id,
+						u.fleet,
+						u.imei,
+						u.number,
+						u.tracker_type,
+						u.tracker_type_id,
+						u.device_type_id,
+						u.name,
+						u.owner,
+						u.active,
+						u.additional,
+						u.customization,
+						u.group_id,
+						u.detector_fuel_id,
+						u.detector_motion_id,
+						u.detector_dinamik_id,
+						u.pid,
+						u.installed_sensor,
+						u.detector_agro_id,
+						u.car_health,
+						u.color,
+						u.what_class,
+						a.a_param_id 
+					from
+						max_units u
+					LEFT JOIN additional_decode a
+					 ON a.pr_name = 'fuelvolt' 
+				  	 AND u.device_type_id = a.device_type
+					 AND u.tracker_type_id = a.tracker_type
+					 WHERE u.active = '1'`,
 	"fleetTrackers": `
                       SELECT fleet, GROUP_CONCAT(id) cars
                       FROM max_units

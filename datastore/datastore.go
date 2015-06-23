@@ -3,6 +3,7 @@ package datastore
 import (
 	"database/sql"
 	"fmt"
+	"strconv"
 	"strings"
 
 	"bitbucket.org/maksadbek/go-mon-service/conf"
@@ -35,17 +36,12 @@ func Initialize(c conf.App) error {
 	return nil
 }
 
-func GetTrackers(fleet string) (map[int]rcache.Vehicle, error) {
-	queryFilter := " where fleet = " + fleet
-	if fleet == "" {
-		queryFilter = ""
-	}
+func GetTrackers() (map[int]rcache.Vehicle, error) {
 	log.Log.WithFields(logrus.Fields{
 		"package": "datastore",
-		"fleet":   fleet,
-	}).Info("GetTrackers")
+	}).Debug("GetTrackers")
 	var pos map[int]rcache.Vehicle = make(map[int]rcache.Vehicle)
-	query := queries["getTrackers"] + queryFilter
+	query := queries["getTrackers"]
 	rows, err := db.Query(query)
 	defer rows.Close()
 	if err != nil {
@@ -56,7 +52,11 @@ func GetTrackers(fleet string) (map[int]rcache.Vehicle, error) {
 		return pos, err
 	}
 	for rows.Next() {
-		var v rcache.Vehicle
+		var (
+			v       rcache.Vehicle
+			paramId sql.NullInt64
+			pid     sql.NullInt64
+		)
 		rows.Scan(
 			&v.Id,
 			&v.Fleet,
@@ -74,13 +74,16 @@ func GetTrackers(fleet string) (map[int]rcache.Vehicle, error) {
 			&v.Detector_fuel_id,
 			&v.Detector_motion_id,
 			&v.Detector_dinamik_id,
-			&v.Pid,
+			&pid,
 			&v.Installed_sensor,
 			&v.Detector_agro_id,
 			&v.Car_health,
 			&v.Color,
 			&v.What_class,
+			&paramId,
 		)
+		v.ParamID = strconv.Itoa(int(paramId.Int64))
+		v.Pid = int(pid.Int64)
 		pos[v.Id] = v
 	}
 	log.Log.WithFields(logrus.Fields{
@@ -94,7 +97,7 @@ func UsrTrackers(name string) (usr rcache.Usr, err error) {
 	log.Log.WithFields(logrus.Fields{
 		"package": "datastore",
 		"name":    name,
-	}).Info("UsrTrackers")
+	}).Debug("UsrTrackers")
 	err = db.QueryRow(queries["usrTrackers"], name).Scan(&usr.Login, &usr.Fleet, &cars)
 	if err != nil {
 		log.Log.WithFields(logrus.Fields{
@@ -109,7 +112,7 @@ func UsrTrackers(name string) (usr rcache.Usr, err error) {
 		log.Log.WithFields(logrus.Fields{
 			"package": "datastore",
 			"user":    usr,
-		}).Info("UsrTrackers")
+		}).Debug("UsrTrackers")
 		return usr, err
 	}
 
@@ -127,7 +130,7 @@ func UsrTrackers(name string) (usr rcache.Usr, err error) {
 func CacheFleetTrackers() ([]rcache.FleetTracker, error) {
 	log.Log.WithFields(logrus.Fields{
 		"package": "datastore",
-	}).Info("CacheFleetTrackers")
+	}).Debug("CacheFleetTrackers")
 	var fleetTrackers []rcache.FleetTracker
 	rows, err := db.Query(queries["fleetTrackers"])
 	if err != nil {

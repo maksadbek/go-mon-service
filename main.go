@@ -234,7 +234,7 @@ func WritePid() error {
 	return nil
 }
 func CacheData(app conf.App) {
-	trackers, err := datastore.GetTrackers("")
+	trackers, err := datastore.GetTrackers()
 	if err != nil {
 		panic(err)
 	}
@@ -244,7 +244,7 @@ func CacheData(app conf.App) {
 	}
 	CacheFleetTrackers()
 	for _ = range time.Tick(time.Duration(app.DS.Mysql.Interval) * time.Minute) {
-		trackers, err := datastore.GetTrackers("")
+		trackers, err := datastore.GetTrackers()
 		if err != nil {
 			panic(err)
 		}

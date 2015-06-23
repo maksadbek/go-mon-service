@@ -2,7 +2,6 @@ package rcache
 
 import (
 	"errors"
-	"fmt"
 	"strconv"
 	"strings"
 	"sync"
@@ -29,7 +28,6 @@ type Calibration struct {
 func GetLitrage(id int, volt float32) (litre int, err error) {
 	mutex.RLock()
 	c := Calibres[id]
-	fmt.Printf("%+v\n", c)
 	if c == nil {
 		err = errors.New(conf.ErrNotInCache)
 		return litre, err
@@ -40,16 +38,10 @@ func GetLitrage(id int, volt float32) (litre int, err error) {
 			litre = calibre.Litre
 			return
 		}
-		fmt.Println("calibre.Volt", calibre.Volt)
-		fmt.Println("volt", volt)
-		fmt.Println("c[i+1].Volt", c[i+1].Volt)
 		if calibre.Volt < volt && c[i+1].Volt > volt {
 			numer := (int(volt) - int(calibre.Volt)) * (c[i+1].Litre - calibre.Litre)
 			denom := int(c[i+1].Volt) - int(calibre.Volt)
 			litre = numer/denom + calibre.Litre
-			fmt.Println("numer", numer)
-			fmt.Println("denom", denom)
-			fmt.Println("litre", litre)
 			break
 		}
 	}
@@ -86,8 +78,11 @@ func (pos *Pos) SetLitrage() error {
 				additionals[m[0]] = float32(fuel)
 			}
 		}
-		pos.FuelVal, err = GetLitrage(pos.Id, additionals["67"])
-		fmt.Println("fuelval is", pos.FuelVal)
+		param, err := redis.String(rc.Do("HGET", hashName, "ParamID"))
+		if err != nil {
+			return err
+		}
+		pos.FuelVal, err = GetLitrage(pos.Id, additionals[param])
 		if err != nil {
 			return err
 		}
