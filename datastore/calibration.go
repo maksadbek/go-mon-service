@@ -1,9 +1,17 @@
 package datastore
 
 import (
+	"sort"
+
 	log "bitbucket.org/maksadbek/go-mon-service/logger"
 	"bitbucket.org/maksadbek/go-mon-service/rcache"
 )
+
+type ByVoltage []rcache.Calibration
+
+func (a ByVoltage) Len() int           { return len(a) }
+func (a ByVoltage) Swap(i, j int)      { a[i], a[j] = a[j], a[i] }
+func (a ByVoltage) Less(i, j int) bool { return a[i].Volt < a[j].Volt }
 
 // LoadCalibres can be used to load calibration data form mysql
 // and put it into storage
@@ -23,6 +31,7 @@ func LoadCalibres() error {
 			&c.Volt,
 		)
 		rcache.Calibres[c.ID] = append(rcache.Calibres[c.ID], c)
+		sort.Sort(ByVoltage(rcache.Calibres[c.ID]))
 	}
 
 	return nil
