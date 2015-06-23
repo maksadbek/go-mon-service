@@ -40,17 +40,9 @@ type Vehicle struct {
 	Name                string `json=name`
 	Owner               string `json=owner`
 	Active              string `json=active`
-	DateCreated         string `json=dateCreated`
 	Additional          string `json=additional`
 	Customization       string `json=customization`
-	Motor               int    `json=motor`
-	MotorKoef           []byte `json=motorKoefbyte`
-	CarSort             int    `json=carSort`
 	Group_id            int    `json=group_id`
-	YearOfManufac       int    `json=yearOfManufac`
-	MarkerTypeId        int    `json=markerTypeId`
-	ObjectTypeId        int    `json=objectTypeId`
-	ScheduleId          int    `json=scheduleId`
 	Detector_fuel_id    int    `json=detector_fuel_id`
 	Detector_motion_id  int    `json=detector_motion_id`
 	Detector_dinamik_id int    `json=detector_dinamik_id`
@@ -60,6 +52,7 @@ type Vehicle struct {
 	Car_health          string `json=car_health`
 	Color               string `json=color`
 	What_class          int    `json=what_class`
+	ParamID             string `json=a_param_id`
 }
 
 func Initialize(c conf.App) (err error) {
