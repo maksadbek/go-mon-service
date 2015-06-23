@@ -41,6 +41,6 @@ func FuncLog(fn, msg string, msgs map[string]interface{}, err error) {
 		m["error"] = err.Error()
 		Log.WithFields(logrus.Fields{"": fmt.Sprintf("%+v", m)}).Warn(msg)
 	} else {
-		Log.WithFields(logrus.Fields{"": fmt.Sprintf("%+v", m)}).Info(msg)
+		Log.WithFields(logrus.Fields{"": fmt.Sprintf("%+v", m)}).Debug(msg)
 	}
 }
