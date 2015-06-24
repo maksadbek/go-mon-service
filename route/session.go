@@ -44,7 +44,7 @@ func SignUpHandler(w http.ResponseWriter, r *http.Request) {
 
 	if !datastore.CheckUser(user, hash) {
 		logger.ReqWarn(r, conf.ErrReq)
-		http.Error(w, "Bad Request", 400)
+		http.Error(w, "Bad User Credentials", 400)
 		return
 	}
 
