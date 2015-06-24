@@ -9,8 +9,20 @@ import (
 
 var Log = logrus.New()
 
-func Init(path string) {
+func Init(level string) {
 	Log.Formatter = new(logrus.TextFormatter)
+	switch {
+	case level == "debug":
+		Log.Level = logrus.DebugLevel
+	case level == "info":
+		Log.Level = logrus.InfoLevel
+	case level == "warn":
+		Log.Level = logrus.WarnLevel
+	case level == "fatal":
+		Log.Level = logrus.FatalLevel
+	case level == "panic":
+		Log.Level = logrus.PanicLevel
+	}
 }
 
 func ReqWarn(req *http.Request, msg string, err ...error) {

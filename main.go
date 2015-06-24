@@ -12,7 +12,6 @@ import (
 	"os/exec"
 	"os/signal"
 	"runtime"
-	"runtime/pprof"
 	"strconv"
 	"strings"
 	"syscall"
@@ -40,8 +39,9 @@ var (
 		"conf",
 		"conf.toml",
 		`configuration file for daemon`)
-	daemon     = flag.Bool("d", true, "do not touch it")
-	daemonize  = flag.Bool("f", false, "daemonize or not")
+	daemon     = flag.Bool("d", false, "do not touch it")
+	daemonize  = flag.Bool("f", true, "daemonize or not")
+	logLevel   = flag.String("v", "error", "log level: debug, info, warn, error")
 	cpuprofile = flag.String("cpuprofile", "", "write cpu profile to file")
 	sig        = make(chan os.Signal)
 	stop       = make(chan bool)
@@ -107,16 +107,7 @@ var server Server
 func main() {
 	runtime.GOMAXPROCS(4)
 	flag.Parse()
-
-	// set profiling file
-	if *cpuprofile != "" {
-		f, err := os.Create(*cpuprofile)
-		if err != nil {
-			log.Log.Fatal(err)
-		}
-		pprof.StartCPUProfile(f)
-		defer pprof.StopCPUProfile()
-	}
+	log.Init(*logLevel)
 
 	switch *control {
 	case "stop":
@@ -148,7 +139,7 @@ func main() {
 		if checkPidFile("pid") {
 			pid, err := readPid("pid")
 			if err != nil {
-				panic(err)
+				log.Log.Error(err)
 			}
 			fmt.Println("daemon is running, pid is: ", strconv.Itoa(pid))
 		} else {
@@ -175,8 +166,8 @@ func main() {
 	go sigCatch()
 	go stopd()
 	go resd()
-	if *daemonize == true {
-		if *daemon == true {
+	if *daemon == true {
+		if *daemonize == true {
 			res <- true
 			stop <- true
 		}
@@ -186,17 +177,17 @@ func main() {
 	// config init
 	f, err := ioutil.ReadFile(*confPath)
 	if err != nil {
-		panic(err)
+		log.Log.Error(err)
 	}
 
 	c := strings.NewReader(string(f))
 	if err != nil {
-		panic(err)
+		log.Log.Error(err)
 	}
 
 	app, err := conf.Read(c)
 	if err != nil {
-		panic(err)
+		log.Log.Error(err)
 	}
 
 	// log setup
@@ -213,7 +204,7 @@ func main() {
 	go worker(app)
 	err = WritePid()
 	if err != nil {
-		panic(err)
+		log.Log.Error(err)
 	}
 	<-stop
 }
@@ -221,14 +212,14 @@ func main() {
 func WritePid() error {
 	f, err := os.Create("pid")
 	if err != nil {
-		panic(err)
+		log.Log.Error(err)
 	}
 	pid := os.Getpid()
 	log.Log.Info("my pid is", pid)
 	pidStr := strconv.Itoa(pid)
 	_, err = f.Write([]byte(pidStr))
 	if err != nil {
-		return err
+		log.Log.Error(err)
 	}
 	f.Close()
 	return nil
@@ -236,17 +227,17 @@ func WritePid() error {
 func CacheData(app conf.App) {
 	trackers, err := datastore.GetTrackers()
 	if err != nil {
-		panic(err)
+		log.Log.Error(err)
 	}
 	err = rcache.CacheDefaults(trackers)
 	if err != nil {
-		panic(err)
+		log.Log.Error(err)
 	}
 	CacheFleetTrackers()
 	for _ = range time.Tick(time.Duration(app.DS.Mysql.Interval) * time.Minute) {
 		trackers, err := datastore.GetTrackers()
 		if err != nil {
-			panic(err)
+			log.Log.Error(err)
 		}
 		rcache.CacheDefaults(trackers)
 		CacheFleetTrackers()
@@ -256,11 +247,12 @@ func CacheData(app conf.App) {
 func CacheFleetTrackers() {
 	t, err := datastore.CacheFleetTrackers()
 	if err != nil {
-		panic(err)
+
+		log.Log.Error(err)
 	}
 	err = rcache.AddFleetTrackers(t)
 	if err != nil {
-		panic(err)
+		log.Log.Error(err)
 	}
 }
 func sigCatch() {
@@ -289,6 +281,7 @@ func stopd() {
 			panic(err)
 		}
 	}
+
 	log.Log.Info("terminating")
 	os.Exit(0)
 }
@@ -298,7 +291,7 @@ func resd() {
 	log.Log.Info("restarting")
 	logFile, err := os.Create("logs")
 	if err != nil {
-		panic(err)
+		log.Log.Error(err)
 	}
 	defer logFile.Close()
 	cmd := exec.Command(os.Args[0], "-d=false")
@@ -306,9 +299,16 @@ func resd() {
 	cmd.Stderr = logFile
 	err = cmd.Start()
 	if err != nil {
-		panic(err)
+		log.Log.Error(err)
 	}
 	stop <- true
+	// remove pid file
+	if checkPidFile("pid") {
+		err := os.Remove("pid")
+		if err != nil {
+			log.Log.Error(err)
+		}
+	}
 }
 
 func worker(app conf.App) {
@@ -321,7 +321,7 @@ func worker(app conf.App) {
 	})
 	server.Listener, err = net.Listen("tcp", app.SRV.Port)
 	if err != nil {
-		panic(err)
+		log.Log.Error(err)
 	}
 
 	handler := c.Handler(webHandlers())
