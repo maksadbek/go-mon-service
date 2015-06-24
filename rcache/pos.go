@@ -2,6 +2,7 @@ package rcache
 
 import (
 	"encoding/json"
+	"fmt"
 	"strconv"
 
 	"bitbucket.org/maksadbek/go-mon-service/conf"
@@ -26,7 +27,7 @@ type Pos struct {
 	Battery       int     `json:"battery66"`
 	Seat          int     `json:"seat"`
 	BatteryLvl    int     `json:"batterylvl"`
-	Fuel          float32 `json:"fuel"`
+	Fuel          int     `json:"fuel"`
 	FuelVal       int     `json:"fuel_val"`
 	MuAdditional  string  `json:"mu_additional"`
 	Customization string  `json:"customization"`
@@ -44,12 +45,11 @@ func GetPositions(trackerId []string) (trackers map[string]Pos, err error) {
 		pos.Id, err = strconv.Atoi(id)
 		if err != nil {
 			logger.FuncLog("rcache.GetPositions", "", nil, err)
-			continue
 		}
 		// tracker's name saved with prefix, can be set from conf
 		p, err := redis.String(rc.Do("LINDEX", config.DS.Redis.TPrefix+":"+id, -1))
 		if err != nil {
-			logger.FuncLog("rcache.GetPositions", err.Error(), nil, err)
+			logger.Log.Error(err)
 		}
 		// if the value is nil, then merge with default values from max_units
 		if p == "" {
@@ -59,12 +59,13 @@ func GetPositions(trackerId []string) (trackers map[string]Pos, err error) {
 		} else {
 			err = json.Unmarshal([]byte(p), &pos)
 			if err != nil {
-				logger.FuncLog("rcache.GetPositions", conf.ErrNotInCache, nil, err)
+				logger.FuncLog("rcache.GetPositions", "Cannot unmarshal", nil, err)
 				return trackers, err
 			}
 
 			err = pos.SetLitrage()
 			if err != nil {
+				logger.Log.Error("here is it")
 				return trackers, err
 			}
 			trackers[id] = pos
@@ -88,6 +89,7 @@ func GetPositionsByFleet(fleetNum string, start, stop int) (Fleet, error) {
 
 	fleet.Update, err = GetPositions(trackers)
 	if err != nil {
+		fmt.Println("error is in fleet.Update, err = GetPositions(trackers)")
 		logger.FuncLog("rcache.GetPositionsByFleet", conf.ErrGetListOfTrackers, nil, err)
 	}
 	return fleet, err
@@ -104,7 +106,7 @@ func (pos *Pos) SetPosDefaults() {
 	pos.Battery = config.Defaults.Battery
 	pos.Seat = config.Defaults.Seat
 	pos.BatteryLvl = config.Defaults.BatteryLvl
-	pos.Fuel = float32(config.Defaults.Fuel)
+	pos.Fuel = config.Defaults.Fuel
 	pos.FuelVal = config.Defaults.FuelVal
 	pos.MuAdditional = config.Defaults.MuAdditional
 	pos.Action = config.Defaults.Action

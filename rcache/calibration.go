@@ -9,11 +9,13 @@ import (
 	"github.com/garyburd/redigo/redis"
 
 	"bitbucket.org/maksadbek/go-mon-service/conf"
+	"bitbucket.org/maksadbek/go-mon-service/logger"
 )
 
 var (
-	Calibres map[int][]Calibration
-	mutex    sync.RWMutex
+	Calibres  map[int][]Calibration
+	TopLitres map[int]int
+	mutex     sync.RWMutex
 )
 
 type Calibration struct {
@@ -64,6 +66,7 @@ func (pos *Pos) SetLitrage() error {
 	}
 	deviceTypeId, err := redis.Int(d, err)
 	if err != nil {
+		logger.Log.Error(err)
 		return err
 	}
 
@@ -73,6 +76,7 @@ func (pos *Pos) SetLitrage() error {
 			if len(m) == 2 {
 				fuel, err := strconv.Atoi(m[1])
 				if err != nil {
+					logger.Log.Error(err)
 					return err
 				}
 				additionals[m[0]] = float32(fuel)
@@ -80,12 +84,20 @@ func (pos *Pos) SetLitrage() error {
 		}
 		param, err := redis.String(rc.Do("HGET", hashName, "ParamID"))
 		if err != nil {
+			logger.Log.Error(err)
 			return err
 		}
 		pos.FuelVal, err = GetLitrage(pos.Id, additionals[param])
 		if err != nil {
+			logger.Log.Error(err)
 			return err
 		}
+
+		// set fuel value
+		topLitre := TopLitres[pos.Id]
+
+		// get percentage of FuelVal
+		pos.Fuel = (100 * pos.FuelVal) / topLitre
 	}
 	return nil
 }

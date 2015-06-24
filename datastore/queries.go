@@ -15,6 +15,14 @@ var queries map[string]string = map[string]string{
 						litr,
 						volt
 					FROM max_fuel_calibration`,
+	"getTopLitres": `
+				SELECT car_id , max( litr )
+				FROM max_fuel_calibration
+				WHERE 1
+				GROUP BY car_id
+				ORDER BY car_id 
+				DESC
+	`,
 	"getTrackers": `select 
 						u.id,
 						u.fleet,
