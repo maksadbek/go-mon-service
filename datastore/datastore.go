@@ -2,6 +2,7 @@ package datastore
 
 import (
 	"database/sql"
+	"encoding/json"
 	"fmt"
 	"strconv"
 	"strings"
@@ -53,9 +54,10 @@ func GetTrackers() (map[int]rcache.Vehicle, error) {
 	}
 	for rows.Next() {
 		var (
-			v       rcache.Vehicle
-			paramId sql.NullInt64
-			pid     sql.NullInt64
+			v          rcache.Vehicle
+			paramId    sql.NullInt64
+			pid        sql.NullInt64
+			additional string
 		)
 		rows.Scan(
 			&v.Id,
@@ -68,7 +70,7 @@ func GetTrackers() (map[int]rcache.Vehicle, error) {
 			&v.Name,
 			&v.Owner,
 			&v.Active,
-			&v.Additional,
+			&additional,
 			&v.Customization,
 			&v.Group_id,
 			&v.Detector_fuel_id,
@@ -82,6 +84,27 @@ func GetTrackers() (map[int]rcache.Vehicle, error) {
 			&v.What_class,
 			&paramId,
 		)
+		// unserialize additionals
+		decodedMap, err := phpserialize.Decode(additional)
+		container := make(map[string]string)
+		if err != nil {
+			log.Log.Error(err)
+		}
+
+		if decodedMap == nil {
+			continue
+		}
+		// convert from map[interface{}]interface to map[string]string
+		for key, val := range decodedMap.(map[interface{}]interface{}) {
+			container[fmt.Sprintf("%v", key)] = fmt.Sprintf("%v", val)
+		}
+
+		jAdditionals, err := json.Marshal(container)
+		if err != nil {
+			panic(err)
+		}
+
+		v.Additional = string(jAdditionals)
 		v.ParamID = strconv.Itoa(int(paramId.Int64))
 		v.Pid = int(pid.Int64)
 		pos[v.Id] = v
@@ -121,6 +144,7 @@ func UsrTrackers(name string) (usr rcache.Usr, err error) {
 	if err != nil {
 		return usr, err
 	}
+
 	for _, x := range tr.(map[interface{}]interface{}) {
 		usr.Trackers = append(usr.Trackers, fmt.Sprintf("%v", x))
 	}

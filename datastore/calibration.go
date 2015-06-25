@@ -1,7 +1,6 @@
 package datastore
 
 import (
-	"fmt"
 	"sort"
 
 	log "bitbucket.org/maksadbek/go-mon-service/logger"
@@ -33,7 +32,6 @@ func LoadCalibres() error {
 			&c.Litre,
 			&c.Volt,
 		)
-		fmt.Println(c)
 		rcache.Calibres[c.ID] = append(rcache.Calibres[c.ID], c)
 		sort.Sort(ByVoltage(rcache.Calibres[c.ID]))
 	}
