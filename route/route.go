@@ -21,25 +21,22 @@ func Initialize(c conf.App) error {
 
 // GetTrackers can be used to get list of trackers
 // if user does not exist in cache then in caches from mysql
-func GetTrackers(name string) (rcache.Usr, error) {
-	trackers, err := rcache.UsrTrackers(name)
+func GetTrackers(name string) (trackers rcache.Usr, err error) {
+	trackers, err = rcache.UsrTrackers(name)
 	logger.FuncLog("route.GetTracker", "GetTracker", nil, nil)
-	if err != nil {
-		// if redis result is nil
-		if err == redis.ErrNil {
-			trackersDS, err := datastore.UsrTrackers(name)
-			if err != nil {
-				return trackers, err
-			}
-			err = rcache.SetUsrTrackers(trackersDS)
-			if err != nil {
-				logger.FuncLog("route.GetTrackers", "GetTrackers", nil, err)
-				return trackersDS, err
-			}
-			return trackersDS, nil
-		} else {
-			return trackers, err
-		}
+	if err == nil || err != redis.ErrNil {
+		return
 	}
-	return trackers, nil
+	// if redis result is nil
+	trackers, err = datastore.UsrTrackers(name)
+	if err != nil {
+		return
+	}
+	err = rcache.SetUsrTrackers(trackers)
+	if err != nil {
+		logger.FuncLog("route.GetTrackers", "GetTrackers", nil, err)
+		return
+	}
+
+	return
 }
