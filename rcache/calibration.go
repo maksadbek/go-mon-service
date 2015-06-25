@@ -1,6 +1,7 @@
 package rcache
 
 import (
+	"encoding/json"
 	"errors"
 	"strconv"
 	"strings"
@@ -87,6 +88,7 @@ func (pos *Pos) SetLitrage() error {
 			logger.Log.Error(err)
 			return err
 		}
+
 		pos.FuelVal, err = GetLitrage(pos.Id, additionals[param])
 		if err != nil {
 			logger.Log.Error(err)
@@ -98,6 +100,28 @@ func (pos *Pos) SetLitrage() error {
 
 		// get percentage of FuelVal
 		pos.Fuel = (100 * pos.FuelVal) / topLitre
+
+		// set ignition
+		// if error then set ignition = 0
+		additionalsFromMU := make(map[string]string)
+		add, err := redis.String(rc.Do("HGET", hashName, "Additional"))
+		if err != nil {
+			logger.Log.Error(err)
+			pos.Ignition = 0
+		}
+
+		err = json.Unmarshal([]byte(add), &additionalsFromMU)
+		if err != nil {
+			logger.Log.Error(err)
+			pos.Ignition = 0
+		}
+
+		ignitionIndex := additionalsFromMU["param_port_ignition"]
+		ignition, ok := additionals[ignitionIndex]
+		if !ok {
+			pos.Ignition = 0
+		}
+		pos.Ignition = int(ignition)
 	}
 	return nil
 }
