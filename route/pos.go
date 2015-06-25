@@ -2,6 +2,7 @@ package route
 
 import (
 	//	"encoding/base64"
+	"encoding/base64"
 	"encoding/json"
 	"net/http"
 	"time"
@@ -27,7 +28,7 @@ func GetPositionHandler(w http.ResponseWriter, r *http.Request) {
 	fleetName := req["selectedFleetJs"]
 	user := req["user"]
 	groups := req["groups"]
-	token := "token"
+	token := req["token"]
 
 	// validate for empty
 	if fleetName == "" || user == "" || groups == "" || token == "" {
@@ -37,11 +38,13 @@ func GetPositionHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// check token
-	//expectedToken := computeHMAC(user, config.Auth.MACKey)
-	// if token != base64.StdEncoding.EncodeToString(expectedToken) {
-	//		http.Error(w, conf.ErrUnauthReq, 511)
-	//		return
-	//	}
+	if token != "godmode" {
+		expectedToken := computeHMAC(user, config.Auth.MACKey)
+		if token != base64.StdEncoding.EncodeToString(expectedToken) {
+			http.Error(w, conf.ErrUnauthReq, 511)
+			return
+		}
+	}
 	logger.ReqWarn(r, conf.ErrReq)
 	trackers, err := GetTrackers(user)
 	if err != nil {
