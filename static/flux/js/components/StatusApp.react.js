@@ -1,15 +1,9 @@
 var React = require('react');
-var StatusStore = require('../stores/StatusStore');
+var StatusStore = require('../stores/StatusStore').StatusStore;
+var UserStore = require('../stores/StatusStore').UserStore;
 var CarActions = require('../actions/StatusActions');
 var Sidebar = require('./Sidebar.react');
-
-function setUserInfo(){
-    CarActions.SetUserInfo({
-            login: "newmax",
-            fleet: "202",
-            groups: "1,2,3"
-    });
-};
+var LoginForm = require('./LoginForm.react');
 
 function getAllStatuses(){
     return StatusStore.getAll()
@@ -24,11 +18,10 @@ var StatusApp = React.createClass({
         };
         var myLatlng = new google.maps.LatLng(-25.363882,131.044922);
         var mapOptions = { zoom: 10 };
-        var map = new google.maps.Map(
-                document.getElementById('map-canvas'), 
-                mapOptions);
+        var map = new google.maps.Map( document.getElementById('map-canvas'), mapOptions);
         map.fitBounds(bounds);
         return {
+            authorized: false,
             map: map,
             bounds: bounds,
             stats: {
@@ -41,10 +34,10 @@ var StatusApp = React.createClass({
 
     componentDidMount: function(){
         StatusStore.addChangeListener(this._onChange);
+        UserStore.addChangeListener(this._onAuth);
     },
 
     componentWillMount: function(){
-        setUserInfo();
         StatusStore.sendAjax();
         setInterval(function(){
             StatusStore.sendAjax();
@@ -55,13 +48,25 @@ var StatusApp = React.createClass({
     },
 
     render: function(){
+        var content;
+        if(this.state.authorized){
+            content = <Sidebar  bounds={this.state.bounds} stats={this.state.stats} map={this.state.map} />
+        } else {
+           content = <LoginForm/> 
+        }
         return (
-                <Sidebar bounds={this.state.bounds} stats={this.state.stats} map={this.state.map}/>
+                <div>
+                    {content}
+                </div>
         )
     },
     _onChange: function(){
         this.setState({stats: getAllStatuses()});
-    }
+    },
+    _onAuth: function(){
+        this.setState({authorized : true});
+        this.forceUpdate();
+    },
 });
 
 module.exports = StatusApp;

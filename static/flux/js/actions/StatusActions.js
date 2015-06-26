@@ -9,4 +9,5 @@ var StatusActions = {
         });
     }
 };
+
 module.exports = StatusActions;
