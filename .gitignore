@@ -5,3 +5,4 @@ logs
 nohup.out
 pid
 *~
+static/flux/js/bundle.js
