@@ -1,0 +1,45 @@
+<!DOCTYPE HTML>
+<html>
+    <head>
+        <script src="./js/Chart.js"></script>
+    </head>
+    <body>
+        <canvas id="myChart" width="800" height="600"></canvas>
+        <script>
+            var ctx = document.getElementById("myChart").getContext("2d");
+            var data = {
+                labels: ["January", "February", "March", "April", "May", "June", "July"],
+                datasets: [
+                    {
+                        label: "My Second dataset",
+                        fillColor: "rgba(151,187,205,0.2)",
+                        strokeColor: "rgba(151,187,205,1)",
+                        pointColor: "rgba(151,187,205,1)",
+                        pointStrokeColor: "#fff",
+                        pointHighlightFill: "#fff",
+                        pointHighlightStroke: "rgba(151,187,205,1)",
+                        data: [28, 48, 40, 19, 86, 27, 90]
+                    }
+                ]
+            };
+            var myLineChart = new Chart(ctx).Line(data,  { bezierCurve: false });
+            function getState(){
+                var xhr = new XMLHttpRequest();
+                xhr.open('GET', encodeURI("http://localhost:8080/debug/vars"));
+                xhr.onload = function() {
+                        if (xhr.status === 200 ) {
+                            var d = JSON.parse(xhr.responseText);
+                            var now = new Date();
+                            myLineChart.addData([d.memstats.Alloc], now.getHours() + ":" + now.getMinutes() + ":" + now.getSeconds());
+                            myLineChart.removeData();
+                        }
+                        else if (xhr.status !== 200) {
+                            console.log("failed");
+                        }
+                };
+                xhr.send();
+            }
+            setInterval(getState, 5000);
+        </script>
+    </body>
+</html>
