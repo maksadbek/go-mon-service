@@ -2,6 +2,7 @@ package main
 
 import (
 	"compress/gzip"
+	_ "expvar"
 	"flag"
 	"fmt"
 	"io"
@@ -20,6 +21,7 @@ import (
 	"bitbucket.org/maksadbek/go-mon-service/conf"
 	"bitbucket.org/maksadbek/go-mon-service/datastore"
 	log "bitbucket.org/maksadbek/go-mon-service/logger"
+	"bitbucket.org/maksadbek/go-mon-service/metrics"
 	"bitbucket.org/maksadbek/go-mon-service/rcache"
 	"bitbucket.org/maksadbek/go-mon-service/route"
 	"github.com/Sirupsen/logrus"
@@ -202,6 +204,7 @@ func main() {
 	rcache.Initialize(app)
 	go CacheData(app)
 	go worker(app)
+	http.ListenAndServe(":8888", nil)
 	err = WritePid()
 	if err != nil {
 		log.Log.Error(err)
@@ -323,7 +326,6 @@ func worker(app conf.App) {
 	if err != nil {
 		log.Log.Error(err)
 	}
-
 	handler := c.Handler(webHandlers())
 	serve := &http.Server{Handler: GzipHandler(handler)}
 	serve.Serve(server.Listener)
@@ -334,6 +336,9 @@ func webHandlers() http.Handler {
 	web.Handle("/", http.FileServer(http.Dir("static/")))
 	web.HandleFunc("/positions", route.GetPositionHandler)
 	web.HandleFunc("/signup", route.SignUpHandler)
+	web.HandleFunc("/debug/vars/", metrics.MetricsHandler)
+	metrics.Publish("cmdline", metrics.Func(metrics.Cmdline))
+	metrics.Publish("memstats", metrics.Func(metrics.Memstats))
 	return web
 }
 

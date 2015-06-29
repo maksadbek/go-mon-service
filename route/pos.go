@@ -4,6 +4,7 @@ import (
 	//	"encoding/base64"
 	"encoding/base64"
 	"encoding/json"
+	"expvar"
 	"net/http"
 	"time"
 
@@ -12,8 +13,11 @@ import (
 	"bitbucket.org/maksadbek/go-mon-service/rcache"
 )
 
+var numCalls = expvar.NewInt("num-calls")
+
 //w.Write([]byte())
 func GetPositionHandler(w http.ResponseWriter, r *http.Request) {
+	numCalls.Add(1)
 	// decode request values
 	decoder := json.NewDecoder(r.Body)
 	req := make(map[string]string)
@@ -38,12 +42,15 @@ func GetPositionHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// check token
-	if token != "godmode" {
-		expectedToken := computeHMAC(user, config.Auth.MACKey)
-		if token != base64.StdEncoding.EncodeToString(expectedToken) {
-			http.Error(w, conf.ErrUnauthReq, 511)
-			return
-		}
+	usrTokenKey, ok := tokens[token]
+	if !ok {
+		http.Error(w, conf.ErrUnauthReq, 511)
+		return
+	}
+	expectedToken := computeHMAC(user, usrTokenKey.Key)
+	if token != base64.StdEncoding.EncodeToString(expectedToken) {
+		http.Error(w, conf.ErrUnauthReq, 511)
+		return
 	}
 	logger.ReqWarn(r, conf.ErrReq)
 	trackers, err := GetTrackers(user)
