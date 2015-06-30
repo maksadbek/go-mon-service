@@ -4,7 +4,6 @@ import (
 	//	"encoding/base64"
 	"encoding/base64"
 	"encoding/json"
-	"expvar"
 	"net/http"
 	"time"
 
@@ -13,11 +12,7 @@ import (
 	"bitbucket.org/maksadbek/go-mon-service/rcache"
 )
 
-var numCalls = expvar.NewInt("num-calls")
-
-//w.Write([]byte())
 func GetPositionHandler(w http.ResponseWriter, r *http.Request) {
-	numCalls.Add(1)
 	// decode request values
 	decoder := json.NewDecoder(r.Body)
 	req := make(map[string]string)

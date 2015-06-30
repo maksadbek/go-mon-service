@@ -204,7 +204,6 @@ func main() {
 	rcache.Initialize(app)
 	go CacheData(app)
 	go worker(app)
-	http.ListenAndServe(":8888", nil)
 	err = WritePid()
 	if err != nil {
 		log.Log.Error(err)
@@ -337,8 +336,9 @@ func webHandlers() http.Handler {
 	web.HandleFunc("/positions", route.GetPositionHandler)
 	web.HandleFunc("/signup", route.SignUpHandler)
 	web.HandleFunc("/debug/vars/", metrics.MetricsHandler)
-	metrics.Publish("cmdline", metrics.Func(metrics.Cmdline))
-	metrics.Publish("memstats", metrics.Func(metrics.Memstats))
+	//metrics.Publish("cmdline", metrics.Func(metrics.Cmdline))
+	//metrics.Publish("memstats", metrics.Func(metrics.Memstats))
+	metrics.Publish("goroutines", metrics.Func(metrics.Goroutines))
 	return web
 }
 

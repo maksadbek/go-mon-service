@@ -11,7 +11,10 @@ import (
 	"bitbucket.org/maksadbek/go-mon-service/conf"
 	"bitbucket.org/maksadbek/go-mon-service/datastore"
 	"bitbucket.org/maksadbek/go-mon-service/logger"
+	"bitbucket.org/maksadbek/go-mon-service/metrics"
 )
+
+var expTokens = metrics.NewString("expTokens")
 
 type tokenKey struct {
 	ID  string
@@ -79,9 +82,11 @@ func SignUpHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	// compute new token
-	token := string(computeHMAC(user, string(key)))
+	token := base64.StdEncoding.EncodeToString(computeHMAC(user, base64.StdEncoding.EncodeToString(key)))
 	// put token into container
-	tokens[token] = tokenKey{ID: uid, Key: string(key)}
+	tokens[token] = tokenKey{ID: uid, Key: base64.StdEncoding.EncodeToString(key)}
+	jtokens, _ := json.MarshalIndent(tokens, "\t", "")
+	expTokens.Set(string(jtokens))
 	// and send computed token
-	w.Write([]byte(base64.StdEncoding.EncodeToString([]byte(token))))
+	w.Write([]byte(token))
 }
