@@ -329,6 +329,11 @@ func Memstats() interface{} {
 	return *stats
 }
 
+func Goroutines() interface{} {
+	num := runtime.NumGoroutine()
+	return num
+}
+
 /*
 func init() {
 	http.HandleFunc("/debug/vars", expvarHandler)
