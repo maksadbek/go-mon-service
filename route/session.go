@@ -7,6 +7,7 @@ import (
 	"encoding/base64"
 	"encoding/json"
 	"net/http"
+	"sync"
 
 	"bitbucket.org/maksadbek/go-mon-service/conf"
 	"bitbucket.org/maksadbek/go-mon-service/datastore"
@@ -14,7 +15,10 @@ import (
 	"bitbucket.org/maksadbek/go-mon-service/metrics"
 )
 
-var expTokens = metrics.NewString("expTokens")
+var (
+	expTokens = metrics.NewString("expTokens")
+	mutex     sync.RWMutex
+)
 
 type tokenKey struct {
 	ID  string
@@ -40,7 +44,40 @@ func checkMAC(msg string, expMAC []byte, key string) bool {
 	return hmac.Equal(expMAC, expectedMAC)
 }
 
-func SignUpHandler(w http.ResponseWriter, r *http.Request) {
+// LogOutHandler handles user log out request
+// deletes user token from container
+func LogoutHandler(w http.ResponseWriter, r *http.Request) {
+	defer r.Body.Close()
+	decoder := json.NewDecoder(r.Body) // json decoder
+	req := make(map[string]string)     // request params
+	// decode
+	err := decoder.Decode(&req)
+	if err != nil {
+		logger.ReqWarn(r, conf.ErrReq)
+		http.Error(w, "invalid req body format", 500)
+		return
+	}
+	// get login and hash
+	token := req["token"]
+	// validate for empty string
+	if token == "" {
+		logger.ReqWarn(r, conf.ErrReq)
+		http.Error(w, "Bad Request", 400)
+		return
+	}
+
+	// delete the token from tokens container
+	// lock it before deleting
+	mutex.Lock()
+	if _, ok := tokens[token]; ok {
+		delete(tokens, token)
+	}
+	mutex.Unlock()
+	// then unlock
+}
+
+// SignUpHandler handles user sign up request
+func SignupHandler(w http.ResponseWriter, r *http.Request) {
 	key := make([]byte, 64)            // key for HMAC computation
 	decoder := json.NewDecoder(r.Body) // json decoder
 	req := make(map[string]string)     // request params
@@ -68,12 +105,14 @@ func SignUpHandler(w http.ResponseWriter, r *http.Request) {
 	// range over tokens, and
 	// if has already got token,
 	// then return old token
+	mutex.Lock()
 	for oldToken, usr := range tokens {
 		if usr.ID == uid {
 			w.Write([]byte(base64.StdEncoding.EncodeToString([]byte(oldToken))))
 			return
 		}
 	}
+	mutex.Unlock()
 	// else, generate random key
 	_, err = rand.Read(key)
 	if err != nil {
@@ -84,7 +123,9 @@ func SignUpHandler(w http.ResponseWriter, r *http.Request) {
 	// compute new token
 	token := base64.StdEncoding.EncodeToString(computeHMAC(user, base64.StdEncoding.EncodeToString(key)))
 	// put token into container
+	mutex.Lock()
 	tokens[token] = tokenKey{ID: uid, Key: base64.StdEncoding.EncodeToString(key)}
+	mutex.Unlock()
 	jtokens, _ := json.MarshalIndent(tokens, "\t", "")
 	expTokens.Set(string(jtokens))
 	// and send computed token
