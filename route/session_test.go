@@ -3,6 +3,10 @@ package route
 import (
 	"crypto/hmac"
 	"crypto/sha256"
+	"fmt"
+	"io/ioutil"
+	"net/http"
+	"strings"
 	"testing"
 )
 
@@ -23,4 +27,47 @@ func TestCheckMAC(t *testing.T) {
 	if !checkMAC(TestMsg, expectedMAC, TestKey) {
 		t.Errorf("want %b, got %b", true, false)
 	}
+}
+
+// TestLogoutHandler tests logout request
+func TestLogoutHandler(t *testing.T) {
+	/*
+		msg = `{
+				"user":"newmax",
+				"selectedFleetJs":"202",
+				"groups":"1,2,3",
+				"uid":"testuid"
+				}`
+	*/
+	// signup
+	signupMsg := `{
+			"hash":"f8cb56593dd08e04cd0f84d796b9cecd",
+			"uid":"newmax",
+			"user":"newmax"
+	}`
+
+	res, err := http.Post("http://localhost:8080/signup", "application/json", strings.NewReader(signupMsg))
+	if err != nil {
+		t.Error(err)
+	}
+
+	if res.Status != "200 OK" {
+		t.Errorf("want 200, got %s", res.Status)
+	}
+
+	defer res.Body.Close()
+	token, err := ioutil.ReadAll(res.Body)
+
+	fmt.Println(string(token))
+	// logout
+	logoutMsg := `{"token":"` + string(token) + `"}`
+	res, err = http.Post("http://localhost:8080/logout", "application/json", strings.NewReader(logoutMsg))
+	if err != nil {
+		t.Error(err)
+	}
+
+	if res.Status != "200 OK" {
+		t.Errorf("want 200, got %s", res.Status)
+	}
+	defer res.Body.Close()
 }
