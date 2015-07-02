@@ -67,6 +67,7 @@ var StatusStore = assign({}, EventEmitter.prototype, {
                 xhr.setRequestHeader('Content-Type', 'application/json');
                 xhr.onload = function() {
                         if (xhr.status === 200 ) {
+                            // parse by groups
                             _carStatus = JSON.parse(xhr.responseText);
                             console.log(_carStatus);
                             StatusStore.emitChange();
@@ -77,10 +78,10 @@ var StatusStore = assign({}, EventEmitter.prototype, {
                         }
                 };
                 xhr.send(JSON.stringify({
-                        selectedFleetJs: _clientInfo.fleet,
-                        user: _clientInfo.login,
-                        groups: _clientInfo.groups,
-                        token: _token
+                        selectedFleetJs: "202",
+                        user: "newmax",
+                        groups: "1,2,3",
+                        token: "DSfv9rEA0vBM1dJ1uJbZKoBLZE353xMPHjaGe6xqR3s="
                         })
                 );
         },

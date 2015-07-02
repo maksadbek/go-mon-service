@@ -30,7 +30,7 @@
                         if (xhr.status === 200 ) {
                             var d = JSON.parse(xhr.responseText);
                             var now = new Date();
-                            myLineChart.addData([d.memstats.Alloc], now.getHours() + ":" + now.getMinutes() + ":" + now.getSeconds());
+                            myLineChart.addData([d.memstats.Alloc / 1000], now.getHours() + ":" + now.getMinutes() + ":" + now.getSeconds());
                             myLineChart.removeData();
                         }
                         else if (xhr.status !== 200) {

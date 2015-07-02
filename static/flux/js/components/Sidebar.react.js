@@ -2,60 +2,42 @@ var React = require('react');
 var CarActions = require('../actions/StatusActions');
 var Status = require('./CarStatus.react');
 
-
 var markers = [];
 var Sidebar = React.createClass({
     propTypes:{
         stats: React.PropTypes.object.isRequired,
-        map: React.PropTypes.object.isRequired,
-        bounds: React.PropTypes.object.isRequired
+    },
+    getInitialState: function(){
+        return {
+                style: ""
+                }
     },
     render: function(){
         var statuses = [];
         var stat = this.props.stats.update;
-        var map = this.props.map;
-        var bounds = this.props.bounds;
-        var shape = {
-            coords: [1, 1, 1, 20, 18, 20, 18 , 1],
-            type: 'circle'
-        };
-        if(markers.length === 0){
-            for(var i in stat){
-                var latLng = new google.maps.LatLng(
-                    stat[i].latitude, stat[i].longitude
-                );
-                    var marker = new google.maps.Marker({
-                        position: latLng,
-                        map: map,
-                        title: stat[i].number,
-                        id: stat[i].id,
-                        shape: shape,
-                    });
-                    markers.push(marker);
-                bounds.extend(marker.position);
-                statuses.push(
-                    <Status key={stat[i].id} stat={stat[i]} />
-                );
-            }
-        } else{
-            markers.forEach(function(m){
-                for(var i in stat){
-                    if(stat[i].id === m.id){
-                        m.setPosition(new google.maps.LatLng(stat[i].latitude, stat[i].longitude));
-                        m.title = stat[i].number;
-                        m.id = stat[i].id;
-                        statuses.push(
-                            <Status key={stat[i].id} stat={stat[i]} />
-                        );
-                    }
-                }
-            });
+        for(var i in stat){
+            statuses.push( <Status key={stat[i].id} stat={stat[i]} />);
         }
         return (
-            <nav className="menu">
-                {statuses} 
-            </nav>
+            <div className={"body_monitoring"}>
+                <div className={"show_panel " + this.state.style} onClick={this._onClickHandler} id={"panel_1"}> 
+                    <form>
+                        <label className="check_bock"><input type="checkbox" name="checkAll" />Group</label> 
+                    </form>
+                </div>
+                <div id="hide_panel" className={"hide_panel " + this.state.style} > 
+                    {statuses} 
+                </div>
+            </div>
         );
+    },
+
+    _onClickHandler: function(){
+        if(this.state.style == "") {
+            this.setState({style:"active"});
+        }else {
+            this.setState({style: ""});
+        }
     },
     componentDidMount: function(){
         console.log(this.props.stats);
