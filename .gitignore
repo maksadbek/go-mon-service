@@ -8,4 +8,5 @@ pid
 static/flux/js/bundle.js
 static/flux/js/ext-all-debug.js
 static/flux/js/ext-base.js
+conf.toml
 
