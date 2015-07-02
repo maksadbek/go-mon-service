@@ -56,20 +56,19 @@ func GetPositions(trackerId []string) (trackers map[string]Pos, err error) {
 			// set default values
 			pos.SetPosDefaults()
 			trackers[id] = pos
-		} else {
-			err = json.Unmarshal([]byte(p), &pos)
-			if err != nil {
-				logger.FuncLog("rcache.GetPositions", "Cannot unmarshal", nil, err)
-				return trackers, err
-			}
-
-			err = pos.SetLitrage()
-			if err != nil {
-				logger.Log.Error("here is it")
-				return trackers, err
-			}
-			trackers[id] = pos
 		}
+		err = json.Unmarshal([]byte(p), &pos)
+		if err != nil {
+			logger.FuncLog("rcache.GetPositions", "Cannot unmarshal", nil, err)
+			return trackers, err
+		}
+
+		err = pos.SetLitrage()
+		if err != nil {
+			logger.Log.Error("here is it")
+			return trackers, err
+		}
+		trackers[id] = pos
 	}
 	return
 }

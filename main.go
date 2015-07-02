@@ -338,7 +338,7 @@ func webHandlers() http.Handler {
 	web.HandleFunc("/logout", route.LogoutHandler)
 	web.HandleFunc("/debug/vars/", metrics.MetricsHandler)
 	//metrics.Publish("cmdline", metrics.Func(metrics.Cmdline))
-	//metrics.Publish("memstats", metrics.Func(metrics.Memstats))
+	metrics.Publish("memstats", metrics.Func(metrics.Memstats))
 	metrics.Publish("goroutines", metrics.Func(metrics.Goroutines))
 	return web
 }

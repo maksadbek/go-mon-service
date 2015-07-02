@@ -63,7 +63,7 @@ func TestFleetTrackers(t *testing.T) {
 			}
 		}
 		if !found {
-			t.Error("%s not found", track)
+			t.Errorf("%s not found", track)
 		}
 	}
 }
@@ -118,7 +118,7 @@ func TestUsrTrackers(t *testing.T) {
 
 	want := testUsr[0].Login
 	if usr.Login != want {
-		t.Error("want %s, got %s", want, usr.Login)
+		t.Errorf("want %s, got %s", want, usr.Login)
 	}
 }
 
@@ -142,7 +142,7 @@ func TestSetUsrTrackers(t *testing.T) {
 
 	want := testUsr[1].Login
 	if usr.Login != want {
-		t.Error("got %s, want %s", usr.Login, want)
+		t.Errorf("got %s, want %s", usr.Login, want)
 	}
 }
 
@@ -154,6 +154,6 @@ func TestGetPositions_NonExisting(t *testing.T) {
 	}
 
 	if v["10"].Id != 0 {
-		t.Error("got %v, want nothing", v["10"])
+		t.Errorf("got %v, want nothing", v["10"])
 	}
 }
