@@ -12,7 +12,7 @@ var StatusApp = React.createClass({
         return {
             stats: {
                 id: '',
-                update: {},
+                update: {"":[]},
                 last_request: null
             }
         }
@@ -33,7 +33,11 @@ var StatusApp = React.createClass({
     },
 
     render: function(){
-        var content = <Sidebar stats={this.state.stats} />
+        var content = [];
+        var update = this.state.stats.update;
+        for(var i in update){
+            content.push(<Sidebar groupName={i} stats={update[i]}/>)
+        }
         return (<div className={"body_mon"}>
                     {content}
                 </div>)
