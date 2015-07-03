@@ -1,6 +1,3 @@
-// @author: Maksadbek
-// @email: a.maksadbek@gmail.com
-
 package conf
 
 import (
@@ -16,6 +13,11 @@ type ErrorStr struct {
 type Auth struct {
 	MACKey string
 }
+
+type Cache struct {
+	GroupInterval int `toml:"group_interval"`
+}
+
 type Datastore struct {
 	Mysql struct {
 		DSN      string
@@ -72,6 +74,7 @@ type App struct {
 	ErrorMsg map[string]ErrorStr `toml:"errors"`
 	Defaults Defaults
 	Auth     Auth
+	Cache    Cache
 }
 
 type Log struct {

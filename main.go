@@ -48,6 +48,7 @@ var (
 	sig        = make(chan os.Signal)
 	stop       = make(chan bool)
 	res        = make(chan bool)
+	app        conf.App
 )
 
 type Server struct {
@@ -187,7 +188,7 @@ func main() {
 		log.Log.Error(err)
 	}
 
-	app, err := conf.Read(c)
+	app, err = conf.Read(c)
 	if err != nil {
 		log.Log.Error(err)
 	}
@@ -203,6 +204,7 @@ func main() {
 	datastore.Initialize(app)
 	rcache.Initialize(app)
 	go CacheData(app)
+	go CacheGroups()
 	go worker(app)
 	err = WritePid()
 	if err != nil {
@@ -255,6 +257,19 @@ func CacheFleetTrackers() {
 	err = rcache.AddFleetTrackers(t)
 	if err != nil {
 		log.Log.Error(err)
+	}
+}
+
+func CacheGroups() {
+	err := datastore.LoadGroups()
+	if err != nil {
+		log.Log.Error(err)
+	}
+	for _ = range time.Tick(time.Duration(app.Cache.GroupInterval) * time.Minute) {
+		err := datastore.LoadGroups()
+		if err != nil {
+			log.Log.Error(err)
+		}
 	}
 }
 func sigCatch() {

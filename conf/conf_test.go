@@ -35,6 +35,8 @@ func TestRead(t *testing.T) {
    action = 2
 [auth]
 	mackey = "f8cb56593dd08e04cd0f84d796b9cecd"
+[cache]
+	group_interval = 5
 `
 
 	r := strings.NewReader(mockConf)
@@ -78,4 +80,8 @@ func TestRead(t *testing.T) {
 		}
 	}
 
+	want := 5
+	if got := app.Cache.GroupInterval; got != want {
+		t.Errorf("got '%d', want '%d'", got, want)
+	}
 }
