@@ -5,6 +5,7 @@ import (
 	"testing"
 
 	"bitbucket.org/maksadbek/go-mon-service/conf"
+	"bitbucket.org/maksadbek/go-mon-service/rcache"
 )
 
 func TestGetTrackers(t *testing.T) {
@@ -19,7 +20,7 @@ func TestGetTrackers(t *testing.T) {
 	if err != nil {
 		t.Error(err)
 	}
-	_, err = GetTrackers("202")
+	_, err = GetTrackers()
 }
 
 func TestUsrTrackersPartialCars(t *testing.T) {
@@ -51,7 +52,7 @@ func TestCacheFleetTrackers(t *testing.T) {
 
 func BenchmarkGetTrackers(b *testing.B) {
 	for i := 0; i < b.N; i++ {
-		_, _ = GetTrackers("")
+		_, _ = GetTrackers()
 	}
 }
 
@@ -61,16 +62,19 @@ func BenchmarkCacheFleetTrackers(b *testing.B) {
 	}
 }
 
-func TestGetLitrage(t *testing.T) {
-	_, err := GetLitrage(104953, 40)
-	if err != nil {
-		t.Error(err)
-	}
-}
-
 func TestCheckUser(t *testing.T) {
 	res := CheckUser(UserTest.Username, UserTest.Hash)
 	if !res {
 		t.Errorf("want %t, got %t", true, res)
+	}
+}
+
+func TestLoadGroups(t *testing.T) {
+	err := LoadGroups()
+	if err != nil {
+		t.Error(err)
+	}
+	if _, err := rcache.Grouplist.Get("202"); err != nil {
+		t.Error(err)
 	}
 }

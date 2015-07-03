@@ -66,4 +66,5 @@ var queries map[string]string = map[string]string{
 			WHERE login = ?
 			AND pass = ?
 	`,
+	`trackerGroups`: `select id, name, fllet_id from max_groups_units  order by fllet_id,name`,
 }

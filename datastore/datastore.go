@@ -193,3 +193,27 @@ func CheckUser(username, hash string) (exists bool) {
 	}
 	return
 }
+
+func LoadGroups() error {
+	log.Log.Debug("Loading groups...")
+	var (
+		group rcache.Group
+		id    string
+	)
+	rows, err := db.Query(queries["trackerGroups"])
+	defer rows.Close()
+	if err != nil {
+		log.FuncLog("datastore.LoadGroups", "checking user", nil, err)
+		return err
+	}
+	for rows.Next() {
+		rows.Scan(
+			&id,
+			&group.Name,
+			&group.FleetID,
+		)
+		rcache.Grouplist.Put(id, group)
+	}
+	log.Log.Debug("Groups are loaded")
+	return nil
+}

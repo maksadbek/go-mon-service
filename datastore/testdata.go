@@ -2,7 +2,7 @@ package datastore
 
 var mockConf string = `[ds]
 [ds.mysql]
-    dsn = "root:toor@tcp(localhost:3306)/maxtrack"
+    dsn = "r23-go-mon:ErDFR8dqv44322www@tcp(maxtrack23:3306)/maxtrack"
     interval = 1
 [ds.redis]
 	host = ":6379"
