@@ -55,7 +55,7 @@ func GetPositionHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	var fleet rcache.Fleet
-	fleet.Update = make(map[string]rcache.Pos)
+	fleet.Update = make(map[string][]rcache.Pos)
 	if trackers.Trackers[0] == "0" {
 		fleet, err = rcache.GetPositionsByFleet(fleetName, 0, 100)
 		if err != nil {

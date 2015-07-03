@@ -36,8 +36,8 @@ type Pos struct {
 }
 
 // GetPositions can be used to retrieve map of positions
-func GetPositions(trackerId []string) (trackers map[string]Pos, err error) {
-	trackers = make(map[string]Pos)
+func GetPositions(trackerId []string) (trackers map[string][]Pos, err error) {
+	trackers = make(map[string][]Pos)
 	logger.FuncLog("rcache.GetPositions", "", nil, nil)
 	// range over ids of trackers
 	for _, id := range trackerId {
@@ -51,16 +51,21 @@ func GetPositions(trackerId []string) (trackers map[string]Pos, err error) {
 		if err != nil {
 			logger.Log.Error(err)
 		}
+		// get groupid of the tracker
+		groupID, err := redis.String(rc.Do("HGET", "max_unit_"+id, "Group_id"))
+		if err != nil {
+			logger.Log.Error(err)
+		}
 		// if the value is nil, then merge with default values from max_units
 		if p == "" {
 			// set default values
 			pos.SetPosDefaults()
-			trackers[id] = pos
-		}
-		err = json.Unmarshal([]byte(p), &pos)
-		if err != nil {
-			logger.FuncLog("rcache.GetPositions", "Cannot unmarshal", nil, err)
-			return trackers, err
+		} else {
+			err = json.Unmarshal([]byte(p), &pos)
+			if err != nil {
+				logger.FuncLog("rcache.GetPositions", "Cannot unmarshal", nil, err)
+				return trackers, err
+			}
 		}
 
 		err = pos.SetLitrage()
@@ -68,7 +73,12 @@ func GetPositions(trackerId []string) (trackers map[string]Pos, err error) {
 			logger.Log.Error("here is it")
 			return trackers, err
 		}
-		trackers[id] = pos
+		group, err := Grouplist.Get(groupID)
+		if err != nil {
+			logger.Log.Error(err)
+			group.Name = "all"
+		}
+		trackers[group.Name] = append(trackers[group.Name], pos)
 	}
 	return
 }
@@ -78,7 +88,7 @@ func GetPositionsByFleet(fleetNum string, start, stop int) (Fleet, error) {
 	logger.FuncLog("rcache.PushRedis", "", nil, nil)
 	fleet := Fleet{}
 	fleet.Id = fleetNum
-	fleet.Update = make(map[string]Pos)
+	fleet.Update = make(map[string][]Pos)
 	// get trackers of current fleet
 	trackers, err := GetTrackers(fleetNum, start, stop)
 	if err != nil {

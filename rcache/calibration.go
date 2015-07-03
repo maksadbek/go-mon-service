@@ -16,7 +16,7 @@ import (
 var (
 	Calibres  map[int][]Calibration
 	TopLitres map[int]int
-	mutex     sync.RWMutex
+	rwmutex   sync.RWMutex
 )
 
 type Calibration struct {
@@ -29,7 +29,7 @@ type Calibration struct {
 // GetLitrage can be used to get litrage value that is proportional
 // to the voltage value of particular tracker
 func GetLitrage(id int, volt float32) (litre int, err error) {
-	mutex.RLock()
+	rwmutex.RLock()
 	c := Calibres[id]
 	if c == nil {
 		err = errors.New(conf.ErrNotInCache)
@@ -48,7 +48,7 @@ func GetLitrage(id int, volt float32) (litre int, err error) {
 			break
 		}
 	}
-	mutex.RUnlock()
+	rwmutex.RUnlock()
 	return litre, err
 }
 

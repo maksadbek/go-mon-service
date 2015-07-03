@@ -18,9 +18,9 @@ var (
 
 // structure for fleet
 type Fleet struct {
-	Id      string         `json:"id"`           // unique id of fleet
-	Update  map[string]Pos `json:"update"`       // and its tracker's info
-	LastReq int64          `json:"last_request"` // current unix time
+	Id      string           `json:"id"`           // unique id of fleet
+	Update  map[string][]Pos `json:"update"`       // and its tracker's info
+	LastReq int64            `json:"last_request"` // current unix time
 }
 
 // structure for fleet
@@ -92,13 +92,15 @@ func PushRedis(fleet Fleet) (err error) {
 	logger.FuncLog("rcache.PushRedis", conf.InfoPushFleet, nil, nil)
 	// get list of trackers ids from cache
 	// range over map of Pos and push them
-	for k, x := range fleet.Update {
-		jpos, err := json.Marshal(x)
-		if err != nil {
-			logger.FuncLog("rcache.PushRedis", conf.ErrGetListOfTrackers, nil, err)
-			return err
+	for _, x := range fleet.Update {
+		for _, pos := range x {
+			jpos, err := json.Marshal(pos)
+			if err != nil {
+				logger.FuncLog("rcache.PushRedis", conf.ErrGetListOfTrackers, nil, err)
+				return err
+			}
+			rc.Do("RPUSH", config.DS.Redis.TPrefix+":"+strconv.Itoa(pos.Id), jpos) // prefix can be set from conf
 		}
-		rc.Do("RPUSH", config.DS.Redis.TPrefix+":"+k, jpos) // prefix can be set from conf
 	}
 	return
 }
