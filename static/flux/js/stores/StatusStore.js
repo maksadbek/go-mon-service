@@ -81,7 +81,7 @@ var StatusStore = assign({}, EventEmitter.prototype, {
                         selectedFleetJs: "202",
                         user: "newmax",
                         groups: "1,2,3",
-                        token: "l5/2LC1m6Hequ2NqV21z35I2XoCR8ju+3o1tZh+rU6Q="
+                        token: "16ZBWgH76FOliQCqZuVzazOoDK+w09ior49LnN4aXsA="
                         })
                 );
         },
