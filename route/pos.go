@@ -37,7 +37,7 @@ func GetPositionHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// check token
-	usrTokenKey, ok := tokens[token]
+	usrTokenKey, ok := tokenList.Get(token)
 	if !ok {
 		http.Error(w, conf.ErrUnauthReq, 511)
 		return

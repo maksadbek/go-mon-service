@@ -6,6 +6,7 @@ import (
 	"crypto/sha256"
 	"encoding/base64"
 	"encoding/json"
+	"errors"
 	"net/http"
 	"sync"
 
@@ -16,8 +17,9 @@ import (
 )
 
 var (
-	expTokens = metrics.NewString("expTokens")
-	mutex     sync.RWMutex
+	expTokens        = metrics.NewString("expTokens")
+	uidNotFoundErr   = errors.New("uid not found")
+	tokenNotFoundErr = errors.New("token not found")
 )
 
 type tokenKey struct {
@@ -26,7 +28,53 @@ type tokenKey struct {
 }
 
 // in-memory container for user tokens
-var tokens = make(map[string]tokenKey)
+type Tokens struct {
+	Tokens map[string]tokenKey
+	sync.RWMutex
+}
+
+var tokenList Tokens
+
+func (t *Tokens) Put(token string, tk tokenKey) {
+	if len(t.Tokens) == 0 {
+		t.Tokens = make(map[string]tokenKey)
+	}
+	t.Lock()
+	t.Tokens[token] = tk
+	t.Unlock()
+}
+
+func (t *Tokens) Get(token string) (tokenKey, bool) {
+	t.RLock()
+	tk, ok := t.Tokens[token]
+	if !ok {
+		t.RUnlock()
+		return tk, false
+	}
+	t.RUnlock()
+	return tk, true
+}
+
+// FindUid can be used to check whether uid with has already got token or not
+func (t *Tokens) FindUid(uid string) (string, bool) {
+	t.Lock()
+	for token, usr := range t.Tokens {
+		if usr.ID == uid {
+			t.Unlock()
+			return token, true
+		}
+	}
+	t.Unlock()
+	return "", false
+}
+
+func (t *Tokens) Del(token string) {
+	t.Lock()
+	if _, ok := t.Tokens[token]; ok {
+		delete(t.Tokens, token)
+	}
+	t.Unlock()
+}
 
 // computeHMAC can be used to compute HMAC hash of given message and key
 func computeHMAC(msg, key string) []byte {
@@ -68,12 +116,7 @@ func LogoutHandler(w http.ResponseWriter, r *http.Request) {
 
 	// delete the token from tokens container
 	// lock it before deleting
-	mutex.Lock()
-	if _, ok := tokens[token]; ok {
-		delete(tokens, token)
-	}
-	mutex.Unlock()
-	// then unlock
+	tokenList.Del(token)
 }
 
 // SignUpHandler handles user sign up request
@@ -105,14 +148,10 @@ func SignupHandler(w http.ResponseWriter, r *http.Request) {
 	// range over tokens, and
 	// if has already got token,
 	// then return old token
-	mutex.Lock()
-	for oldToken, usr := range tokens {
-		if usr.ID == uid {
-			w.Write([]byte(base64.StdEncoding.EncodeToString([]byte(oldToken))))
-			return
-		}
+	if token, ok := tokenList.FindUid(uid); ok {
+		w.Write([]byte(token))
+		return
 	}
-	mutex.Unlock()
 	// else, generate random key
 	_, err = rand.Read(key)
 	if err != nil {
@@ -123,10 +162,9 @@ func SignupHandler(w http.ResponseWriter, r *http.Request) {
 	// compute new token
 	token := base64.StdEncoding.EncodeToString(computeHMAC(user, base64.StdEncoding.EncodeToString(key)))
 	// put token into container
-	mutex.Lock()
-	tokens[token] = tokenKey{ID: uid, Key: base64.StdEncoding.EncodeToString(key)}
-	mutex.Unlock()
-	jtokens, _ := json.MarshalIndent(tokens, "\t", "")
+	tokenList.Put(token, tokenKey{ID: uid, Key: base64.StdEncoding.EncodeToString(key)})
+	// write tokens into debug var
+	jtokens, _ := json.MarshalIndent(tokenList.Tokens, "\t", "")
 	expTokens.Set(string(jtokens))
 	// and send computed token
 	w.Write([]byte(token))
