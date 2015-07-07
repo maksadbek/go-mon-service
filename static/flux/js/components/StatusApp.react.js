@@ -1,15 +1,9 @@
 var React = require('react');
 var StatusStore = require('../stores/StatusStore').StatusStore;
 var CarActions = require('../actions/StatusActions');
+var UserActions = require('../actions/UserActions');
 var Sidebar = require('./Sidebar.react');
-
-function setUserInfo(){
-    CarActions.SetUserInfo({
-            login: "Lizing",
-            fleet: "585",
-            groups: "1,2,3"
-    });
-};
+var UserStore = require('../stores/StatusStore').UserStore;
 
 function getAllStatuses(){
     return StatusStore.getAll()
@@ -28,16 +22,21 @@ var StatusApp = React.createClass({
 
     componentDidMount: function(){
         StatusStore.addChangeListener(this._onChange);
+        UserStore.addChangeListener(this._onAuth);
     },
 
     componentWillMount: function(){
-        StatusStore.sendAjax();
-        setInterval(function(){
-            StatusStore.sendAjax();
-        }, 5000);
+        UserActions.Auth({
+            login: "",
+            uid: "",
+            hash: "",
+            fleet: "",
+            groups: ""
+        });
     },
     componentWillUnmount: function(){
         StatusStore.removeChangeListener(this._onChange);
+        UserStore.removeChangeListener(this._onAuth);
     },
 
     render: function(){
@@ -53,6 +52,12 @@ var StatusApp = React.createClass({
     _onChange: function(){
         this.setState({stats: getAllStatuses()});
     },
+    _onAuth: function(){
+        StatusStore.sendAjax();
+        setInterval(function(){
+            StatusStore.sendAjax();
+        }, 5000);
+    }
 });
 
 module.exports = StatusApp;

@@ -2,7 +2,7 @@ var AppDispatcher = require('../dispatcher/AppDispatcher');
 var UserConstants= require('../constants/UserConstants');
 
 var UserActions = {
-    Authenticate: function(info){
+    Auth: function(info){
         AppDispatcher.dispatch({
                 actionType: UserConstants.AUTH,
                 info: info

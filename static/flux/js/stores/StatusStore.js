@@ -15,28 +15,30 @@ function setClientInfo(info){
     _clientInfo.login = info.login;
     _clientInfo.groups = info.groups;
     _clientInfo.hash = info.hash;
+    _clientInfo.uid = info.uid;
 }
 
 var UserStore = assign({}, EventEmitter.prototype, {
     auth: function(){
-                var xhr = new XMLHttpRequest();
-                xhr.open('POST', encodeURI("http://localhost:8080/signup"));
-                xhr.setRequestHeader('Content-Type', 'application/json');
-                xhr.onload = function() {
-                        if (xhr.status === 200 ) {
-                             _token = xhr.responseText;
-                            UserStore.emitChange();
-                        }
-                        else if (xhr.status !== 200) {
-                            UserStore.emitChange();
-                            return _token;
-                        }
-                };
-                xhr.send(JSON.stringify({
-                                user: _clientInfo.login,
-                                hash: _clientInfo.hash
-                        })
-                );
+        var xhr = new XMLHttpRequest();
+        xhr.open('POST', encodeURI("http://localhost:8080/signup"));
+        xhr.setRequestHeader('Content-Type', 'application/json');
+        xhr.onload = function() {
+                if (xhr.status === 200 ) {
+                     _token = xhr.responseText;
+                    UserStore.emitChange();
+                }
+                else if (xhr.status !== 200) {
+                    UserStore.emitChange();
+                    return _token;
+                }
+        };
+        xhr.send(JSON.stringify({
+                        user: _clientInfo.login,
+                        hash: _clientInfo.hash,
+                        uid: _clientInfo.uid
+                })
+        );
     },
     emitChange: function(){
             this.emit(CHANGE_EVENT);
@@ -78,7 +80,7 @@ var StatusStore = assign({}, EventEmitter.prototype, {
                         selectedFleetJs: _clientInfo.fleet,
                         user: _clientInfo.login,
                         groups: _clientInfo.groups,
-                        token: _clientInfo.hash,
+                        token: _token,
                         })
                 );
         },
