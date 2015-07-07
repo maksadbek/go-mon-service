@@ -29,11 +29,11 @@ func (g *Groups) Put(id string, group Group) {
 }
 
 func (g *Groups) Get(id string) (Group, error) {
-	g.RLock()
+	g.Lock()
 	group, ok := g.Data[id]
 	if !ok {
 		return group, fmt.Errorf("group (id %s) not found", id)
 	}
-	g.RUnlock()
+	g.Unlock()
 	return group, nil
 }
