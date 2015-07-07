@@ -10,6 +10,7 @@ var CarStatus = React.createClass({
     },
     render: function(){
         var stat = this.props.stat;
+	/*
         var info =  "id: "+stat.id+ "\n"+
                     "latitude: "+stat.latitude+"\n"+
                     "longitude:"+ stat.longitude+ "\n"+
@@ -30,19 +31,16 @@ var CarStatus = React.createClass({
                     "customization:"+stat.customization+"\n"+
                     "additional:"+stat.additional+"\n"+
                     "action:"+stat.action+ ""+"\n";
+	*/
         // set speed
         var speed;
-        if(stat.ignition === 0 || stat.speed === 0){
-            console.log("speed", stat.ignition, stat.speed)
+        if(stat.ignition === 0 && stat.speed === 0){
             speed = <img src={"./images/parking.jpg"} />
         } else if(stat.speed >= 0 && stat.speed <= 5){
-            console.log("speed", stat.ignition, stat.speed)
             speed = <span style={{ color:"black" }}><b>{stat.speed}</b></span>
         } else if (stat.speed > 5 && stat.speed < 80) {
-            console.log("speed", stat.ignition, stat.speed)
             speed = <span style={{color:"blue"}}><b>{stat.speed}</b></span>;
         } else if (speed >= 80) {
-            console.log("speed", stat.ignition, stat.speed)
             speed = <span style={{color:"red"}}><b>{stat.speed}</b></span>;
         }
 
@@ -54,16 +52,12 @@ var CarStatus = React.createClass({
         var timeIndicator;
         
         if(rangeInMinutes >= 24) {
-            console.log(rangeInMinutes);
             timeIndicator = "./images/gsm-4.png";
-        }else if(rangeInMinutes > 60 && rangeInMinuts < 24){
-            console.log(rangeInMinutes);
+        }else if(rangeInMinutes > 60 && rangeInMinutes < 24){
             timeIndicator = "./images/gsm-1.png";
-        }else if(rangeInMinutes > 20 && rangeInMinuts <= 60){
-            console.log(rangeInMinutes);
+        }else if(rangeInMinutes > 20 && rangeInMinutes <= 60){
             timeIndicator = "./images/gsm-2.png";
-        }else if(rangeInMinutes >= 0 && rangeInMinuts <= 20){
-            console.log(rangeInMinutes);
+        }else if(rangeInMinutes >= 0 && rangeInMinutes <= 20){
             timeIndicator = "./images/gsm-3.png";
         }
 
@@ -86,36 +80,27 @@ var CarStatus = React.createClass({
         // set ignition indicator
         var ignIndicator;
         if (stat.fuel_val===0) {
-            console.log(stat.fuel_val);
             ignIndicator = "./images/key-off.png";
         } else if (stat.fuel_val > 0) {
-            console.log(stat.fuel_val);
             ignIndicator= "./images/key-on.png";
         } else {
-            console.log(stat.fuel_val);
             ignIndicator = "./images/key-no.png";
         }
-        if (stat.gsmsignal!='' && stat.gsmsignal !== '-1') {           
-            console.log(stat.fuel_val);
+        if (stat.gsmsignal !== '' && stat.gsmsignal !== '-1') {           
             ignIndicator = "./images/android.png";
         }
 
         // set fuel indicator
         var fuelIndicator;
         if (stat.fuel_val>=0 && stat.fuel_val<25) {
-            console.log(stat.fuel_val);
             fuelIndicator = "./images/fuel-0.png";
         } else if (stat.fuel_val >= 25 && stat.fuel_val < 50) {
-            console.log(stat.fuel_val);
             fuelIndicator = "./images/fuel-25.png";
-        } else if (fuel_val>=50 && fuel_val<75) {
-            console.log(stat.fuel_val);
+        } else if (stat.fuel_val>=50 && stat.fuel_val<75) {
             fuelIndicator = "./images/fuel-50.png";
-        } else if (fuel_val>=75 && fuel_val<95) {
-            console.log(stat.fuel_val);
+        } else if (stat.fuel_val>=75 && stat.fuel_val<95) {
             fuelIndicator = "./images/fuel-75.png";
         }else{
-            console.log(stat.fuel_val);
             fuelIndicator = "./images/fuel-100.png";
         }
 
@@ -138,7 +123,6 @@ var CarStatus = React.createClass({
                             <td style={{paddingRight:"9px"}}><img style={{marginTop:"3px"}} src={satIndicator} /></td>
                             <td style={{paddingRight:"11px"}}><img style={{marginTop:"5px"}} src={ignIndicator} /></td>
                             <td style={{paddingRight:"12px"}}><img style={{marginTop:"9px"}} src={fuelIndicator} /></td>
-                            <td style={{paddingRight:"8px"}}><img style={{marginTop:"6px"}} src={"./images/default/exit.png"} /></td>
                           </tr>
                         </table>
                       </div>

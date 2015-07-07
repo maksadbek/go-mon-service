@@ -17,7 +17,6 @@ var Sidebar = React.createClass({
         var statuses = [];
         var stat = this.props.stats;
         var group = this.props.groupName;
-        console.log(stat);
         stat.forEach(function(k){
             statuses.push(<Status key={k.id} stat={k} />);
         })
@@ -44,7 +43,6 @@ var Sidebar = React.createClass({
         }
     },
     componentDidMount: function(){
-        console.log(this.props.stats);
     }
 });
 

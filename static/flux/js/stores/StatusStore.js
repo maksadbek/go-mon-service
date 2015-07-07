@@ -25,7 +25,6 @@ var UserStore = assign({}, EventEmitter.prototype, {
                 xhr.onload = function() {
                         if (xhr.status === 200 ) {
                              _token = xhr.responseText;
-                            console.log(_token);
                             UserStore.emitChange();
                         }
                         else if (xhr.status !== 200) {
@@ -49,7 +48,6 @@ var UserStore = assign({}, EventEmitter.prototype, {
             this.removeListener(CHANGE_EVENT, callback);
     },
     dispatcherIndex: AppDispatcher.register(function(action){
-            console.log(action)
             switch(action.actionType){
                 case UserConstants.AUTH:
                     setClientInfo(action.info);
@@ -69,7 +67,6 @@ var StatusStore = assign({}, EventEmitter.prototype, {
                         if (xhr.status === 200 ) {
                             // parse by groups
                             _carStatus = JSON.parse(xhr.responseText);
-                            console.log(_carStatus);
                             StatusStore.emitChange();
                         }
                         else if (xhr.status !== 200) {
@@ -78,10 +75,10 @@ var StatusStore = assign({}, EventEmitter.prototype, {
                         }
                 };
                 xhr.send(JSON.stringify({
-                        selectedFleetJs: "202",
-                        user: "newmax",
-                        groups: "1,2,3",
-                        token: "16ZBWgH76FOliQCqZuVzazOoDK+w09ior49LnN4aXsA="
+                        selectedFleetJs: _clientInfo.fleet,
+                        user: _clientInfo.login,
+                        groups: _clientInfo.groups,
+                        token: _clientInfo.hash,
                         })
                 );
         },
