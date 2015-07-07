@@ -50,19 +50,25 @@ var CarStatus = React.createClass({
         var delta = Math.abs(now - time) / 1000;
         var rangeInMinutes = Math.floor(delta / 60)
         var timeIndicator;
+	var timeMsg = ""
         
-        if(rangeInMinutes >= 24) {
+        if(rangeInMinutes >= 24*60) {
+	    timeMsg = "Позиция определена 1 дней назад" 
             timeIndicator = "./images/gsm-4.png";
-        }else if(rangeInMinutes > 60 && rangeInMinutes < 24){
+        }else if(rangeInMinutes > 60 && rangeInMinutes < 24*60){
+	    timeMsg = "Позиция определена" + (rangeInMinutes / 60) + " час  назад" 
             timeIndicator = "./images/gsm-1.png";
         }else if(rangeInMinutes > 20 && rangeInMinutes <= 60){
+	    timeMsg = "Позиция определена 1 час  назад" 
             timeIndicator = "./images/gsm-2.png";
         }else if(rangeInMinutes >= 0 && rangeInMinutes <= 20){
+	    timeMsg = "Позиция определена 20 минут  назад" 
             timeIndicator = "./images/gsm-3.png";
         }
 
         // set satellite indicator
         var satIndicator;
+	var satTitle = "количество спутников" + stat.sat
         if (stat.sat==6767) {
                 satIndicator = "/minus-shield.png";
         } else {
@@ -79,19 +85,25 @@ var CarStatus = React.createClass({
 
         // set ignition indicator
         var ignIndicator;
+	var ignTitle = "";
         if (stat.fuel_val===0) {
             ignIndicator = "./images/key-off.png";
+	    ignTitle = "зажигания обьекта отключена";
         } else if (stat.fuel_val > 0) {
             ignIndicator= "./images/key-on.png";
+	    ignTitle = "зажигания обьекта включена";
         } else {
             ignIndicator = "./images/key-no.png";
         }
+	/*
         if (stat.gsmsignal !== '' && stat.gsmsignal !== '-1') {           
             ignIndicator = "./images/android.png";
         }
+	*/
 
         // set fuel indicator
         var fuelIndicator;
+	var fuelTitle = "Объем топлива" + stat.fuel_val + "  литр"
         if (stat.fuel_val>=0 && stat.fuel_val<25) {
             fuelIndicator = "./images/fuel-0.png";
         } else if (stat.fuel_val >= 25 && stat.fuel_val < 50) {
@@ -119,10 +131,10 @@ var CarStatus = React.createClass({
                         <table>
                           <tr>
                             <td>{speed}</td>
-                            <td style={{paddingRight:"11px"}}><img style={{marginTop:"6px"}} src={timeIndicator} /></td>
-                            <td style={{paddingRight:"9px"}}><img style={{marginTop:"3px"}} src={satIndicator} /></td>
-                            <td style={{paddingRight:"11px"}}><img style={{marginTop:"5px"}} src={ignIndicator} /></td>
-                            <td style={{paddingRight:"12px"}}><img style={{marginTop:"9px"}} src={fuelIndicator} /></td>
+                            <td style={{paddingRight:"11px"}}><img title={timeMsg} style={{marginTop:"6px"}} src={timeIndicator} /></td>
+                            <td style={{paddingRight:"9px"}}><img title={satTitle} style={{marginTop:"3px"}} src={satIndicator} /></td>
+                            <td style={{paddingRight:"11px"}}><img title={ignTitle} style={{marginTop:"5px"}} src={ignIndicator} /></td>
+                            <td style={{paddingRight:"12px"}}><img title={fuelTitle} style={{marginTop:"9px"}} src={fuelIndicator} /></td>
                           </tr>
                         </table>
                       </div>
