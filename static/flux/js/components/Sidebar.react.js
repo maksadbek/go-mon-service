@@ -9,9 +9,7 @@ var Sidebar = React.createClass({
         groupName: React.PropTypes.string.isRequired
     },
     getInitialState: function(){
-        return {
-                style: ""
-                }
+        return { style: "" }
     },
     render: function(){
         var statuses = [];

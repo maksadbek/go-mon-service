@@ -27,11 +27,11 @@ var StatusApp = React.createClass({
 
     componentWillMount: function(){
         UserActions.Auth({
-            login: "",
-            uid: "",
-            hash: "",
-            fleet: "",
-            groups: ""
+            login: "zmkm",
+            uid: "zmkm",
+            hash: "21b95a0f90138767b0fd324e6be3457b",
+            fleet: "603",
+            groups: "1,2,3"
         });
     },
     componentWillUnmount: function(){

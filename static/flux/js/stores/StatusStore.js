@@ -9,6 +9,7 @@ var CHANGE_EVENT = 'change';
 var _carStatus = {};
 var _clientInfo = {};
 var _token = "";
+var _markersOnMap = {};
 
 function setClientInfo(info){
     _clientInfo.fleet = info.fleet;
@@ -101,6 +102,14 @@ var StatusStore = assign({}, EventEmitter.prototype, {
                     case StatusConstants.SetClientInfo:
                         SetClientInfo(action.info);
                         StatusStore.emitChange();
+                        break;
+                    case StatusConstants.AddMarker:
+                        // the structure of info must be:
+                        // { id: "1234", pos: { lat: "123", lng:...}}
+                        _markersOnMap[action.info.id] = action.info.pos;
+                        break;
+                    case StatusConstants.DelMarker:
+                        delete _markersOnMap[action.info.id];
                         break;
                 }
                 return true;

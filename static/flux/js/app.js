@@ -3,5 +3,5 @@ var StatusApp = require('./components/StatusApp.react');
 
 React.render(
         <StatusApp/>,
-        document.getElementById('statusapp')
+        document.getElementById('ext-gen91')
 );
