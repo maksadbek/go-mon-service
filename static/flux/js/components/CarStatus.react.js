@@ -19,8 +19,16 @@ var CarStatus = React.createClass({
             StatusActions.AddMarkerToMap({
                 id: this.props.stat.id,
                 pos: {
-                    lat: this.props.stat.latitude,
-                    lng: this.props.stat.longitude
+                    id: this.props.stat.id,
+                    latitude: this.props.stat.latitude,
+                    longitude: this.props.stat.longitude,
+                    direction: this.props.stat.direction,
+                    speed: this.props.stat.speed,
+                    sat: this.props.stat.sat,
+                    owner: this.props.stat.owner,
+                    formatted_time: this.props.stat.time,
+                    addparams: this.props.stat.additional,
+                    action: '2'
                 }
             });
         }
@@ -30,7 +38,7 @@ var CarStatus = React.createClass({
         // set speed
         var speed;
         if(stat.ignition === 0 && stat.speed === 0){
-            speed = <img src={"http://localhost:8080/flux/images/parking.jpg"} />
+            speed = <img src={"http://"+go_mon_site+"/i/monitoring/parking-monitor.jpg"} />
         } else if(stat.speed >= 0 && stat.speed <= 5){
             speed = <span style={{ color:"black" }}><b>{stat.speed}</b></span>
         } else if (stat.speed > 5 && stat.speed < 80) {
@@ -45,36 +53,36 @@ var CarStatus = React.createClass({
         var delta = Math.abs(now - time) / 1000;
         var rangeInMinutes = Math.floor(delta / 60)
         var timeIndicator;
-	var timeMsg = ""
+        var timeMsg = "";
         
         if(rangeInMinutes >= 24*60) {
-	    timeMsg = "Позиция определена 1 дней назад" 
-            timeIndicator = "http://localhost:8080/flux/images/gsm-4.png";
+        timeMsg = "Позиция определена 1 дней назад" 
+            timeIndicator = "http://"+go_mon_site+"/i/monitoring/gsm-4.png";
         }else if(rangeInMinutes > 60 && rangeInMinutes < 24*60){
-	    timeMsg = "Позиция определена" + (rangeInMinutes / 60) + " час  назад" 
-            timeIndicator = "http://localhost:8080/flux/images/gsm-1.png";
+        timeMsg = "Позиция определена" + (rangeInMinutes / 60) + " час  назад" 
+            timeIndicator = "http://"+go_mon_site+"/i/monitoring/gsm-1.png";
         }else if(rangeInMinutes > 20 && rangeInMinutes <= 60){
-	    timeMsg = "Позиция определена 1 час  назад" 
-            timeIndicator = "http://localhost:8080/flux/images/gsm-2.png";
+        timeMsg = "Позиция определена 1 час  назад" 
+            timeIndicator = "http://"+go_mon_site+"/i/monitoring/gsm-2.png";
         }else if(rangeInMinutes >= 0 && rangeInMinutes <= 20){
-	    timeMsg = "Позиция определена 20 минут  назад" 
-            timeIndicator = "http://localhost:8080/flux/images/gsm-3.png";
+        timeMsg = "Позиция определена 20 минут  назад" 
+            timeIndicator = "http://"+go_mon_site+"/i/monitoring/gsm-3.png";
         }
 
         // set satellite indicator
         var satIndicator;
-	var satTitle = "количество спутников" + stat.sat
+        var satTitle = "количество спутников" + stat.sat
         if (stat.sat==6767) {
-                satIndicator = "http://localhost:8080/flux/minus-shield.png";
+                satIndicator = "http://"+go_mon_site+"/i/monitoring/shield.png";
         } else {
                 if (stat.sat >= 0 && stat.sat <=2) {
-                    satIndicator = "http://localhost:8080/flux/images/sat-1.png";
+                    satIndicator = "http://"+go_mon_site+"/i/monitoring/sat-1.png";
                 } else if (stat.sat >=3 && stat.sat <=4) {
-                    satIndicator = "http://localhost:8080/flux./images/sat-2.png";
+                    satIndicator = "http://"+go_mon_site+"/i/monitoring/sat-2.png";
                 } else if (stat.sat >=5 && stat.sat <=6) {
-                    satIndicator = "http://localhost:8080/flux./images/sat-4.png";
+                    satIndicator = "http://"+go_mon_site+"/i/monitoring/sat-4.png";
                 } else {
-                    satIndicator = "http://localhost:8080/flux./images/sat-3.png";
+                    satIndicator = "http://"+go_mon_site+"/i/monitoring/sat-3.png";
                 }
         }
 
@@ -82,28 +90,28 @@ var CarStatus = React.createClass({
         var ignIndicator;
         var ignTitle = "";
         if (stat.fuel_val===0) {
-            ignIndicator = "http://localhost:8080/flux/images/key-off.png";
-	    ignTitle = "зажигания обьекта отключена";
+            ignIndicator = "http://"+go_mon_site+"/i/monitoring/key-off.png";
+        ignTitle = "зажигания обьекта отключена";
         } else if (stat.fuel_val > 0) {
-            ignIndicator= "http://localhost:8080/flux/images/key-on.png";
-	    ignTitle = "зажигания обьекта включена";
+            ignIndicator= "http://"+go_mon_site+"/i/monitoring/key-on.png";
+        ignTitle = "зажигания обьекта включена";
         } else {
-            ignIndicator = "http://localhost:8080/flux/images/key-no.png";
+            ignIndicator = "http://"+go_mon_site+"/i/monitoring/key-no.png";
         }
 
         // set fuel indicator
         var fuelIndicator;
         var fuelTitle = "Объем топлива" + stat.fuel_val + "  литр"
         if (stat.fuel_val>=0 && stat.fuel_val<25) {
-            fuelIndicator = "http://localhost:8080/flux/images/fuel-0.png";
+            fuelIndicator = "http://"+go_mon_site+"/i/monitoring/fuel-0.png";
         } else if (stat.fuel_val >= 25 && stat.fuel_val < 50) {
-            fuelIndicator = "http://localhost:8080/flux/images/fuel-25.png";
+            fuelIndicator = "http://"+go_mon_site+"/i/monitoring/fuel-25.png";
         } else if (stat.fuel_val>=50 && stat.fuel_val<75) {
-            fuelIndicator = "http://localhost:8080/flux/images/fuel-50.png";
+            fuelIndicator = "http://"+go_mon_site+"/i/monitoring/fuel-50.png";
         } else if (stat.fuel_val>=75 && stat.fuel_val<95) {
-            fuelIndicator = "http://localhost:8080/flux/images/fuel-75.png";
+            fuelIndicator = "http://"+go_mon_site+"/i/monitoring/fuel-75.png";
         }else{
-            fuelIndicator = "http://localhost:8080/flux/images/fuel-100.png";
+            fuelIndicator = "http://"+go_mon_site+"/i/monitoring/fuel-100.png";
         }
 
         

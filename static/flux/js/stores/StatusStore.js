@@ -22,7 +22,7 @@ function setClientInfo(info){
 var UserStore = assign({}, EventEmitter.prototype, {
     auth: function(){
         var xhr = new XMLHttpRequest();
-        xhr.open('POST', encodeURI("http://localhost:8080/signup"));
+        xhr.open('POST', encodeURI("http://"+go_mon_host+":8080/signup"));
         xhr.setRequestHeader('Content-Type', 'application/json');
         xhr.onload = function() {
                 if (xhr.status === 200 ) {
@@ -64,18 +64,22 @@ var UserStore = assign({}, EventEmitter.prototype, {
 var StatusStore = assign({}, EventEmitter.prototype, {
         sendAjax: function(){
                 var xhr = new XMLHttpRequest();
-                xhr.open('POST', encodeURI("http://localhost:8080/positions"));
+                xhr.open('POST', encodeURI("http://"+go_mon_host+":8080/positions"));
                 xhr.setRequestHeader('Content-Type', 'application/json');
                 xhr.onload = function() {
                         if (xhr.status === 200 ) {
                             // parse by groups
                             _carStatus = JSON.parse(xhr.responseText);
                             StatusStore.emitChange();
+                            for(var i in _markersOnMap){
+                                _markersOnMap[i].action = 1;
+                            }
                         }
                         else if (xhr.status !== 200) {
                             StatusStore.emitChange();
                             return _carStatus;
                         }
+                        mon.obj_array(_markersOnMap, true);
                 };
                 xhr.send(JSON.stringify({
                         selectedFleetJs: _clientInfo.fleet,
@@ -107,9 +111,11 @@ var StatusStore = assign({}, EventEmitter.prototype, {
                         // the structure of info must be:
                         // { id: "1234", pos: { lat: "123", lng:...}}
                         _markersOnMap[action.info.id] = action.info.pos;
+                        mon.obj_array(_markersOnMap, true);
                         break;
                     case StatusConstants.DelMarker:
-                        delete _markersOnMap[action.info.id];
+                        _markersOnMap[action.info.id].action = '-1';
+                        mon.obj_array(_markersOnMap, true);
                         break;
                 }
                 return true;

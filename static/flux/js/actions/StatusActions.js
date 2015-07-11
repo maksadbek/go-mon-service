@@ -16,7 +16,7 @@ var StatusActions = {
     },
     DelMarkerFromMap: function(info){
         AppDispatcher.dispatch({
-                actionType: StatusConstants.AddMarker,
+                actionType: StatusConstants.DelMarker,
                 info: info
         });
     }
