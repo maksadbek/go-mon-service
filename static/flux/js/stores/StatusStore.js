@@ -62,24 +62,35 @@ var UserStore = assign({}, EventEmitter.prototype, {
 });
 
 var StatusStore = assign({}, EventEmitter.prototype, {
+        updateMarker: function(info){
+            if(_markersOnMap[info.id] !== undefined){
+                _markersOnMap[info.id].latitude= info.latitude;
+                _markersOnMap[info.id].longitude= info.longitude;
+                _markersOnMap[info.id].direction= info.direction;
+                _markersOnMap[info.id].speed= info.speed;
+                _markersOnMap[info.id].sat= info.sat;
+                _markersOnMap[info.id].owner= info.owner;
+                _markersOnMap[info.id].formatted_time= info.time;
+                _markersOnMap[info.id].addparams= info.additional;
+                _markersOnMap[info.id].action= '1';
+            }
+        },
+        redrawMap: function(){
+            mon.obj_array(_markersOnMap, true);
+        },
         sendAjax: function(){
                 var xhr = new XMLHttpRequest();
                 xhr.open('POST', encodeURI("http://"+go_mon_host+":8080/positions"));
                 xhr.setRequestHeader('Content-Type', 'application/json');
                 xhr.onload = function() {
                         if (xhr.status === 200 ) {
-                            // parse by groups
                             _carStatus = JSON.parse(xhr.responseText);
                             StatusStore.emitChange();
-                            for(var i in _markersOnMap){
-                                _markersOnMap[i].action = 1;
-                            }
                         }
                         else if (xhr.status !== 200) {
                             StatusStore.emitChange();
                             return _carStatus;
                         }
-                        mon.obj_array(_markersOnMap, true);
                 };
                 xhr.send(JSON.stringify({
                         selectedFleetJs: _clientInfo.fleet,

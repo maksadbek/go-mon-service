@@ -1,5 +1,6 @@
 var React = require('react');
 var StatusActions = require('../actions/StatusActions');
+var StatusStore = require('../stores/StatusStore').StatusStore;
 
 var CarStatus = React.createClass({
     propTypes:{
@@ -35,6 +36,9 @@ var CarStatus = React.createClass({
     },
     render: function(){
         var stat = this.props.stat;
+        StatusStore.updateMarker(stat);
+        StatusStore.redrawMap();
+
         // set speed
         var speed;
         if(stat.ignition === 0 && stat.speed === 0){
@@ -50,7 +54,7 @@ var CarStatus = React.createClass({
         // set time
         var time = new Date(stat.time);
         var now = new Date(Date.now());
-        var delta = Math.abs(now - time) / 1000;
+        var delta = Math.abs(now - time) / 1000000;
         var rangeInMinutes = Math.floor(delta / 60)
         var timeIndicator;
         var timeMsg = "";
