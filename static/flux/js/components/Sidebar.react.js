@@ -1,8 +1,8 @@
 var React = require('react');
 var CarActions = require('../actions/StatusActions');
 var Status = require('./CarStatus.react');
+var StatusStore = require('../stores/StatusStore').StatusStore;
 
-var markers = [];
 var Sidebar = React.createClass({
     propTypes:{
         stats: React.PropTypes.array.isRequired,
@@ -18,7 +18,6 @@ var Sidebar = React.createClass({
         stat.forEach(function(k){
             statuses.push(<Status key={k.id} stat={k} />);
         })
-        
         return (
             <div className={"body_monitoring"}>
                 <div className={"show_panel " + this.state.style} onClick={this._onClickHandler} id={"panel_1"}> 
