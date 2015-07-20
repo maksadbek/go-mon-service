@@ -9,20 +9,23 @@ var Sidebar = React.createClass({
         groupName: React.PropTypes.string.isRequired
     },
     getInitialState: function(){
-        return { style: "" }
+        return { style: "", isChildChecked: false}
     },
     render: function(){
         var statuses = [];
         var stat = this.props.stats;
         var group = this.props.groupName;
+        var checked = this.state.isChildChecked;
         stat.forEach(function(k){
-            statuses.push(<Status key={k.id} stat={k} />);
+            statuses.push(<Status key={k.id} stat={k} isChecked={checked} />);
         })
         return (
             <div className={"body_monitoring"}>
                 <div className={"show_panel " + this.state.style} onClick={this._onClickHandler} id={"panel_1"}> 
                     <form>
-                        <label className="check_bock"><input type="checkbox" name="checkAll" />{group}</label> 
+                        <label className="check_bock">
+                            <input onChange={this._onCheckHandler} type="checkbox" name="checkAll" />{group}
+                        </label> 
                     </form>
                 </div>
                 <div id="hide_panel" className={"hide_panel " + this.state.style} > 
@@ -38,6 +41,9 @@ var Sidebar = React.createClass({
         }else {
             this.setState({style: ""});
         }
+    },
+    _onCheckHandler: function(event){
+        this.setState({isChildChecked: event.target.checked});
     },
     componentDidMount: function(){
     }

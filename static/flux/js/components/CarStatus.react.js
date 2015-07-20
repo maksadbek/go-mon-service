@@ -4,35 +4,59 @@ var StatusStore = require('../stores/StatusStore').StatusStore;
 
 var CarStatus = React.createClass({
     propTypes:{
-        stat: React.PropTypes.object.isRequired
+        stat: React.PropTypes.object.isRequired,
+        isChecked: React.PropTypes.bool
+
     },
     getInitialState: function(){
-        return { isChecked: false }
+        return { isChecked: this.props.isChecked }
+    },
+    _addMarker: function(){
+        StatusActions.AddMarkerToMap({
+            id: this.props.stat.id,
+            pos: {
+                id: this.props.stat.id,
+                latitude: this.props.stat.latitude,
+                longitude: this.props.stat.longitude,
+                direction: this.props.stat.direction,
+                speed: this.props.stat.speed,
+                sat: this.props.stat.sat,
+                owner: this.props.stat.owner,
+                formatted_time: this.props.stat.time,
+                addparams: this.props.stat.additional,
+                car_name: this.props.stat.number,
+                action: '2'
+            }
+        });
+    },
+    _delMarker: function(){
+        StatusActions.DelMarkerFromMap({
+            id: this.props.stat.id
+        });
+    },
+    componentWillReceiveProps: function(nextProps) {
+        if(nextProps.isChecked === this.props.isChecked){
+            return;
+        }
+        this.setState({ isChecked: nextProps.isChecked});
+        if(nextProps.isChecked){
+            this._addMarker();
+        }else{
+            this._delMarker();
+        }
     },
     _onTick: function(event){
         if(this.state.isChecked){
             this.setState({isChecked : false});
-            StatusActions.DelMarkerFromMap({
-                id: this.props.stat.id
-            });
+            this._delMarker();
         } else {
             this.setState({isChecked : true});
-            StatusActions.AddMarkerToMap({
-                id: this.props.stat.id,
-                pos: {
-                    id: this.props.stat.id,
-                    latitude: this.props.stat.latitude,
-                    longitude: this.props.stat.longitude,
-                    direction: this.props.stat.direction,
-                    speed: this.props.stat.speed,
-                    sat: this.props.stat.sat,
-                    owner: this.props.stat.owner,
-                    formatted_time: this.props.stat.time,
-                    addparams: this.props.stat.additional,
-                    action: '2'
-                }
-            });
+            this._addMarker();
         }
+    },
+    _onTitleClick: function(){
+        // on click to the title, center the marker on the map
+        mon.setCenterObj(this.props.stat.id);
     },
     render: function(){
         var stat = this.props.stat;
@@ -127,7 +151,7 @@ var CarStatus = React.createClass({
                         <label className="check_bock">
                             <input onChange={this._onTick} value={stat.id} checked={this.state.isChecked} type="checkbox" name="checkAll" />
                         </label> 
-                        <span id="title_moni">{stat.number}</span>
+                        <span onClick={this._onTitleClick} id="title_moni">{stat.number}</span>
                     </td>
                     <td>
                       <div className="button_monitoring">
