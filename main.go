@@ -13,6 +13,7 @@ import (
 	"os/exec"
 	"os/signal"
 	"runtime"
+	"runtime/pprof"
 	"strconv"
 	"strings"
 	"syscall"
@@ -210,6 +211,12 @@ func main() {
 	if err != nil {
 		log.Log.Error(err)
 	}
+	// profile
+	prof, err := os.Create("profiling.pprof")
+	if err != nil {
+		log.Log.Error(err)
+	}
+	pprof.StartCPUProfile(prof)
 	<-stop
 }
 
@@ -329,13 +336,14 @@ func resd() {
 }
 
 func worker(app conf.App) {
-	var err error
+
 	c := cors.New(cors.Options{
 		AllowedOrigins:   []string{"*"},
 		AllowCredentials: true,
 		AllowedHeaders:   []string{"content-type", "x-requested-with"},
 		AllowedMethods:   []string{"post"},
 	})
+	var err error
 	server.Listener, err = net.Listen("tcp", app.SRV.Port)
 	if err != nil {
 		log.Log.Error(err)
@@ -343,6 +351,7 @@ func worker(app conf.App) {
 	handler := c.Handler(webHandlers())
 	serve := &http.Server{Handler: GzipHandler(handler)}
 	serve.Serve(server.Listener)
+	pprof.StopCPUProfile()
 }
 
 func webHandlers() http.Handler {

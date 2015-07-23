@@ -21,12 +21,13 @@ var Sidebar = React.createClass({
         })
         return (
             <div className={"body_monitoring"}>
-                <div className={"show_panel " + this.state.style} onClick={this._onClickHandler} id={"panel_1"}> 
+                <div className={"show_panel "+ this.state.style}> 
                     <form>
                         <label className="check_bock">
-                            <input onChange={this._onCheckHandler} type="checkbox" name="checkAll" />{group}
+                            <input onChange={this._onCheckHandler} type="checkbox" name="checkAll" />
                         </label> 
                     </form>
+                    <div id={"panel_1" } onClick={this._onClickHandler} >{group}</div>
                 </div>
                 <div id="hide_panel" className={"hide_panel " + this.state.style} > 
                     {statuses} 

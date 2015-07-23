@@ -123,10 +123,16 @@ var StatusStore = assign({}, EventEmitter.prototype, {
                         // { id: "1234", pos: { lat: "123", lng:...}}
                         _markersOnMap[action.info.id] = action.info.pos;
                         mon.obj_array(_markersOnMap, true);
+                        my_sm.push(action.info.id);
                         break;
                     case StatusConstants.DelMarker:
                         _markersOnMap[action.info.id].action = '-1';
                         mon.obj_array(_markersOnMap, true);
+                        for(var i in my_sm){
+                            if(my_sm[i] == action.info.id){
+                                my_sm.pop(i);
+                            }
+                        }
                         break;
                 }
                 return true;

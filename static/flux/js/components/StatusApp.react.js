@@ -45,8 +45,46 @@ var StatusApp = React.createClass({
         for(var i in update){
             content.push(<Sidebar key={i} groupName={i} stats={update[i]}/>)
         }
-        return (<div className={"body_mon"}>
-                    {content}
+        return (<div>   
+                    <div id={"west_side"}>
+                        <div className={"bottom_side"}>
+                            <table>
+                                <tr>
+                                    <td>
+                                        <button id={"sort_button"}>Автомобиль</button>
+                                    </td>
+                                    <td>
+                                        <div className={"button_monitoring"}>
+                                            <button style={{"width":"28px", "margin-right":"0px"}}>
+                                                <img title="Скорость" src={"http://online.maxtrack.uz/i/monitoring/speed-header.png"}/> 
+                                            </button>
+                                            <button style={{"width":"33px", "margin-right":"0px"}}>
+                                                <img src={"http://online.maxtrack.uz/i/monitoring/gsm-header.png"}/> 
+                                            </button>
+                                            <button style={{"width":"34px", "margin-right":"-6"}}>
+                                                <img    title={"Актуальность позиции во времени и пространстве"} 
+                                                        src={"http://online.maxtrack.uz/i/monitoring/sat-header.png"}
+                                                /> 
+                                            </button>
+                                            <button style={{"width":"26px", "margin-right":"-4"}}>
+                                                <img title={"Статус зажигании объекта"} 
+                                                     src={"http://online.maxtrack.uz/i/monitoring/key-solid.png"}
+                                                /> 
+                                            </button>
+                                            <button style={{"width":"25px", "margin-right":"25px"}}>
+                                                <img title={"Уровень топлива"} 
+                                                     src={"http://online.maxtrack.uz/i/monitoring/fuel-header-tr.png"} 
+                                                /> 
+                                            </button>
+                                        </div>
+                                    </td>
+                                </tr>
+                     		</table>
+                        </div>
+                    </div>
+                    <div className={"body_mon"}>
+                        {content}
+                    </div>
                 </div>)
     },
     _onChange: function(){

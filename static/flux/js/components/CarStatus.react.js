@@ -158,10 +158,10 @@ var CarStatus = React.createClass({
                         <table>
                           <tr>
                             <td>{speed}</td>
-                            <td style={{paddingRight:"11px"}}><img title={timeMsg} style={{marginTop:"6px"}} src={timeIndicator} /></td>
-                            <td style={{paddingRight:"9px"}}><img title={satTitle} style={{marginTop:"3px"}} src={satIndicator} /></td>
-                            <td style={{paddingRight:"11px"}}><img title={ignTitle} style={{marginTop:"5px"}} src={ignIndicator} /></td>
-                            <td style={{paddingRight:"12px"}}><img title={fuelTitle} style={{marginTop:"9px"}} src={fuelIndicator} /></td>
+                            <td style={{paddingRight:"11px"}}><img title={timeMsg}  src={timeIndicator} /></td>
+                            <td style={{paddingRight:"9px"}}><img title={satTitle}  src={satIndicator} /></td>
+                            <td style={{paddingRight:"11px"}}><img title={ignTitle}  src={ignIndicator} /></td>
+                            <td style={{paddingRight:"12px"}}><img title={fuelTitle} src={fuelIndicator} /></td>
                           </tr>
                         </table>
                       </div>
