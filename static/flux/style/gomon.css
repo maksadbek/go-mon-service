@@ -1,0 +1,97 @@
+.bottom_side {
+    background: #f9f9f9 url("../../ext-images/default/grid/grid3-hrow.gif") repeat scroll 0 0;
+    height: 24px;
+}
+.hide_panel .bottom_side table tr td:first-child {
+ /* overflow: hidden; */
+ padding-left: 0;
+ vertical-align: top;
+}
+.hide_panel .bottom_side {
+ background: rgba(0, 0, 0, 0) none repeat scroll 0 0;
+ border-bottom: 1px solid #dfdfdf;
+ height: 30px;
+}
+.hide_panel .bottom_side:nth-child(2n) {
+ background: #fafafa none repeat scroll 0 0;
+}
+.bottom_side table tr td:first-child {
+    padding-left: 8px;
+}
+.top_side table, .bottom_side table tr td {
+    white-space: nowrap;
+    vertical-align: top;
+    height: -20px;
+}
+.bottom_side table button{
+    background: none;
+    border:none;
+    height:24px;
+    position: relative;
+    top: -2px;
+    border-right: 1px solid #d0d0d0;
+    vertical-align: top;
+    cursor: pointer;
+}
+.bottom_side table tr td .button_monitoring {
+    float: right;
+}
+.body_monitoring .show_panel{
+    border-bottom:2px solid #99bbe8;
+    padding:10px 4px 4px 20px;
+    color:#3764a0;
+    cursor: pointer;
+    font:bold 11px tahoma,arial,helvetica,sans-serif;
+    background:url("../../ext-images/default/grid/group-expand.gif") no-repeat 5px 9px;
+}
+.body_monitoring .show_panel.active{
+    background:url("../../ext-images/default/grid/group-collapse.gif") no-repeat 5px 9px;
+}
+.show_panel form {
+    float: left;
+}
+.check_bock {
+    position: relative;
+}
+.check_bock input[type="checkbox"] {
+    margin-right: 5px;
+}
+.body_monitoring .show_panel {
+    color: #3764a0;
+    cursor: pointer;
+    font: bold 11px tahoma,arial,helvetica,sans-serif;
+}
+.bottom_side .check_bock input {
+    margin-left: 5px;
+    position: relative;
+    top: 4px;
+    /* height: 30px; */
+    margin-right: 9px;
+}
+.bottom_side .check_bock {
+    background: rgba(0, 0, 0, 0) url("../../ext-images/default/grid/grid3-special-col-bg.gif") repeat-y scroll 0 0;
+    /* padding-bottom: 10px; */
+    top: -6px;
+    height: 29px;
+    display: inline-block;
+}
+.hide_panel .bottom_side table #title_moni {
+    display: inline-block;
+    font: 11px arial,tahoma,helvetica,sans-serif;
+    overflow: hidden;
+    padding: 3px 10px 3px 5px;
+    width: 77px;
+}
+.top_side table, .bottom_side table {
+ width: 100%;
+}
+.body_monitoring .hide_panel {
+ display: none;
+}
+.body_monitoring .hide_panel.active {
+ display: block;
+}
+.body_mon {
+     height: 600px;
+      overflow: auto;
+  }
