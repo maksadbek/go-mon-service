@@ -1,4 +1,5 @@
 go-mon-service
+vegeta-test
 go-ws-daemon.pid
 gomon_log
 logs
@@ -10,3 +11,4 @@ static/flux/js/ext-all-debug.js
 static/flux/js/ext-base.js
 conf.toml
 static/flux/example.html
+static/flux/js/bundle.min.js
