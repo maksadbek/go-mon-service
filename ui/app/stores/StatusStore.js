@@ -22,7 +22,7 @@ function setClientInfo(info){
 var UserStore = assign({}, EventEmitter.prototype, {
     auth: function(){
         var xhr = new XMLHttpRequest();
-        xhr.open('POST', encodeURI("http://"+go_mon_host+":8080/signup"));
+        xhr.open('POST', encodeURI("http://localhost:8080/signup"));
         xhr.setRequestHeader('Content-Type', 'application/json');
         xhr.onload = function() {
                 if (xhr.status === 200 ) {
@@ -75,12 +75,9 @@ var StatusStore = assign({}, EventEmitter.prototype, {
                 _markersOnMap[info.id].action= '1';
             }
         },
-        redrawMap: function(){
-            mon.obj_array(_markersOnMap, true);
-        },
         sendAjax: function(){
                 var xhr = new XMLHttpRequest();
-                xhr.open('POST', encodeURI("http://"+go_mon_host+":8080/positions"));
+                xhr.open('POST', encodeURI("http://localhost:8080/positions"));
                 xhr.setRequestHeader('Content-Type', 'application/json');
                 xhr.onload = function() {
                         if (xhr.status === 200 ) {
@@ -89,7 +86,7 @@ var StatusStore = assign({}, EventEmitter.prototype, {
                         }
                         else if (xhr.status !== 200) {
                             StatusStore.emitChange();
-                            return _carStatus;
+                            return JSON.parse(_carStatus);
                         }
                 };
                 xhr.send(JSON.stringify({
@@ -122,17 +119,9 @@ var StatusStore = assign({}, EventEmitter.prototype, {
                         // the structure of info must be:
                         // { id: "1234", pos: { lat: "123", lng:...}}
                         _markersOnMap[action.info.id] = action.info.pos;
-                        mon.obj_array(_markersOnMap, true);
-                        my_sm.push(action.info.id);
                         break;
                     case StatusConstants.DelMarker:
                         _markersOnMap[action.info.id].action = '-1';
-                        mon.obj_array(_markersOnMap, true);
-                        for(var i in my_sm){
-                            if(my_sm[i] == action.info.id){
-                                my_sm.pop(i);
-                            }
-                        }
                         break;
                 }
                 return true;

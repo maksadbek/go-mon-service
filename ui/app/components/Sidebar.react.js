@@ -20,19 +20,17 @@ var Sidebar = React.createClass({
             statuses.push(<Status key={k.id} stat={k} isChecked={checked} />);
         })
         return (
-            <div className={"body_monitoring"}>
-                <div className={"show_panel "+ this.state.style}> 
-                    <form>
-                        <label className="check_bock">
-                            <input onChange={this._onCheckHandler} type="checkbox" name="checkAll" />
-                        </label> 
-                    </form>
-                    <div id={"panel_1" } onClick={this._onClickHandler} >{group}</div>
-                </div>
-                <div id="hide_panel" className={"hide_panel " + this.state.style} > 
-                    {statuses} 
-                </div>
-            </div>
+            <tbody>
+                <tr>
+                    <td className={"mdl-data-table__cell--non-numeric"}>Number</td>
+                    <td>Speed</td>
+                    <td>Satellites</td>
+                    <td>Was online</td>
+                    <td>Ignition</td>
+                    <td>Fuel</td>
+                </tr>
+                {statuses} 
+            </tbody>
         );
     },
 

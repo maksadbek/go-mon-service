@@ -1,0 +1,52 @@
+{
+  "name": "Wherepo",
+  "version": "0.0.3",
+  "description": "Wherepo ui",
+  "repository": "https://github.com/maksadbek/wherepo",
+  "main": "js/app.js",
+  "dependencies": {
+    "flux": "^2.0.1",
+    "keymirror": "~0.1.0",
+    "object-assign": "^1.0.0",
+    "react": "^0.13.0"
+  },
+  "devDependencies": {
+    "browserify": "~10.2.6",
+    "envify": "^3.0.0",
+    "gulp": "^3.9.0",
+    "gulp-inject": "^1.5.0",
+    "gulp-react": "^3.0.1",
+    "gulp-uglify": "^1.2.0",
+    "reactify": "^0.15.2",
+    "uglify-js": "~2.4.15",
+    "vinyl-source-stream": "^1.1.0",
+    "watchify": "~3.2.3"
+  },
+  "paths": {
+    "js": "./app/**/*.js",
+    "jsx": "./app/**/*.jsx",
+    "app": "./app/app.js",
+    "html": "*.html",
+    "materialcss": "../public/bower_components/material-design-lite/material.css",
+    "materialjs":"../public/bower_components/material-design-lite/material.js"
+  },
+  "dest": {
+    "path":"../public",
+    "app": "app.js",
+    "dist": "../public/javascripts/"
+  },
+  "scripts": {
+    "start": "browserify . -o js/bundle.js && uglify -s js/bundle.js -o js/bundle.min.js",
+    "build": "browserify . -o js/bundle.js"
+  },
+  "author": "Maksadbek Akxmedov",
+  "browserify": {
+    "transform": [
+      "reactify",
+      "envify"
+    ]
+  },
+  "jest": {
+    "rootDir": "./js"
+  }
+}
