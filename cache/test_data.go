@@ -1,4 +1,4 @@
-package rcache
+package cache
 
 var FleetTest = struct {
 	FleetName string

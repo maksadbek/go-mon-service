@@ -1,4 +1,4 @@
-package datastore
+package models
 
 import (
 	"database/sql"
@@ -7,9 +7,9 @@ import (
 	"strconv"
 	"strings"
 
-	"bitbucket.org/maksadbek/go-mon-service/conf"
-	log "bitbucket.org/maksadbek/go-mon-service/logger"
-	"bitbucket.org/maksadbek/go-mon-service/rcache"
+	"github.com/Maksadbek/wherepo/conf"
+	log "github.com/Maksadbek/wherepo/logger"
+	"github.com/Maksadbek/wherepo/cache"
 	"github.com/Sirupsen/logrus"
 	_ "github.com/go-sql-driver/mysql"
 	"github.com/kovetskiy/go-php-serialize"
@@ -23,38 +23,38 @@ var (
 func Initialize(c conf.App) error {
 	var err error
 	config = c
-	log.FuncLog("datastore.Initialize", "Initialization", nil, nil)
+	log.FuncLog("models.Initialize", "Initialization", nil, nil)
 	db, err = sql.Open("mysql", c.DS.Mysql.DSN)
 	if err != nil {
-		log.FuncLog("datastore.Initialize", "Initalization", nil, err)
+		log.FuncLog("models.Initialize", "Initalization", nil, err)
 		return err
 	}
 	err = LoadCalibres()
 	if err != nil {
-		log.FuncLog("datastore.Initialize", "Initalization", nil, err)
+		log.FuncLog("models.Initialize", "Initalization", nil, err)
 		return err
 	}
 	return nil
 }
 
-func GetTrackers() (map[int]rcache.Vehicle, error) {
+func GetTrackers() (map[int]cache.Vehicle, error) {
 	log.Log.WithFields(logrus.Fields{
-		"package": "datastore",
+		"package": "models",
 	}).Debug("GetTrackers")
-	var pos map[int]rcache.Vehicle = make(map[int]rcache.Vehicle)
+	var pos map[int]cache.Vehicle = make(map[int]cache.Vehicle)
 	query := queries["getTrackers"]
 	rows, err := db.Query(query)
 	defer rows.Close()
 	if err != nil {
 		log.Log.WithFields(logrus.Fields{
-			"package": "datastore",
+			"package": "models",
 			"Error":   err.Error(),
 		}).Warn("GetTrackers")
 		return pos, err
 	}
 	for rows.Next() {
 		var (
-			v          rcache.Vehicle
+			v          cache.Vehicle
 			paramId    sql.NullInt64
 			pid        sql.NullInt64
 			additional string
@@ -110,21 +110,21 @@ func GetTrackers() (map[int]rcache.Vehicle, error) {
 		pos[v.Id] = v
 	}
 	log.Log.WithFields(logrus.Fields{
-		"package": "datastore",
+		"package": "models",
 	}).Warn("GetTrackers")
 	return pos, err
 }
 
-func UsrTrackers(name string) (usr rcache.Usr, err error) {
+func UsrTrackers(name string) (usr cache.Usr, err error) {
 	var cars string
 	log.Log.WithFields(logrus.Fields{
-		"package": "datastore",
+		"package": "models",
 		"name":    name,
 	}).Debug("UsrTrackers")
 	err = db.QueryRow(queries["usrTrackers"], name).Scan(&usr.Login, &usr.Fleet, &cars)
 	if err != nil {
 		log.Log.WithFields(logrus.Fields{
-			"package": "datastore",
+			"package": "models",
 			"error":   err.Error(),
 		}).Warn("UsrTrackers")
 		return usr, err
@@ -133,7 +133,7 @@ func UsrTrackers(name string) (usr rcache.Usr, err error) {
 	if cars == "all" {
 		usr.Trackers = append(usr.Trackers, "0")
 		log.Log.WithFields(logrus.Fields{
-			"package": "datastore",
+			"package": "models",
 			"user":    usr,
 		}).Debug("UsrTrackers")
 		return usr, err
@@ -151,15 +151,15 @@ func UsrTrackers(name string) (usr rcache.Usr, err error) {
 	return
 }
 
-func CacheFleetTrackers() ([]rcache.FleetTracker, error) {
+func CacheFleetTrackers() ([]cache.FleetTracker, error) {
 	log.Log.WithFields(logrus.Fields{
-		"package": "datastore",
+		"package": "models",
 	}).Debug("CacheFleetTrackers")
-	var fleetTrackers []rcache.FleetTracker
+	var fleetTrackers []cache.FleetTracker
 	rows, err := db.Query(queries["fleetTrackers"])
 	if err != nil {
 		log.Log.WithFields(logrus.Fields{
-			"package": "datastore",
+			"package": "models",
 			"error":   err.Error(),
 		}).Warn("CacheFleetTrackers")
 		return fleetTrackers, err
@@ -167,7 +167,7 @@ func CacheFleetTrackers() ([]rcache.FleetTracker, error) {
 	defer rows.Close()
 	for rows.Next() {
 		var (
-			trackers rcache.FleetTracker
+			trackers cache.FleetTracker
 			t        string
 		)
 		rows.Scan(
@@ -184,7 +184,7 @@ func CheckUser(username, hash string) (exists bool) {
 	exists = false
 	rows, err := db.Query(queries["checkUser"], username, hash)
 	if err != nil {
-		log.FuncLog("datastore.CheckUser", "checking user", map[string]interface{}{"username": username, "hash": hash}, nil)
+		log.FuncLog("models.CheckUser", "checking user", map[string]interface{}{"username": username, "hash": hash}, nil)
 	}
 	defer rows.Close()
 
@@ -197,13 +197,13 @@ func CheckUser(username, hash string) (exists bool) {
 func LoadGroups() error {
 	log.Log.Debug("Loading groups...")
 	var (
-		group rcache.Group
+		group cache.Group
 		id    string
 	)
 	rows, err := db.Query(queries["trackerGroups"])
 	defer rows.Close()
 	if err != nil {
-		log.FuncLog("datastore.LoadGroups", "checking user", nil, err)
+		log.FuncLog("models.LoadGroups", "checking user", nil, err)
 		return err
 	}
 	for rows.Next() {
@@ -212,7 +212,7 @@ func LoadGroups() error {
 			&group.Name,
 			&group.FleetID,
 		)
-		rcache.Grouplist.Put(id, group)
+		cache.Grouplist.Put(id, group)
 	}
 	log.Log.Debug("Groups are loaded")
 	return nil

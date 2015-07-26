@@ -1,12 +1,12 @@
-package rcache
+package cache
 
 import (
 	"encoding/json"
 	"fmt"
 	"strconv"
 
-	"bitbucket.org/maksadbek/go-mon-service/conf"
-	"bitbucket.org/maksadbek/go-mon-service/logger"
+	"github.com/Maksadbek/wherepo/conf"
+	"github.com/Maksadbek/wherepo/logger"
 	"github.com/garyburd/redigo/redis"
 )
 
@@ -38,13 +38,13 @@ type Pos struct {
 // GetPositions can be used to retrieve map of positions
 func GetPositions(trackerId []string) (trackers map[string][]Pos, err error) {
 	trackers = make(map[string][]Pos)
-	logger.FuncLog("rcache.GetPositions", "", nil, nil)
+	logger.FuncLog("cache.GetPositions", "", nil, nil)
 	// range over ids of trackers
 	for _, id := range trackerId {
 		var pos Pos
 		pos.Id, err = strconv.Atoi(id)
 		if err != nil {
-			logger.FuncLog("rcache.GetPositions", "", nil, err)
+			logger.FuncLog("cache.GetPositions", "", nil, err)
 		}
 		// tracker's name saved with prefix, can be set from conf
 		p, err := redis.String(rc.Do("LINDEX", config.DS.Redis.TPrefix+":"+id, -1))
@@ -63,7 +63,7 @@ func GetPositions(trackerId []string) (trackers map[string][]Pos, err error) {
 		} else {
 			err = json.Unmarshal([]byte(p), &pos)
 			if err != nil {
-				logger.FuncLog("rcache.GetPositions", "Cannot unmarshal", nil, err)
+				logger.FuncLog("cache.GetPositions", "Cannot unmarshal", nil, err)
 				return trackers, err
 			}
 		}
@@ -85,21 +85,21 @@ func GetPositions(trackerId []string) (trackers map[string][]Pos, err error) {
 
 // GetPositionsByFleet can be used to get tracker data by fleet id
 func GetPositionsByFleet(fleetNum string, start, stop int) (Fleet, error) {
-	logger.FuncLog("rcache.PushRedis", "", nil, nil)
+	logger.FuncLog("cache.PushRedis", "", nil, nil)
 	fleet := Fleet{}
 	fleet.Id = fleetNum
 	fleet.Update = make(map[string][]Pos)
 	// get trackers of current fleet
 	trackers, err := GetTrackers(fleetNum, start, stop)
 	if err != nil {
-		logger.FuncLog("rcache.GetPositionsByFleet", conf.ErrGetListOfTrackers, nil, err)
+		logger.FuncLog("cache.GetPositionsByFleet", conf.ErrGetListOfTrackers, nil, err)
 		return fleet, err
 	}
 
 	fleet.Update, err = GetPositions(trackers)
 	if err != nil {
 		fmt.Println("error is in fleet.Update, err = GetPositions(trackers)")
-		logger.FuncLog("rcache.GetPositionsByFleet", conf.ErrGetListOfTrackers, nil, err)
+		logger.FuncLog("cache.GetPositionsByFleet", conf.ErrGetListOfTrackers, nil, err)
 	}
 	return fleet, err
 }
@@ -125,35 +125,35 @@ func (pos *Pos) SetPosDefaults() {
 	// set default owner's name
 	rOwner, err := redis.String(rc.Do("HGET", hashName, "Owner"))
 	if err != nil {
-		logger.FuncLog("rcache.GetPositions", conf.ErrNotInCache, nil, err)
+		logger.FuncLog("cache.GetPositions", conf.ErrNotInCache, nil, err)
 	}
 	pos.Owner = rOwner
 
 	// set default phone number
 	rNumber, err := redis.String(rc.Do("HGET", hashName, "Number"))
 	if err != nil {
-		logger.FuncLog("rcache.GetPositions", conf.ErrNotInCache, nil, err)
+		logger.FuncLog("cache.GetPositions", conf.ErrNotInCache, nil, err)
 	}
 	pos.Number = rNumber
 
 	// set default name
 	rName, err := redis.String(rc.Do("HGET", hashName, "Name"))
 	if err != nil {
-		logger.FuncLog("rcache.GetPositions", conf.ErrNotInCache, nil, err)
+		logger.FuncLog("cache.GetPositions", conf.ErrNotInCache, nil, err)
 	}
 	pos.Name = rName
 
 	// set default customization values
 	rCustom, err := redis.String(rc.Do("HGET", hashName, "Customization"))
 	if err != nil {
-		logger.FuncLog("rcache.GetPositions", conf.ErrNotInCache, nil, err)
+		logger.FuncLog("cache.GetPositions", conf.ErrNotInCache, nil, err)
 	}
 	pos.Customization = rCustom
 
 	// set default additional values
 	rAdditional, err := redis.String(rc.Do("HGET", hashName, "Additional"))
 	if err != nil {
-		logger.FuncLog("rcache.GetPositions", conf.ErrNotInCache, nil, err)
+		logger.FuncLog("cache.GetPositions", conf.ErrNotInCache, nil, err)
 	}
 	pos.Additional = rAdditional
 }

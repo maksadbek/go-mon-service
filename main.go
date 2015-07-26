@@ -19,12 +19,12 @@ import (
 	"syscall"
 	"time"
 
-	"bitbucket.org/maksadbek/go-mon-service/conf"
-	"bitbucket.org/maksadbek/go-mon-service/datastore"
-	log "bitbucket.org/maksadbek/go-mon-service/logger"
-	"bitbucket.org/maksadbek/go-mon-service/metrics"
-	"bitbucket.org/maksadbek/go-mon-service/rcache"
-	"bitbucket.org/maksadbek/go-mon-service/route"
+	"github.com/Maksadbek/wherepo/conf"
+	"github.com/Maksadbek/wherepo/models"
+	log "github.com/Maksadbek/wherepo/logger"
+	"github.com/Maksadbek/wherepo/metrics"
+	"github.com/Maksadbek/wherepo/cache"
+	"github.com/Maksadbek/wherepo/route"
 	"github.com/Sirupsen/logrus"
 	"github.com/rs/cors"
 )
@@ -202,8 +202,8 @@ func main() {
 	}
 
 	route.Initialize(app)
-	datastore.Initialize(app)
-	rcache.Initialize(app)
+	models.Initialize(app)
+	cache.Initialize(app)
 	go CacheData(app)
 	go CacheGroups()
 	go worker(app)
@@ -236,44 +236,44 @@ func WritePid() error {
 	return nil
 }
 func CacheData(app conf.App) {
-	trackers, err := datastore.GetTrackers()
+	trackers, err := models.GetTrackers()
 	if err != nil {
 		log.Log.Error(err)
 	}
-	err = rcache.CacheDefaults(trackers)
+	err = cache.CacheDefaults(trackers)
 	if err != nil {
 		log.Log.Error(err)
 	}
 	CacheFleetTrackers()
 	for _ = range time.Tick(time.Duration(app.DS.Mysql.Interval) * time.Minute) {
-		trackers, err := datastore.GetTrackers()
+		trackers, err := models.GetTrackers()
 		if err != nil {
 			log.Log.Error(err)
 		}
-		rcache.CacheDefaults(trackers)
+		cache.CacheDefaults(trackers)
 		CacheFleetTrackers()
 	}
 }
 
 func CacheFleetTrackers() {
-	t, err := datastore.CacheFleetTrackers()
+	t, err := models.CacheFleetTrackers()
 	if err != nil {
 
 		log.Log.Error(err)
 	}
-	err = rcache.AddFleetTrackers(t)
+	err = cache.AddFleetTrackers(t)
 	if err != nil {
 		log.Log.Error(err)
 	}
 }
 
 func CacheGroups() {
-	err := datastore.LoadGroups()
+	err := models.LoadGroups()
 	if err != nil {
 		log.Log.Error(err)
 	}
 	for _ = range time.Tick(time.Duration(app.Cache.GroupInterval) * time.Minute) {
-		err := datastore.LoadGroups()
+		err := models.LoadGroups()
 		if err != nil {
 			log.Log.Error(err)
 		}

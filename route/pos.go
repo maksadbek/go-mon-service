@@ -7,9 +7,9 @@ import (
 	"net/http"
 	"time"
 
-	"bitbucket.org/maksadbek/go-mon-service/conf"
-	"bitbucket.org/maksadbek/go-mon-service/logger"
-	"bitbucket.org/maksadbek/go-mon-service/rcache"
+	"github.com/Maksadbek/wherepo/conf"
+	"github.com/Maksadbek/wherepo/logger"
+	"github.com/Maksadbek/wherepo/cache"
 )
 
 func GetPositionHandler(w http.ResponseWriter, r *http.Request) {
@@ -54,17 +54,17 @@ func GetPositionHandler(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, err.Error(), 404)
 		return
 	}
-	var fleet rcache.Fleet
-	fleet.Update = make(map[string][]rcache.Pos)
+	var fleet cache.Fleet
+	fleet.Update = make(map[string][]cache.Pos)
 	if trackers.Trackers[0] == "0" {
-		fleet, err = rcache.GetPositionsByFleet(fleetName, 0, 100)
+		fleet, err = cache.GetPositionsByFleet(fleetName, 0, 100)
 		if err != nil {
 			logger.ReqWarn(r, conf.ErrReq, err)
 			http.Error(w, err.Error(), 404)
 			return
 		}
 	} else {
-		pos, err := rcache.GetPositions(trackers.Trackers)
+		pos, err := cache.GetPositions(trackers.Trackers)
 		if err != nil {
 			logger.ReqWarn(r, conf.ErrReq, err)
 			http.Error(w, err.Error(), 404)

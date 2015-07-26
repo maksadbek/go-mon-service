@@ -1,11 +1,11 @@
-package datastore
+package models
 
 import (
 	"strings"
 	"testing"
 
-	"bitbucket.org/maksadbek/go-mon-service/conf"
-	"bitbucket.org/maksadbek/go-mon-service/rcache"
+	"github.com/Maksadbek/wherepo/conf"
+	"github.com/Maksadbek/wherepo/cache"
 )
 
 func TestGetTrackers(t *testing.T) {
@@ -74,7 +74,7 @@ func TestLoadGroups(t *testing.T) {
 	if err != nil {
 		t.Error(err)
 	}
-	if _, err := rcache.Grouplist.Get("202"); err != nil {
+	if _, err := cache.Grouplist.Get("202"); err != nil {
 		t.Error(err)
 	}
 }

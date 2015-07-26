@@ -10,10 +10,10 @@ import (
 	"net/http"
 	"sync"
 
-	"bitbucket.org/maksadbek/go-mon-service/conf"
-	"bitbucket.org/maksadbek/go-mon-service/datastore"
-	"bitbucket.org/maksadbek/go-mon-service/logger"
-	"bitbucket.org/maksadbek/go-mon-service/metrics"
+	"github.com/Maksadbek/wherepo/conf"
+	"github.com/Maksadbek/wherepo/models"
+	"github.com/Maksadbek/wherepo/logger"
+	"github.com/Maksadbek/wherepo/metrics"
 )
 
 var (
@@ -121,7 +121,7 @@ func LogoutHandler(w http.ResponseWriter, r *http.Request) {
 
 // SignUpHandler handles user sign up request
 func SignupHandler(w http.ResponseWriter, r *http.Request) {
-	key := make([]byte, 64)            // key for HMAC computation
+	key := make([]byte, 32)            // key for HMAC computation
 	decoder := json.NewDecoder(r.Body) // json decoder
 	req := make(map[string]string)     // request params
 	// decode
@@ -140,7 +140,7 @@ func SignupHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	// if user credentials are bad, then send 400 status
-	if !datastore.CheckUser(user, hash) {
+	if !models.CheckUser(user, hash) {
 		logger.ReqWarn(r, conf.ErrReq)
 		http.Error(w, "Bad User Credentials", 400)
 		return

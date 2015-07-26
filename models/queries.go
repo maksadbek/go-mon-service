@@ -1,4 +1,4 @@
-package datastore
+package models
 
 var queries map[string]string = map[string]string{
 	"usrTrackers": `SELECT 

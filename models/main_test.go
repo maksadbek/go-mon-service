@@ -1,11 +1,11 @@
-package datastore
+package models
 
 import (
 	"os"
 	"strings"
 	"testing"
 
-	"bitbucket.org/maksadbek/go-mon-service/conf"
+	"github.com/Maksadbek/wherepo/conf"
 )
 
 func TestMain(m *testing.M) {

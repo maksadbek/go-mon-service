@@ -1,9 +1,9 @@
-package rcache
+package cache
 
 import (
 	"encoding/json"
 
-	"bitbucket.org/maksadbek/go-mon-service/logger"
+	"github.com/Maksadbek/wherepo/logger"
 	"github.com/garyburd/redigo/redis"
 )
 
@@ -17,16 +17,16 @@ type Usr struct {
 // UsrTrackers can be used to get info of user and list of its trackers
 func UsrTrackers(name string) (Usr, error) {
 	usr := Usr{}
-	logger.FuncLog("rcache.UsrTrackers", "", nil, nil)
+	logger.FuncLog("cache.UsrTrackers", "", nil, nil)
 	// get user data
 	userb, err := redis.String(rc.Do("GET", config.DS.Redis.UPrefix+":"+name)) // prefix can be set from conf
 	if err != nil {
-		logger.FuncLog("rcache.UsrTrackers", "", nil, err)
+		logger.FuncLog("cache.UsrTrackers", "", nil, err)
 		return usr, err
 	}
 	err = json.Unmarshal([]byte(userb), &usr)
 	if err != nil {
-		logger.FuncLog("rcache.UsrTrackers", "", nil, err)
+		logger.FuncLog("cache.UsrTrackers", "", nil, err)
 		return usr, err
 	}
 	return usr, nil
@@ -34,10 +34,10 @@ func UsrTrackers(name string) (Usr, error) {
 
 // SetUsrTrackers can be used to save user info in redis
 func SetUsrTrackers(usr Usr) error {
-	logger.FuncLog("rcache.SetUsrTrackers", "", nil, nil)
+	logger.FuncLog("cache.SetUsrTrackers", "", nil, nil)
 	jusr, err := json.Marshal(usr)
 	if err != nil {
-		logger.FuncLog("rcache.SetUsrTrackers", "", nil, err)
+		logger.FuncLog("cache.SetUsrTrackers", "", nil, err)
 		return err
 	}
 	rc.Do(

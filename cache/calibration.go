@@ -1,4 +1,4 @@
-package rcache
+package cache
 
 import (
 	"encoding/json"
@@ -9,8 +9,8 @@ import (
 
 	"github.com/garyburd/redigo/redis"
 
-	"bitbucket.org/maksadbek/go-mon-service/conf"
-	"bitbucket.org/maksadbek/go-mon-service/logger"
+	"github.com/Maksadbek/wherepo/conf"
+	"github.com/Maksadbek/wherepo/logger"
 )
 
 var (

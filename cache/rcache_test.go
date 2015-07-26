@@ -1,4 +1,4 @@
-package rcache
+package cache
 
 import (
 	"encoding/json"
@@ -7,7 +7,7 @@ import (
 	"strings"
 	"testing"
 
-	"bitbucket.org/maksadbek/go-mon-service/conf"
+	"github.com/Maksadbek/wherepo/conf"
 )
 
 func TestInit(t *testing.T) {

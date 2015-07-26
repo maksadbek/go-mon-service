@@ -1,4 +1,4 @@
-package rcache
+package cache
 
 import (
 	"encoding/json"
@@ -6,8 +6,8 @@ import (
 	"reflect"
 	"strconv"
 
-	"bitbucket.org/maksadbek/go-mon-service/conf"
-	"bitbucket.org/maksadbek/go-mon-service/logger"
+	"github.com/Maksadbek/wherepo/conf"
+	"github.com/Maksadbek/wherepo/logger"
 	"github.com/garyburd/redigo/redis"
 )
 
@@ -58,12 +58,12 @@ type Vehicle struct {
 func Initialize(c conf.App) (err error) {
 	m := make(map[string]interface{})
 	m["config"] = c
-	logger.FuncLog("rcache.Initialize", "Initialize", m, nil)
+	logger.FuncLog("cache.Initialize", "Initialize", m, nil)
 	config = c
 	// connect to redis
 	err = rc.Start(c.DS.Redis.Host)
 	if err != nil {
-		logger.FuncLog("rcache.Initialize", "Unable to connect redis server", nil, err)
+		logger.FuncLog("cache.Initialize", "Unable to connect redis server", nil, err)
 		return err
 	}
 	return
@@ -72,11 +72,11 @@ func Initialize(c conf.App) (err error) {
 // GetTrackers can be used to get array of tracker of particular fleet
 // start and stop are range values of list, default is 0,200, can be set from config
 func GetTrackers(fleet string, start, stop int) (trackers []string, err error) {
-	logger.FuncLog("rcache.GetTrackers", conf.InfoListOfTrackers, nil, nil)
+	logger.FuncLog("cache.GetTrackers", conf.InfoListOfTrackers, nil, nil)
 	// get list of trackers ids from cache
 	v, err := redis.Strings(rc.Do("SMEMBERS", config.DS.Redis.FPrefix+":"+fleet)) //
 	if err != nil {
-		logger.FuncLog("rcache.GetTrackers", conf.ErrGetListOfTrackers, nil, err)
+		logger.FuncLog("cache.GetTrackers", conf.ErrGetListOfTrackers, nil, err)
 		return
 	}
 
@@ -89,14 +89,14 @@ func GetTrackers(fleet string, start, stop int) (trackers []string, err error) {
 
 // PushRedis can be used to save fleet var into redis
 func PushRedis(fleet Fleet) (err error) {
-	logger.FuncLog("rcache.PushRedis", conf.InfoPushFleet, nil, nil)
+	logger.FuncLog("cache.PushRedis", conf.InfoPushFleet, nil, nil)
 	// get list of trackers ids from cache
 	// range over map of Pos and push them
 	for _, x := range fleet.Update {
 		for _, pos := range x {
 			jpos, err := json.Marshal(pos)
 			if err != nil {
-				logger.FuncLog("rcache.PushRedis", conf.ErrGetListOfTrackers, nil, err)
+				logger.FuncLog("cache.PushRedis", conf.ErrGetListOfTrackers, nil, err)
 				return err
 			}
 			rc.Do("RPUSH", config.DS.Redis.TPrefix+":"+strconv.Itoa(pos.Id), jpos) // prefix can be set from conf
@@ -109,7 +109,7 @@ func PushRedis(fleet Fleet) (err error) {
 func AddFleetTrackers(ftracker []FleetTracker) error {
 	r, err := redis.Dial("tcp", config.DS.Redis.Host)
 	if err != nil {
-		logger.FuncLog("rcache.AddFleetTrackers", conf.ErrRedisConn, nil, err)
+		logger.FuncLog("cache.AddFleetTrackers", conf.ErrRedisConn, nil, err)
 		return err
 	}
 	defer r.Close()
@@ -130,11 +130,11 @@ func CacheDefaults(trackers map[int]Vehicle) error {
 	// create separate connection for caching
 	r, err := redis.Dial("tcp", config.DS.Redis.Host)
 	if err != nil {
-		logger.FuncLog("rcache.AddFleetTrackers", conf.ErrRedisConn, nil, err)
+		logger.FuncLog("cache.AddFleetTrackers", conf.ErrRedisConn, nil, err)
 		return err
 	}
 	defer r.Close()
-	logger.FuncLog("rcache.CacheDefaults", "Caching Defaults", nil, nil)
+	logger.FuncLog("cache.CacheDefaults", "Caching Defaults", nil, nil)
 	// range over map of data
 	for id, x := range trackers {
 		st := reflect.ValueOf(x)

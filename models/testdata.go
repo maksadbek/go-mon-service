@@ -1,4 +1,4 @@
-package datastore
+package models
 
 var mockConf string = `[ds]
 [ds.mysql]
