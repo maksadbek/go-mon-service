@@ -171,7 +171,6 @@ func main() {
 		log.Log.Error(err)
 	}
 	<-stop
-	// pprof.StopCPUProfile()
 }
 
 func sigCatch() {

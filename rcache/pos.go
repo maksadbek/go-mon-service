@@ -104,6 +104,7 @@ func GetPositionsByFleet(fleetNum string, start, stop int) (Fleet, error) {
 	return fleet, err
 }
 
+// SetDefaults get default values from cache and set them into pos
 func (pos *Pos) SetPosDefaults() {
 	pos.Latitude = config.Defaults.Lat
 	pos.Longitude = config.Defaults.Lng
