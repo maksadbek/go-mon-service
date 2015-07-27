@@ -10,4 +10,6 @@ static/flux/js/ext-all-debug.js
 static/flux/js/ext-base.js
 conf.toml
 static/flux/example.html
-public/bowercomponents
+public/bower_components
+public/fonts
+wherepo
