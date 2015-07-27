@@ -1,4 +1,5 @@
 go-mon-service
+vegeta-test
 go-ws-daemon.pid
 gomon_log
 logs

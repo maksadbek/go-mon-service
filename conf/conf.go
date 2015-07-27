@@ -2,7 +2,10 @@ package conf
 
 import (
 	"io"
+	"io/ioutil"
+	"strings"
 
+	log "bitbucket.org/maksadbek/go-mon-service/logger"
 	"github.com/BurntSushi/toml"
 )
 
@@ -84,4 +87,22 @@ type Log struct {
 func Read(r io.Reader) (config App, err error) {
 	_, err = toml.DecodeReader(r, &config)
 	return config, err
+}
+
+func Init(fileName string) (config App, err error) {
+	// read the file
+	f, err := ioutil.ReadFile(fileName)
+	if err != nil {
+		log.Log.Error(err)
+		return
+	}
+
+	// read contents
+	c := strings.NewReader(string(f))
+	if err != nil {
+		log.Log.Error(err)
+		return
+	}
+
+	return Read(c)
 }

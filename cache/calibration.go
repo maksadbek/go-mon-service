@@ -5,7 +5,6 @@ import (
 	"errors"
 	"strconv"
 	"strings"
-	"sync"
 
 	"github.com/garyburd/redigo/redis"
 
@@ -16,7 +15,6 @@ import (
 var (
 	Calibres  map[int][]Calibration
 	TopLitres map[int]int
-	rwmutex   sync.RWMutex
 )
 
 type Calibration struct {
@@ -29,7 +27,6 @@ type Calibration struct {
 // GetLitrage can be used to get litrage value that is proportional
 // to the voltage value of particular tracker
 func GetLitrage(id int, volt float32) (litre int, err error) {
-	rwmutex.RLock()
 	c := Calibres[id]
 	if c == nil {
 		err = errors.New(conf.ErrNotInCache)
@@ -48,7 +45,6 @@ func GetLitrage(id int, volt float32) (litre int, err error) {
 			break
 		}
 	}
-	rwmutex.RUnlock()
 	return litre, err
 }
 
