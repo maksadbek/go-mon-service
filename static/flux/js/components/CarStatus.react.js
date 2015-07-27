@@ -76,6 +76,7 @@ var CarStatus = React.createClass({
         }
 
         // set time
+        stat.time = stat.time.replace(/-/g, " ")
         var time = new Date(stat.time);
         var now = new Date(Date.now());
         var delta = Math.abs(now - time) / 1000000;
