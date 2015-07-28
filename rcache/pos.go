@@ -2,7 +2,6 @@ package rcache
 
 import (
 	"encoding/json"
-	"fmt"
 	"strconv"
 
 	"bitbucket.org/maksadbek/go-mon-service/conf"
@@ -38,42 +37,59 @@ type Pos struct {
 // GetPositions can be used to retrieve map of positions
 func GetPositions(trackerId []string) (trackers map[string][]Pos, err error) {
 	trackers = make(map[string][]Pos)
-	logger.FuncLog("rcache.GetPositions", "", nil, nil)
+	rc := pool.Get()
+	defer rc.Close()
 	// range over ids of trackers
 	for _, id := range trackerId {
 		var pos Pos
 		pos.Id, err = strconv.Atoi(id)
 		if err != nil {
-			logger.FuncLog("rcache.GetPositions", "", nil, err)
+			logger.Log.Warn("GetPositions", err.Error())
 		}
 		// tracker's name saved with prefix, can be set from conf
 		p, err := redis.String(rc.Do("LINDEX", config.DS.Redis.TPrefix+":"+id, -1))
 		if err != nil {
 			logger.Log.Error(err)
 		}
-		// get groupid of the tracker
-		groupID, err := redis.String(rc.Do("HGET", "max_unit_"+id, "Group_id"))
+		v, err := VehicleList.Get(id)
 		if err != nil {
-			logger.Log.Error(err)
+			return trackers, err
 		}
 		// if the value is nil, then merge with default values from max_units
 		if p == "" {
 			// set default values
-			pos.SetPosDefaults()
+			pos.Latitude = config.Defaults.Lat
+			pos.Longitude = config.Defaults.Lng
+			pos.Direction = config.Defaults.Direction
+			pos.Speed = config.Defaults.Speed
+			pos.Sat = config.Defaults.Sat
+			pos.Ignition = config.Defaults.Ignition
+			pos.GsmSignal = config.Defaults.GsmSignal
+			pos.Battery = config.Defaults.Battery
+			pos.Seat = config.Defaults.Seat
+			pos.BatteryLvl = config.Defaults.BatteryLvl
+			pos.Fuel = config.Defaults.Fuel
+			pos.FuelVal = config.Defaults.FuelVal
+			pos.MuAdditional = config.Defaults.MuAdditional
+			pos.Action = config.Defaults.Action
+			pos.Time = config.Defaults.Time
+
+			pos.Owner = v.Owner
+			pos.Number = v.Number
+			pos.Name = v.Name
+			pos.Customization = v.Customization
+			pos.Additional = v.Additional
 		} else {
 			err = json.Unmarshal([]byte(p), &pos)
 			if err != nil {
-				logger.FuncLog("rcache.GetPositions", "Cannot unmarshal", nil, err)
 				return trackers, err
 			}
 		}
-
-		err = pos.SetLitrage()
+		err = pos.SetLitrage(v.Device_type_id)
 		if err != nil {
-			logger.Log.Error("here is it")
 			return trackers, err
 		}
-		group, err := Grouplist.Get(groupID)
+		group, err := Grouplist.Get(strconv.Itoa(v.Group_id))
 		if err != nil {
 			logger.Log.Error(err)
 			group.Name = "all"
@@ -85,7 +101,6 @@ func GetPositions(trackerId []string) (trackers map[string][]Pos, err error) {
 
 // GetPositionsByFleet can be used to get tracker data by fleet id
 func GetPositionsByFleet(fleetNum string, start, stop int) (Fleet, error) {
-	logger.FuncLog("rcache.PushRedis", "", nil, nil)
 	fleet := Fleet{}
 	fleet.Id = fleetNum
 	fleet.Update = make(map[string][]Pos)
@@ -95,66 +110,9 @@ func GetPositionsByFleet(fleetNum string, start, stop int) (Fleet, error) {
 		logger.FuncLog("rcache.GetPositionsByFleet", conf.ErrGetListOfTrackers, nil, err)
 		return fleet, err
 	}
-
 	fleet.Update, err = GetPositions(trackers)
 	if err != nil {
-		fmt.Println("error is in fleet.Update, err = GetPositions(trackers)")
 		logger.FuncLog("rcache.GetPositionsByFleet", conf.ErrGetListOfTrackers, nil, err)
 	}
 	return fleet, err
-}
-
-// SetDefaults get default values from cache and set them into pos
-func (pos *Pos) SetPosDefaults() {
-	pos.Latitude = config.Defaults.Lat
-	pos.Longitude = config.Defaults.Lng
-	pos.Direction = config.Defaults.Direction
-	pos.Speed = config.Defaults.Speed
-	pos.Sat = config.Defaults.Sat
-	pos.Ignition = config.Defaults.Ignition
-	pos.GsmSignal = config.Defaults.GsmSignal
-	pos.Battery = config.Defaults.Battery
-	pos.Seat = config.Defaults.Seat
-	pos.BatteryLvl = config.Defaults.BatteryLvl
-	pos.Fuel = config.Defaults.Fuel
-	pos.FuelVal = config.Defaults.FuelVal
-	pos.MuAdditional = config.Defaults.MuAdditional
-	pos.Action = config.Defaults.Action
-	pos.Time = config.Defaults.Time
-
-	hashName := "max_unit_" + strconv.Itoa(pos.Id)
-	// set default owner's name
-	rOwner, err := redis.String(rc.Do("HGET", hashName, "Owner"))
-	if err != nil {
-		logger.FuncLog("rcache.GetPositions", conf.ErrNotInCache, nil, err)
-	}
-	pos.Owner = rOwner
-
-	// set default phone number
-	rNumber, err := redis.String(rc.Do("HGET", hashName, "Number"))
-	if err != nil {
-		logger.FuncLog("rcache.GetPositions", conf.ErrNotInCache, nil, err)
-	}
-	pos.Number = rNumber
-
-	// set default name
-	rName, err := redis.String(rc.Do("HGET", hashName, "Name"))
-	if err != nil {
-		logger.FuncLog("rcache.GetPositions", conf.ErrNotInCache, nil, err)
-	}
-	pos.Name = rName
-
-	// set default customization values
-	rCustom, err := redis.String(rc.Do("HGET", hashName, "Customization"))
-	if err != nil {
-		logger.FuncLog("rcache.GetPositions", conf.ErrNotInCache, nil, err)
-	}
-	pos.Customization = rCustom
-
-	// set default additional values
-	rAdditional, err := redis.String(rc.Do("HGET", hashName, "Additional"))
-	if err != nil {
-		logger.FuncLog("rcache.GetPositions", conf.ErrNotInCache, nil, err)
-	}
-	pos.Additional = rAdditional
 }

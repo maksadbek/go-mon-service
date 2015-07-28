@@ -23,7 +23,7 @@ var (
 func Initialize(c conf.App) error {
 	var err error
 	config = c
-	log.FuncLog("datastore.Initialize", "Initialization", nil, nil)
+	log.Log.Info("Datastore initialization")
 	db, err = sql.Open("mysql", c.DS.Mysql.DSN)
 	if err != nil {
 		log.FuncLog("datastore.Initialize", "Initalization", nil, err)
@@ -37,11 +37,8 @@ func Initialize(c conf.App) error {
 	return nil
 }
 
-func GetTrackers() (map[int]rcache.Vehicle, error) {
-	log.Log.WithFields(logrus.Fields{
-		"package": "datastore",
-	}).Debug("GetTrackers")
-	var pos map[int]rcache.Vehicle = make(map[int]rcache.Vehicle)
+func CacheTrackers() error {
+	log.Log.Info("Caching Default tracker data...")
 	query := queries["getTrackers"]
 	rows, err := db.Query(query)
 	defer rows.Close()
@@ -50,7 +47,7 @@ func GetTrackers() (map[int]rcache.Vehicle, error) {
 			"package": "datastore",
 			"Error":   err.Error(),
 		}).Warn("GetTrackers")
-		return pos, err
+		return err
 	}
 	for rows.Next() {
 		var (
@@ -107,12 +104,10 @@ func GetTrackers() (map[int]rcache.Vehicle, error) {
 		v.Additional = string(jAdditionals)
 		v.ParamID = strconv.Itoa(int(paramId.Int64))
 		v.Pid = int(pid.Int64)
-		pos[v.Id] = v
+		rcache.VehicleList.Put(strconv.Itoa(v.Id), v)
 	}
-	log.Log.WithFields(logrus.Fields{
-		"package": "datastore",
-	}).Warn("GetTrackers")
-	return pos, err
+	log.Log.Info("Succesfully cached default values")
+	return nil
 }
 
 func UsrTrackers(name string) (usr rcache.Usr, err error) {

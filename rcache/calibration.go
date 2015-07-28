@@ -5,9 +5,6 @@ import (
 	"errors"
 	"strconv"
 	"strings"
-	"sync"
-
-	"github.com/garyburd/redigo/redis"
 
 	"bitbucket.org/maksadbek/go-mon-service/conf"
 	"bitbucket.org/maksadbek/go-mon-service/logger"
@@ -49,23 +46,17 @@ func GetLitrage(id int, volt float32) (litre int, err error) {
 	return litre, err
 }
 
-func (pos *Pos) SetLitrage() error {
+func (pos *Pos) SetLitrage(deviceTypeId int) error {
 	id := strconv.Itoa(pos.Id)
-	hashName := "max_unit_" + id
+	v, err := VehicleList.Get(id)
+	if err != nil {
+		logger.Log.Error(err)
+	}
+
 	additionals := make(map[string]float32)
 	// validate id
 	if id == "" {
 		return errors.New("position id is nil")
-	}
-
-	d, err := rc.Do("HGET", hashName, "Device_type_id")
-	if d == nil {
-		return nil
-	}
-	deviceTypeId, err := redis.Int(d, err)
-	if err != nil {
-		logger.Log.Error(err)
-		return err
 	}
 
 	if deviceTypeId > 0 {
@@ -80,7 +71,7 @@ func (pos *Pos) SetLitrage() error {
 				additionals[m[0]] = float32(fuel)
 			}
 		}
-		param, err := redis.String(rc.Do("HGET", hashName, "ParamID"))
+		param := v.ParamID
 		if err != nil {
 			logger.Log.Error(err)
 			return err
@@ -101,7 +92,7 @@ func (pos *Pos) SetLitrage() error {
 		// set ignition
 		// if error then set ignition = 0
 		additionalsFromMU := make(map[string]string)
-		add, err := redis.String(rc.Do("HGET", hashName, "Additional"))
+		add := v.Additional
 		if err != nil {
 			logger.Log.Error(err)
 			pos.Ignition = 0

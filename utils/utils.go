@@ -75,21 +75,16 @@ func WritePid() error {
 	return nil
 }
 func CacheData(app conf.App, done <-chan bool) {
-	trackers, err := datastore.GetTrackers()
-	if err != nil {
-		log.Log.Error(err)
-	}
-	err = rcache.CacheDefaults(trackers)
+	err := datastore.CacheTrackers()
 	if err != nil {
 		log.Log.Error(err)
 	}
 	CacheFleetTrackers()
 	for _ = range time.Tick(time.Duration(app.DS.Mysql.Interval) * time.Minute) {
-		trackers, err := datastore.GetTrackers()
+		err := datastore.CacheTrackers()
 		if err != nil {
 			log.Log.Error(err)
 		}
-		rcache.CacheDefaults(trackers)
 		CacheFleetTrackers()
 	}
 	<-done

@@ -32,6 +32,7 @@ func (g *Groups) Get(id string) (Group, error) {
 	g.Lock()
 	group, ok := g.Data[id]
 	if !ok {
+		g.Unlock()
 		return group, fmt.Errorf("group (id %s) not found", id)
 	}
 	g.Unlock()
