@@ -89,6 +89,8 @@ var StatusApp = React.createClass({
     },
     _onChange: function(){
         this.setState({stats: getAllStatuses()});
+        var loader = document.getElementById("gomon-loader");
+        loader.remove();
     },
     _onAuth: function(){
         StatusStore.sendAjax();

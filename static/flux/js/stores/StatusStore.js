@@ -3,6 +3,7 @@ var EventEmitter = require('events').EventEmitter;
 var StatusConstants = require('../constants/StatusConstants');
 var UserConstants = require('../constants/UserConstants');
 var assign = require('object-assign');
+var _ = require('lodash');
 
 var CHANGE_EVENT = 'change';
 
@@ -10,6 +11,7 @@ var _carStatus = {};
 var _clientInfo = {};
 var _token = "";
 var _markersOnMap = {};
+var _searchCase = [];
 
 function setClientInfo(info){
     _clientInfo.fleet = info.fleet;
@@ -86,6 +88,20 @@ var StatusStore = assign({}, EventEmitter.prototype, {
                         if (xhr.status === 200 ) {
                             _carStatus = JSON.parse(xhr.responseText);
                             StatusStore.emitChange();
+                            if(_searchCase.length !== 0){
+                                return
+                            }
+                            for(var groupName in _carStatus){
+                                for(var carId in _carStatus[groupName]){
+                                    _searchCase.push({
+                                        i: {
+                                            id: carId, 
+                                            name: groupName[carId].name,
+                                            number: groupName[carId].number
+                                        }
+                                    });
+                                }
+                            }
                         }
                         else if (xhr.status !== 200) {
                             StatusStore.emitChange();
@@ -123,6 +139,11 @@ var StatusStore = assign({}, EventEmitter.prototype, {
                         // { id: "1234", pos: { lat: "123", lng:...}}
                         _markersOnMap[action.info.id] = action.info.pos;
                         mon.obj_array(_markersOnMap, true);
+                        for(var i in my_sm){
+                            if(my_sm[i] === action.info.id){
+                                return;
+                            }
+                        }
                         my_sm.push(action.info.id);
                         break;
                     case StatusConstants.DelMarker:
@@ -134,6 +155,9 @@ var StatusStore = assign({}, EventEmitter.prototype, {
                             }
                         }
                         break;
+                    case StatusConstants.SearchCar:
+
+
                 }
                 return true;
         })

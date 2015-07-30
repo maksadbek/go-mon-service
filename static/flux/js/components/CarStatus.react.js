@@ -88,7 +88,7 @@ var CarStatus = React.createClass({
         timeMsg = "Позиция определена 1 дней назад" 
             timeIndicator = "http://"+go_mon_site+"/i/monitoring/gsm-4.png";
         }else if(rangeInMinutes > 60 && rangeInMinutes < 24*60){
-        timeMsg = "Позиция определена" + math.ceil((rangeInMinutes / 60)) + " час  назад" 
+        timeMsg = "Позиция определена" + Math.ceil((rangeInMinutes / 60)) + " час  назад" 
             timeIndicator = "http://"+go_mon_site+"/i/monitoring/gsm-1.png";
         }else if(rangeInMinutes > 20 && rangeInMinutes <= 60){
         timeMsg = "Позиция определена 1 час  назад" 
