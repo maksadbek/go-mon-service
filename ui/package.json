@@ -31,9 +31,9 @@
     "materialjs":"../public/bower_components/material-design-lite/material.js"
   },
   "dest": {
-    "path":"../public",
+    "path":"./public",
     "app": "app.js",
-    "dist": "../public/javascripts/"
+    "dist": "./public/javascripts/"
   },
   "scripts": {
     "start": "browserify . -o js/bundle.js && uglify -s js/bundle.js -o js/bundle.min.js",

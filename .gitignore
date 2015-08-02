@@ -11,6 +11,6 @@ static/flux/js/ext-all-debug.js
 static/flux/js/ext-base.js
 conf.toml
 static/flux/example.html
-public/bower_components
-public/fonts
+ui/public/bower_components
+ui/public/fonts
 wherepo
