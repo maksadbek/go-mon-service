@@ -19,6 +19,18 @@ var StatusActions = {
                 actionType: StatusConstants.DelMarker,
                 info: info
         });
+    },
+    SearchCar: function(info){
+        AppDispatcher.dispatch({
+                actionType: StatusConstants.SearchCar,
+                info: info
+        });
+    },
+    DelSearchCon: function(info){
+        AppDispatcher.dispatch({
+                actionType: StatusConstants.DelSearchCon,
+                info: info
+        });
     }
 };
 

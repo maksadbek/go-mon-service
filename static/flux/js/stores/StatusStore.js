@@ -6,12 +6,15 @@ var assign = require('object-assign');
 var _ = require('lodash');
 
 var CHANGE_EVENT = 'change';
+var SEARCH_EVENT = 'search';
 
 var _carStatus = {};
 var _clientInfo = {};
 var _token = "";
 var _markersOnMap = {};
+var _search = false;
 var _searchCase = [];
+var _searchRes;
 
 function setClientInfo(info){
     _clientInfo.fleet = info.fleet;
@@ -87,21 +90,31 @@ var StatusStore = assign({}, EventEmitter.prototype, {
                 xhr.onload = function() {
                         if (xhr.status === 200 ) {
                             _carStatus = JSON.parse(xhr.responseText);
-                            StatusStore.emitChange();
-                            if(_searchCase.length !== 0){
-                                return
+                            console.log(_searchCase);
+                            // if search is on, then filter incoming data
+                            if(_search){
+                                var res = [];
+                                var m = {};
+                                car = _carStatus.update[_searchRes.group][_searchRes.id];
+                                res.push(car);
+                                m[_searchRes.group] = res;
+                                _carStatus.update = m;
                             }
-                            for(var groupName in _carStatus){
-                                for(var carId in _carStatus[groupName]){
-                                    _searchCase.push({
-                                        i: {
+                            // if search index container is empty, then fill it
+                            if(_searchCase.length === 0){
+                                for(var groupName in _carStatus.update){
+                                    for(var carId in _carStatus.update[groupName]){
+                                        _searchCase.push({
+                                            group: i,
                                             id: carId, 
-                                            name: groupName[carId].name,
-                                            number: groupName[carId].number
-                                        }
-                                    });
+                                            name: _carStatus.update[groupName][carId].name,
+                                            number: _carStatus.update[groupName][carId].number
+                                        });
+                                    }
                                 }
                             }
+                            StatusStore.emitChange();
+                            return _carStatus;
                         }
                         else if (xhr.status !== 200) {
                             StatusStore.emitChange();
@@ -121,6 +134,9 @@ var StatusStore = assign({}, EventEmitter.prototype, {
         },
         emitChange: function(){
                 this.emit(CHANGE_EVENT);
+        },
+        emitChange: function(EVENT){
+                this.emit(EVENT);
         },
         addChangeListener: function(callback){
                 this.on(CHANGE_EVENT, callback);
@@ -156,8 +172,13 @@ var StatusStore = assign({}, EventEmitter.prototype, {
                         }
                         break;
                     case StatusConstants.SearchCar:
-
-
+                        var number = action.info.name;
+                        _searchRes = _.find(_searchCase, {'number': number});
+                        _search = true;
+                        break;
+                    case StatusConstants.DelSearchCon:
+                        search = false;
+                        break;
                 }
                 return true;
         })

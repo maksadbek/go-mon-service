@@ -4,5 +4,6 @@ module.exports = keyMirror({
   SetClientInfo: null,
   AddMarker: null,
   DelMarker:"DelMarker",
-  SearchCar: null
+  SearchCar: null,
+  DelSearchCon: null
 });

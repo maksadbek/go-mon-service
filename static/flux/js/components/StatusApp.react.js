@@ -1,3 +1,4 @@
+// TODO make inputbox for search and button for search cancel
 var React = require('react');
 var StatusStore = require('../stores/StatusStore').StatusStore;
 var CarActions = require('../actions/StatusActions');
@@ -16,7 +17,8 @@ var StatusApp = React.createClass({
                 id: '',
                 update: {"":[]},
                 last_request: null
-            }
+            },
+            searchCon: {}
         }
     },
 
@@ -46,6 +48,11 @@ var StatusApp = React.createClass({
             content.push(<Sidebar key={i} groupName={i} stats={update[i]}/>)
         }
         return (<div>   
+                    <form onSubmit={this._onSearch}>
+                       <input type="textfield" name="context" /> 
+                       <input type="submit" />
+                    </form>
+                    <button onChange={this._onEmptySearch}>X</button>
                     <div id={"west_side"}>
                         <div className={"bottom_side"}>
                             <table>
@@ -90,13 +97,25 @@ var StatusApp = React.createClass({
     _onChange: function(){
         this.setState({stats: getAllStatuses()});
         var loader = document.getElementById("gomon-loader");
-        loader.remove();
+        if(leader !== null){
+            loader.remove();
+        }
     },
     _onAuth: function(){
         StatusStore.sendAjax();
         setInterval(function(){
             StatusStore.sendAjax();
         }, 5000);
+    },
+    _onSearch: function(event){
+        event.preventDefault();
+        var target = event.target
+        CarActions.SearchCar({
+                name: target.value
+        });
+    },
+    _onEmptySearch: function(){
+        CarActions.DelSearchCon();
     }
 });
 
