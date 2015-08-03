@@ -6,6 +6,7 @@ logs
 nohup.out
 pid
 *~
+*.swp
 static/flux/js/bundle.js
 static/flux/js/ext-all-debug.js
 static/flux/js/ext-base.js
