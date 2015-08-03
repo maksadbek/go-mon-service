@@ -1,7 +1,7 @@
 var React = require('react');
 var CarActions = require('../actions/StatusActions');
 var Status = require('./CarStatus.react');
-var StatusStore = require('../stores/StatusStore').StatusStore;
+var StatusStore = require('../stores/StatusStore');
 
 var Sidebar = React.createClass({
     propTypes:{

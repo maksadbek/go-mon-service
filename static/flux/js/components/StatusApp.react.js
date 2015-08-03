@@ -1,12 +1,32 @@
 var React = require('react');
-var StatusStore = require('../stores/StatusStore').StatusStore;
+var StatusStore = require('../stores/StatusStore');
 var CarActions = require('../actions/StatusActions');
 var UserActions = require('../actions/UserActions');
 var Sidebar = require('./Sidebar.react');
-var UserStore = require('../stores/StatusStore').UserStore;
+var UserStore = require('../stores/UserStore');
 
 function getAllStatuses(){
     return StatusStore.getAll()
+}
+var userLogin   = "";
+var userUID     = "";
+var userHash    = "";
+var userFleet   = "";
+
+if(typeof(go_mon_login) !== "undefined"){
+    userLogin = go_mon_login;
+}
+
+if(typeof(go_mon_uid) !== "undefined"){
+    userUID = go_mon_uid;
+}
+
+if(typeof(go_mon_passw) !== "undefined"){
+    userHash= go_mon_passw;
+}
+
+if(typeof(go_mon_login) !== "undefined"){
+    go_mon_login = go_mon_fleet;
 }
 
 var StatusApp = React.createClass({
@@ -16,7 +36,8 @@ var StatusApp = React.createClass({
                 id: '',
                 update: {"":[]},
                 last_request: null
-            }
+            },
+            group: "all"
         }
     },
 
@@ -27,10 +48,10 @@ var StatusApp = React.createClass({
 
     componentWillMount: function(){
         UserActions.Auth({
-            login: go_mon_login,
-            uid: go_mon_uid,
-            hash: go_mon_passw,
-            fleet:go_mon_fleet,
+            login:  userLogin,
+            uid:    userUID,
+            hash:   userHash,
+            fleet:  userFleet,
             groups: "1,2,3" // TODO ochirib tashlash
         });
     },
@@ -41,11 +62,18 @@ var StatusApp = React.createClass({
 
     render: function(){
         var content = [];
+        var groups = [];
         var update = this.state.stats.update;
+        StatusStore.groupNames.forEach(function(group){
+            groups.push(<option>{group}</option>);
+        });
         for(var i in update){
             content.push(<Sidebar key={i} groupName={i} stats={update[i]}/>)
         }
         return (<div>   
+                    <select>
+                        {groups}
+                    </select>
                     <form onSubmit={this._onSearch}>
                        <input type="textfield" name="context" /> 
                        <input type="submit" />
