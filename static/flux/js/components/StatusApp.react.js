@@ -1,4 +1,3 @@
-// TODO make inputbox for search and button for search cancel
 var React = require('react');
 var StatusStore = require('../stores/StatusStore').StatusStore;
 var CarActions = require('../actions/StatusActions');
@@ -17,8 +16,7 @@ var StatusApp = React.createClass({
                 id: '',
                 update: {"":[]},
                 last_request: null
-            },
-            searchCon: {}
+            }
         }
     },
 
@@ -97,7 +95,7 @@ var StatusApp = React.createClass({
     _onChange: function(){
         this.setState({stats: getAllStatuses()});
         var loader = document.getElementById("gomon-loader");
-        if(leader !== null){
+        if(loader !== null){
             loader.remove();
         }
     },
@@ -111,7 +109,7 @@ var StatusApp = React.createClass({
         event.preventDefault();
         var target = event.target
         CarActions.SearchCar({
-                name: target.value
+                name: target.context.value
         });
     },
     _onEmptySearch: function(){

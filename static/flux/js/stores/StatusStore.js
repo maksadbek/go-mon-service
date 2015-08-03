@@ -90,27 +90,26 @@ var StatusStore = assign({}, EventEmitter.prototype, {
                 xhr.onload = function() {
                         if (xhr.status === 200 ) {
                             _carStatus = JSON.parse(xhr.responseText);
-                            console.log(_searchCase);
-                            // if search is on, then filter incoming data
+                            // if search is on, then filter incoming data by criteria from _searchRes
                             if(_search){
                                 var res = [];
                                 var m = {};
-                                car = _carStatus.update[_searchRes.group][_searchRes.id];
-                                res.push(car);
+                                foundCar = _carStatus.update[_searchRes.group][_searchRes.id];
+                                res.push(foundCar);
                                 m[_searchRes.group] = res;
                                 _carStatus.update = m;
                             }
                             // if search index container is empty, then fill it
                             if(_searchCase.length === 0){
                                 for(var groupName in _carStatus.update){
-                                    for(var carId in _carStatus.update[groupName]){
+                                    _carStatus.update[groupName].forEach(function(v, index){
                                         _searchCase.push({
-                                            group: i,
-                                            id: carId, 
-                                            name: _carStatus.update[groupName][carId].name,
-                                            number: _carStatus.update[groupName][carId].number
+                                            group: groupName,
+                                            id: index, 
+                                            name: v.name,
+                                            number: v.number
                                         });
-                                    }
+                                    });
                                 }
                             }
                             StatusStore.emitChange();
@@ -134,9 +133,6 @@ var StatusStore = assign({}, EventEmitter.prototype, {
         },
         emitChange: function(){
                 this.emit(CHANGE_EVENT);
-        },
-        emitChange: function(EVENT){
-                this.emit(EVENT);
         },
         addChangeListener: function(callback){
                 this.on(CHANGE_EVENT, callback);
@@ -177,7 +173,7 @@ var StatusStore = assign({}, EventEmitter.prototype, {
                         _search = true;
                         break;
                     case StatusConstants.DelSearchCon:
-                        search = false;
+                        _search = false;
                         break;
                 }
                 return true;
