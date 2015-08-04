@@ -28,7 +28,12 @@ var StatusActions = {
     },
     DelSearchCon: function(info){
         AppDispatcher.dispatch({
-                actionType: StatusConstants.DelSearchCon,
+                actionType: StatusConstants.DelSearchCon
+        });
+    },
+    SelectGroup: function(info){
+        AppDispatcher.dispatch({
+                actionType: StatusConstants.SelectGroup,
                 info: info
         });
     }

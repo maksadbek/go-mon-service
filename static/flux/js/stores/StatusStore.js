@@ -22,6 +22,7 @@ var positionURL = "http://"+host+":8080/positions";
 
 var StatusStore = assign({}, EventEmitter.prototype, {
     groupNames: ["all"],
+    groupIndex: 0,
     updateMarker: function(info){
         if(_markersOnMap[info.id] !== undefined){
             _markersOnMap[info.id].latitude= info.latitude;
@@ -76,6 +77,12 @@ var StatusStore = assign({}, EventEmitter.prototype, {
                         });
                     }
                 }
+                if(StatusStore.groupIndex !== 0){
+                    var groupName = StatusStore.groupNames[StatusStore.groupIndex];
+                    var filteredStatuses = {};
+                    filteredStatuses[groupName] = _carStatus.update[groupName];
+                    _carStatus.update = filteredStatuses;
+                }
                 StatusStore.emitChange();
                 return _carStatus;
             }
@@ -83,6 +90,8 @@ var StatusStore = assign({}, EventEmitter.prototype, {
                 StatusStore.emitChange();
                 return _carStatus;
             }
+            StatusStore.emitChange();
+            return _carStatus;
         };
         xhr.send(JSON.stringify({
             selectedFleetJs: UserStore.clientInfo.fleet,
@@ -138,6 +147,10 @@ var StatusStore = assign({}, EventEmitter.prototype, {
                 break;
             case StatusConstants.DelSearchCon:
                 _search = false;
+                break;
+            case StatusConstants.SelectGroup:
+                console.log("dispatch", action.info);
+                StatusStore.groupIndex = action.info.id;
                 break;
         }
         return true;

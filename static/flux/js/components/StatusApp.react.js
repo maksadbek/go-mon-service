@@ -37,7 +37,7 @@ var StatusApp = React.createClass({
                 update: {"":[]},
                 last_request: null
             },
-            group: "all"
+            groupIndex: 0
         }
     },
 
@@ -64,14 +64,14 @@ var StatusApp = React.createClass({
         var content = [];
         var groups = [];
         var update = this.state.stats.update;
-        StatusStore.groupNames.forEach(function(group){
-            groups.push(<option>{group}</option>);
+        StatusStore.groupNames.forEach(function(group, id){
+            groups.push(<option value={id}>{group}</option>);
         });
         for(var i in update){
             content.push(<Sidebar key={i} groupName={i} stats={update[i]}/>)
         }
         return (<div>   
-                    <select>
+                    <select onChange={this._onGroupSelect} >
                         {groups}
                     </select>
                     <form onSubmit={this._onSearch}>
@@ -143,6 +143,12 @@ var StatusApp = React.createClass({
     _onEmptySearch: function(){
         this.refs.searchText.getDOMNode().value = "";
         CarActions.DelSearchCon();
+    },
+    _onGroupSelect: function(event){
+        console.log(event.target.value);
+        CarActions.SelectGroup({
+            id: parseInt(event.target.value)
+        });
     }
 });
 
