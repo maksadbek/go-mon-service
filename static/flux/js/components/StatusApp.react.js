@@ -75,10 +75,10 @@ var StatusApp = React.createClass({
                         {groups}
                     </select>
                     <form onSubmit={this._onSearch}>
-                       <input type="textfield" name="context" /> 
+                       <input ref="searchText" type="textfield" name="context" /> 
                        <input type="submit" />
                     </form>
-                    <button onChange={this._onEmptySearch}>X</button>
+                    <button onClick={this._onEmptySearch}>X</button>
                     <div id={"west_side"}>
                         <div className={"bottom_side"}>
                             <table>
@@ -141,6 +141,7 @@ var StatusApp = React.createClass({
         });
     },
     _onEmptySearch: function(){
+        this.refs.searchText.getDOMNode().value = "";
         CarActions.DelSearchCon();
     }
 });
