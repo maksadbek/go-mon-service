@@ -14,7 +14,7 @@ var _search = false;
 var _searchCase = [];
 var _searchRes;
 
-var host = "217.29.118.23";
+var host = "localhost";
 if(typeof(go_mon_host) !== "undefined"){
     host = go_mon_host;
 }
@@ -51,16 +51,6 @@ var StatusStore = assign({}, EventEmitter.prototype, {
         xhr.onload = function() {
             if (xhr.status === 200 ) {
                 _carStatus = JSON.parse(xhr.responseText);
-                // if search is on, then filter incoming data 
-                // by criteria from _searchRes
-                if(_search){
-                    var res = [];
-                    var m = {};
-                    foundCar = _carStatus.update[_searchRes.group][_searchRes.id];
-                    res.push(foundCar);
-                    m[_searchRes.group] = res;
-                    _carStatus.update = m;
-                }
                 // if search index container is empty, 
                 // then fill it and groups container by the way
                 if(_searchCase.length === 0){
@@ -77,12 +67,8 @@ var StatusStore = assign({}, EventEmitter.prototype, {
                         });
                     }
                 }
-                if(StatusStore.groupIndex !== 0){
-                    var groupName = StatusStore.groupNames[StatusStore.groupIndex];
-                    var filteredStatuses = {};
-                    filteredStatuses[groupName] = _carStatus.update[groupName];
-                    _carStatus.update = filteredStatuses;
-                }
+                // if search is on, then filter incoming data 
+                // by criteria from _searchRes
                 StatusStore.emitChange();
                 return _carStatus;
             }
@@ -102,6 +88,26 @@ var StatusStore = assign({}, EventEmitter.prototype, {
         );
     },
     getAll: function(){
+        if(_search){
+            var res = [];
+            var m = {};
+            foundCar = carStatus.update[_searchRes.group][_searchRes.id];
+            res.push(foundCar);
+            m[_searchRes.group] = res;
+            return {
+                 id: _carStatus.id,
+                 update: m 
+            }
+        }
+        if(StatusStore.groupIndex !== 0){
+            var groupName = StatusStore.groupNames[StatusStore.groupIndex];
+            var filteredStatuses = {};
+            filteredStatuses[groupName] = _carStatus.update[groupName];
+            return {
+                 id: _carStatus.id,
+                 update: filteredStatuses
+            }
+        }
         return _carStatus;
     },
     emitChange: function(){
@@ -149,8 +155,8 @@ var StatusStore = assign({}, EventEmitter.prototype, {
                 _search = false;
                 break;
             case StatusConstants.SelectGroup:
-                console.log("dispatch", action.info);
                 StatusStore.groupIndex = action.info.id;
+                StatusStore.emitChange();
                 break;
         }
         return true;
