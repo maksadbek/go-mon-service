@@ -1,16 +1,11 @@
 var React = require('react');
 var StatusActions = require('../actions/StatusActions');
 var StatusStore = require('../stores/StatusStore').StatusStore;
-
-var Checkbox = React.createClass({
-  render: function() {
-    return (
-      <label className="mdl-checkbox mdl-js-checkbox mdl-js-ripple-effect" htmlFor="checkbox-1">
-        <input type="checkbox" id="checkbox-1" className="mdl-checkbox__input" defaultChecked />
-      </label>
-    );
-  }
-});
+var Mui  = require('material-ui');
+var ThemeManager = new Mui.Styles.ThemeManager();
+var ListItem = Mui.ListItem;
+var FontIcon = Mui.FontIcon;
+var CheckBox = Mui.CheckBox; 
 
 var CarStatus = React.createClass({
     propTypes:{
@@ -98,19 +93,7 @@ var CarStatus = React.createClass({
             ign= "on";
         }
         return (
-                  <tr>
-                    <td>
-                          <label className="mdl-checkbox mdl-js-checkbox mdl-js-ripple-effect" htmlFor="checkbox-1">
-                            <input type="checkbox" id="checkbox-1" className="mdl-checkbox__input" />
-                          </label>
-                    </td>
-                    <td className={"mdl-data-table__cell--non-numeric"}>{stat.number}</td>
-                    <td>{stat.speed}</td>
-                    <td>{stat.sat}</td>
-                    <td>{timeMsg}</td>
-                    <td>{ign}</td>
-                    <td>{stat.fuel_val}</td>
-                  </tr>
+              <ListItem  primaryText={stat.number} />
         );
     }
 });

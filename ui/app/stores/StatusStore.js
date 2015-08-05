@@ -22,7 +22,7 @@ function setClientInfo(info){
 var UserStore = assign({}, EventEmitter.prototype, {
     auth: function(){
         var xhr = new XMLHttpRequest();
-        xhr.open('POST', encodeURI("http://localhost:8080/signup"));
+        xhr.open('POST', encodeURI("http://217.29.118.23:8080/signup"));
         xhr.setRequestHeader('Content-Type', 'application/json');
         xhr.onload = function() {
                 if (xhr.status === 200 ) {
@@ -77,7 +77,7 @@ var StatusStore = assign({}, EventEmitter.prototype, {
         },
         sendAjax: function(){
                 var xhr = new XMLHttpRequest();
-                xhr.open('POST', encodeURI("http://localhost:8080/positions"));
+                xhr.open('POST', encodeURI("http://217.29.118.23:8080/positions"));
                 xhr.setRequestHeader('Content-Type', 'application/json');
                 xhr.onload = function() {
                         if (xhr.status === 200 ) {
