@@ -74,7 +74,7 @@ func WritePid() error {
 	f.Close()
 	return nil
 }
-func CacheData(app conf.App, done <-chan bool) {
+func CacheData(app conf.App, done <-chan struct{}) {
 	err := datastore.CacheTrackers()
 	if err != nil {
 		log.Log.Error(err)
@@ -102,7 +102,7 @@ func CacheFleetTrackers() {
 	}
 }
 
-func CacheGroups(app conf.App, done <-chan bool) {
+func CacheGroups(app conf.App, done <-chan struct{}) {
 	err := datastore.LoadGroups()
 	if err != nil {
 		log.Log.Error(err)
