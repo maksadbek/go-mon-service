@@ -62,7 +62,7 @@ var CarStatus = React.createClass({
         var stat = this.props.stat;
         StatusStore.updateMarker(stat);
         StatusStore.redrawMap();
-        var host = "localhost";
+        var host = "";
         if(typeof(go_mon_site) !== "undefined"){
             host = go_mon_site;
         }

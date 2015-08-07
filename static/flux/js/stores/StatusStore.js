@@ -4,7 +4,7 @@ var StatusConstants = require('../constants/StatusConstants');
 var UserConstants = require('../constants/UserConstants');
 var UserStore = require('./UserStore');
 var assign = require('object-assign');
-var _ = require('lodash');
+var lunr = require('lunr');
 
 var CHANGE_EVENT = 'change';
 
@@ -14,12 +14,18 @@ var _search = false;
 var _searchCase = [];
 var _searchRes;
 
-var host = "localhost";
+var host = "";
 if(typeof(go_mon_host) !== "undefined"){
     host = go_mon_host;
 }
 var positionURL = "http://"+host+":8080/positions";
 
+var searchIdx = lunr(function(){
+    this.field('number');
+    this.ref('id');
+});
+
+var indexed = false;
 var StatusStore = assign({}, EventEmitter.prototype, {
     groupNames: ["all"],
     groupIndex: 0,
@@ -53,19 +59,18 @@ var StatusStore = assign({}, EventEmitter.prototype, {
                 _carStatus = JSON.parse(xhr.responseText);
                 // if search index container is empty, 
                 // then fill it and groups container by the way
-                if(_searchCase.length === 0){
+                if(!indexed){
                     for(var groupName in _carStatus.update){
                         StatusStore.groupNames.push(groupName);
                         _carStatus.update[groupName]
                         .forEach(function(v, index){
-                            _searchCase.push({
-                                group: groupName,
-                                id: index, 
-                                name: v.name,
+                            searchIdx.add({
+                                id: v.id, 
                                 number: v.number
                             });
                         });
                     }
+                    indexed = true;
                 }
                 // if search is on, then filter incoming data 
                 // by criteria from _searchRes
@@ -89,11 +94,24 @@ var StatusStore = assign({}, EventEmitter.prototype, {
     },
     getAll: function(){
         if(_search){
-            var res = [];
             var m = {};
-            foundCar = carStatus.update[_searchRes.group][_searchRes.id];
-            res.push(foundCar);
-            m[_searchRes.group] = res;
+            var foundCar;
+            // iterate over all found items
+                // iterate over groups
+            for(var groups in _carStatus.update){
+                // iterate over all items in the group
+                var res = [];
+                _carStatus.update[groups].forEach(function(car){
+                    _searchRes.forEach(function(foundRef){
+                        if(car.id === parseInt(foundRef.ref)){
+                            res.push(car);
+                        }
+                    });
+                })
+                if(res.length !== 0){
+                    m[groups] = res;
+                }
+            };
             return {
                  id: _carStatus.id,
                  update: m 
@@ -148,11 +166,13 @@ var StatusStore = assign({}, EventEmitter.prototype, {
                 break;
             case StatusConstants.SearchCar:
                 var number = action.info.name;
-                _searchRes = _.find(_searchCase, {'number': number});
+                _searchRes = searchIdx.search(number);
                 _search = true;
+                StatusStore.emitChange();
                 break;
             case StatusConstants.DelSearchCon:
                 _search = false;
+                StatusStore.emitChange();
                 break;
             case StatusConstants.SelectGroup:
                 StatusStore.groupIndex = action.info.id;

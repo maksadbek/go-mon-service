@@ -5,7 +5,7 @@
   "dependencies": {
     "flux": "^2.0.1",
     "keymirror": "~0.1.0",
-    "lodash": "^3.10.0",
+    "lunr": "^0.5.11",
     "object-assign": "^1.0.0",
     "react": "^0.13.0"
   },

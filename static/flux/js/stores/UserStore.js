@@ -2,11 +2,10 @@ var AppDispatcher = require('../dispatcher/AppDispatcher');
 var EventEmitter = require('events').EventEmitter;
 var UserConstants = require('../constants/UserConstants');
 var assign = require('object-assign');
-var _ = require('lodash');
 
 var _clientInfo = {};
 var _token = "";
-var host = "localhost";
+var host = "";
 if(typeof(go_mon_host) !== "undefined"){
     host = go_mon_host;
 }

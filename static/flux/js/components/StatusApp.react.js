@@ -145,7 +145,6 @@ var StatusApp = React.createClass({
         CarActions.DelSearchCon();
     },
     _onGroupSelect: function(event){
-        console.log(event.target.value);
         CarActions.SelectGroup({
             id: parseInt(event.target.value)
         });
