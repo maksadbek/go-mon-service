@@ -5,6 +5,7 @@ gomon_log
 logs
 nohup.out
 pid
+log
 *~
 *.swp
 static/flux/js/bundle.js
