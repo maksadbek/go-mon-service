@@ -1,0 +1,13 @@
+#!/bin/bash
+case "$1" in
+    start)
+        /usr/local/bin/go-mon-service -v="fatal" -log="/var/log/gomon/log" -conf=/etc/gomon/conf.toml
+        ;;
+    stop)
+        /usr/local/bin/go-mon-service -s stop
+        ;;
+    *)
+      echo "Usage: /etc/init.d/gomon {start|stop}"
+      exit 1
+esac
+exit 0

@@ -25,13 +25,16 @@ var (
 	confPath = flag.String(
 		"conf",
 		"conf.toml",
-		`configuration file for daemon`)
+		`conf file for daemon`)
+	logPath = flag.String(
+		"log",
+		"log",
+		`log file path for daemon`)
 	signal = flag.String("s", "",
 		`send signal to the daemon
 		quit — graceful shutdown
 		stop — fast shutdown
 		reload — reloading the configuration file`)
-	//daemon    = flag.Bool("d", false, "do not touch it")
 	logLevel = flag.String("v", "error", "log level: debug, info, warn, error")
 	done     = make(chan struct{})
 	app      conf.App
@@ -59,7 +62,7 @@ func main() {
 	cntxt := &daemon.Context{
 		PidFileName: "pid",
 		PidFilePerm: 0644,
-		LogFileName: "log",
+		LogFileName: *logPath,
 		LogFilePerm: 0640,
 		WorkDir:     "./",
 		Umask:       027,
