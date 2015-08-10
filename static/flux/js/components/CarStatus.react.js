@@ -156,7 +156,7 @@ var CarStatus = React.createClass({
                         <label className="check_bock">
                             <input onChange={this._onTick} value={stat.id} checked={this.state.isChecked} type="checkbox" name="checkAll" />
                         </label> 
-                        <span onClick={this._onTitleClick} id="title_moni">{stat.number}</span>
+                        <span onClick={this._onTitleClick} id="title_moni">{stat.number+" "+stat.name}</span>
                     </td>
                     <td>
                       <div className="button_monitoring">
