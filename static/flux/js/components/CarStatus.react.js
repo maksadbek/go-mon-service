@@ -61,8 +61,9 @@ var CarStatus = React.createClass({
     render: function(){
         var stat = this.props.stat;
         StatusStore.updateMarker(stat);
-        StatusStore.redrawMap();
-        var host = "";
+        // pass false, this prevents zooming the map
+        StatusStore.redrawMap(false);
+        var host = "beta.maxtrack.uz";
         if(typeof(go_mon_site) !== "undefined"){
             host = go_mon_site;
         }

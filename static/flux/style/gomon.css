@@ -83,15 +83,24 @@
     width: 77px;
 }
 .top_side table, .bottom_side table {
- width: 100%;
+    width: 100%;
 }
 .body_monitoring .hide_panel {
- display: none;
+    display: none;
 }
 .body_monitoring .hide_panel.active {
- display: block;
+    display: block;
+}
+.hide_panel .bottom_side .button_monitoring table tr td:first-child {
+    font: 11px/14px arial,tahoma,helvetica,sans-serif;
+    padding-right:15px;
 }
 .body_mon {
-     height: 600px;
-      overflow: auto;
-  }
+	height: 96.7%;
+	overflow-y: scroll;
+}
+#gomon-loader{
+    margin:140px 0;
+    display:block;
+    text-align:center;
+}

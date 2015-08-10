@@ -12,13 +12,15 @@ var Sidebar = React.createClass({
         return { style: "", isChildChecked: false}
     },
     render: function(){
+        count = 0;
         var statuses = [];
         var stat = this.props.stats;
-        var group = this.props.groupName;
         var checked = this.state.isChildChecked;
         stat.forEach(function(k){
+            count++;
             statuses.push(<Status key={k.id} stat={k} isChecked={checked} />);
         })
+        var group = this.props.groupName + " (" + count + ")";
         return (
             <div className={"body_monitoring"}>
                 <div className={"show_panel "+ this.state.style}> 

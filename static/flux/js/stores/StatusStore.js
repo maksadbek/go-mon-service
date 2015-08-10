@@ -14,7 +14,7 @@ var _search = false;
 var _searchCase = [];
 var _searchRes;
 
-var host = "";
+var host = "217.29.118.23";
 if(typeof(go_mon_host) !== "undefined"){
     host = go_mon_host;
 }
@@ -42,15 +42,18 @@ var StatusStore = assign({}, EventEmitter.prototype, {
             _markersOnMap[info.id].action= '1';
         }
     },
-    redrawMap: function(){
+    redrawMap: function(zoom){
         // mon is global object
         // can be used to control the Map
         if(typeof(mon) !== "undefined"){
-            mon.obj_array(_markersOnMap, true);
+            mon.obj_array(_markersOnMap, zoom);
         }
         
     },
     sendAjax: function(){
+        if(MonReqToggler !== 1){
+            return _carStatus;
+        }
         var xhr = new XMLHttpRequest();
         xhr.open('POST', encodeURI(positionURL));
         xhr.setRequestHeader('Content-Type','application/json');
@@ -154,6 +157,8 @@ var StatusStore = assign({}, EventEmitter.prototype, {
                     }
                 }
                 my_sm.push(action.info.id);
+                // pass true to zoom the map
+                StatusStore.redrawMap(true);
                 break;
             case StatusConstants.DelMarker:
                 _markersOnMap[action.info.id].action = '-1';

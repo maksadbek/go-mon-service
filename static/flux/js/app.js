@@ -1,4 +1,8 @@
 var React = require('react');
 var StatusApp = require('./components/StatusApp.react');
-
-React.render( <StatusApp/>, document.getElementById('ext-gen91'));
+var fleetListDOM = document.getElementById('fleet_list');
+if(fleetListDOM !== null){ 
+    React.render( <StatusApp/>, document.getElementById('fleet_list'));
+} else {
+    console.error("gomon: нет дом элемента");
+}

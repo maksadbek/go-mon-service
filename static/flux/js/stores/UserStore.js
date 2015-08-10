@@ -5,7 +5,7 @@ var assign = require('object-assign');
 
 var _clientInfo = {};
 var _token = "";
-var host = "";
+var host = "217.29.118.23";
 if(typeof(go_mon_host) !== "undefined"){
     host = go_mon_host;
 }
@@ -30,13 +30,12 @@ var UserStore = assign({}, EventEmitter.prototype, {
         xhr.setRequestHeader('Content-Type', 'application/json');
         xhr.onload = function() {
             if (xhr.status === 200 ) {
-                _token = xhr.responseText;
-                UserStore.token = _token;
+                UserStore.token = xhr.responseText;
                 UserStore.emitChange();
             }
             else if (xhr.status !== 200) {
                 UserStore.emitChange();
-                return _token;
+                return UserStore.token;
             }
         };
         xhr.send(
