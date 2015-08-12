@@ -29,6 +29,11 @@ var indexed = false;
 var StatusStore = assign({}, EventEmitter.prototype, {
     groupNames: ["all"],
     groupIndex: 0,
+    centerMarker: function(id){
+        if(_markersOnMap[id] !== undefined){
+            mon.setCenterObj(id);
+        }
+    },
     updateMarker: function(info){
         if(_markersOnMap[info.id] !== undefined){
             _markersOnMap[info.id].latitude= info.latitude;

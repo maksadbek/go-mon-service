@@ -56,7 +56,7 @@ var CarStatus = React.createClass({
     },
     _onTitleClick: function(){
         // on click to the title, center the marker on the map
-        mon.setCenterObj(this.props.stat.id);
+        StatusStore.centerMarker(this.props.stat.id);
     },
     render: function(){
         var stat = this.props.stat;
