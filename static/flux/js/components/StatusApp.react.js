@@ -65,6 +65,41 @@ var StatusApp = React.createClass({
     render: function(){
         var content = [];
         var groups = [];
+        var speedButton,
+            ignitionButton,
+            satButton,
+            wifiButton,
+            fuelButton;
+
+
+
+        if(monitoring_speed !== 0){
+            speedButton = <button style={{"width":"34px"}}>
+                            <img title="Скорость" src={"http://online.maxtrack.uz/i/monitoring/speed-header.png"}/> 
+                        </button>
+        }
+        if(monitoring_actual_time !== 0){
+            satButton =  <button style={{"width":"34px"}}>
+                            <img src={"http://online.maxtrack.uz/i/monitoring/gsm-header.png"}/> 
+                        </button>
+        }
+        if(status_ignition_object !== 0){
+            ignitionButton = <button style={{"width":"34px"}}>
+                                <img    title={"Статус зажигании объекта"} 
+                                        src={"http://online.maxtrack.uz/i/monitoring/key-solid.png"} /> 
+                             </button>
+        } 
+        if(monitoring_gprs_condition !== 0){
+            wifiButton = <button style={{"width":"34px"}}>
+                            <img title={"Актуальность позиции во времени и пространстве"} 
+                                 src={"http://online.maxtrack.uz/i/monitoring/sat-header.png"} /> 
+                        </button>
+        }
+        if(status_fuel !== 0){
+            fuelButton = <button style={{"width":"34px"}}>
+                            <img title={"Уровень топлива"} src={"http://online.maxtrack.uz/i/monitoring/fuel-header-tr.png"} /> 
+                         </button>
+        }
         sPanelStyle = this.state.searchPanelStyle;
         var update = this.state.stats.update;
         StatusStore.groupNames.forEach(function(group, id){
@@ -109,13 +144,13 @@ var StatusApp = React.createClass({
                                 <table style={{"float":"left"}}>
                                     <tr>
                                         <td>
-                                            <select style={{"marginTop":"4px"}} onChange={this._onGroupSelect} >
+                                            <select onChange={this._onGroupSelect} >
                                                 {groups}
                                             </select>
                                         </td>
                                     </tr>
                                 </table>
-                                <table cellspacing={"0"} style={{"float":"right"}}>
+                                <table cellspacing={"0"} style={{"margin-top": "-7px", "float":"right"}}>
                                     <tbody>
                                         <tr>
                                             <td className="x-toolbar-cell">
@@ -140,11 +175,11 @@ var StatusApp = React.createClass({
                                                                 <i>&nbsp;</i>
                                                             </td>
                                                             <td className="x-btn-mc">
-                                                              <em unselectable="on" className="x-btn-arrow">
-                                                                    <button onClick={this._onSearchClick} 
+                                                              <em onClick={this._onSearchClick} unselectable="on" className="x-btn-arrow">
+                                                                    <button  
                                                                             id="search_show" 
                                                                             type="button" 
-                                                                            className="x-btn-text ">
+                                                                            className={"x-btn-text "+ sPanelStyle}>
                                                                             <img style={{"position": "relative", "right": "6px"}} 
                                                                             src="/i/monitoring/magnifier-zoom.png" />
                                                                     </button>
@@ -179,27 +214,11 @@ var StatusApp = React.createClass({
                                     </td>
                                     <td>
                                         <div className={"button_monitoring"}>
-                                            <button style={{"width":"28px", "marginRight":"0px"}}>
-                                                <img title="Скорость" src={"http://online.maxtrack.uz/i/monitoring/speed-header.png"}/> 
-                                            </button>
-                                            <button style={{"width":"33px", "marginRight":"0px"}}>
-                                                <img src={"http://online.maxtrack.uz/i/monitoring/gsm-header.png"}/> 
-                                            </button>
-                                            <button style={{"width":"34px", "marginRight":"-6"}}>
-                                                <img    title={"Актуальность позиции во времени и пространстве"} 
-                                                        src={"http://online.maxtrack.uz/i/monitoring/sat-header.png"}
-                                                /> 
-                                            </button>
-                                            <button style={{"width":"26px", "marginRight":"-4"}}>
-                                                <img title={"Статус зажигании объекта"} 
-                                                     src={"http://online.maxtrack.uz/i/monitoring/key-solid.png"}
-                                                /> 
-                                            </button>
-                                            <button style={{"width":"25px", "marginRight":"25px"}}>
-                                                <img title={"Уровень топлива"} 
-                                                     src={"http://online.maxtrack.uz/i/monitoring/fuel-header-tr.png"} 
-                                                /> 
-                                            </button>
+                                        {speedButton}
+                                        {wifiButton}
+                                        {satButton}
+                                        {ignitionButton}
+                                        {fuelButton}
                                         </div>
                                     </td>
                                 </tr>

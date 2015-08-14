@@ -93,7 +93,7 @@ var StatusStore = assign({}, EventEmitter.prototype, {
             return _carStatus;
         };
         xhr.send(JSON.stringify({
-            selectedFleetJs: UserStore.clientInfo.fleet,
+            selectedFleetJs: go_mon_fleet, // TODO use UserStore.clientInfo.fleet,
             user: UserStore.clientInfo.login,
             groups: UserStore.clientInfo.groups,
             token: UserStore.token,

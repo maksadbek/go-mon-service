@@ -9,7 +9,11 @@ var Sidebar = React.createClass({
         groupName: React.PropTypes.string.isRequired
     },
     getInitialState: function(){
-        return { style: "", isChildChecked: false}
+        return { 
+                style: "", 
+                styleCheckAll: "",
+                isChildChecked: false
+        }
     },
     render: function(){
         count = 0;
@@ -23,7 +27,7 @@ var Sidebar = React.createClass({
         var group = this.props.groupName + " (" + count + ")";
         return (
             <div className={"body_monitoring"}>
-                <div className={"show_panel "+ this.state.style}> 
+                <div className={"show_panel "+ this.state.style + " " + this.state.styleCheckAll}> 
                     <form>
                         <label className="check_bock">
                             <input onChange={this._onCheckHandler} type="checkbox" name="checkAll" />
@@ -46,7 +50,15 @@ var Sidebar = React.createClass({
         }
     },
     _onCheckHandler: function(event){
-        this.setState({isChildChecked: event.target.checked});
+        var style = "";
+        if(this.state.styleCheckAll === ""){
+            style = "checkAll";
+        }
+        this.setState({
+                style:"active",
+                styleCheckAll: style,
+                isChildChecked: event.target.checked
+        });
     },
     componentDidMount: function(){
     }
