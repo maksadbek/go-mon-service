@@ -50,7 +50,7 @@ func (g *Vehicles) Put(id string, v Vehicle) {
 func (g *Vehicles) Get(id string) (Vehicle, error) {
 	v, ok := g.Data[id]
 	if !ok {
-		return v, fmt.Errorf("group (id %s) not found", id)
+		return v, fmt.Errorf("vehicle (id %s) not found", id)
 	}
 	return v, nil
 }

@@ -35,13 +35,14 @@ type Pos struct {
 }
 
 // GetPositions can be used to retrieve map of positions
-func GetPositions(trackerId []string) (trackers map[string][]Pos, err error) {
-	trackers = make(map[string][]Pos)
+func GetPositions(trackerId []string) (map[string][]Pos, error) {
+	trackers := make(map[string][]Pos)
 	rc := pool.Get()
 	defer rc.Close()
 	// range over ids of trackers
 	for _, id := range trackerId {
 		var pos Pos
+		var err error
 		pos.Id, err = strconv.Atoi(id)
 		if err != nil {
 			logger.Log.Warn("GetPositions", err.Error())
@@ -53,7 +54,8 @@ func GetPositions(trackerId []string) (trackers map[string][]Pos, err error) {
 		}
 		v, err := VehicleList.Get(id)
 		if err != nil {
-			return trackers, err
+			logger.Log.Error(err)
+			continue
 		}
 		// if the value is nil, then merge with default values from max_units
 		if p == "" {
@@ -91,12 +93,11 @@ func GetPositions(trackerId []string) (trackers map[string][]Pos, err error) {
 		}
 		group, err := Grouplist.Get(strconv.Itoa(v.Group_id))
 		if err != nil {
-			logger.Log.Error(err)
 			group.Name = "all"
 		}
 		trackers[group.Name] = append(trackers[group.Name], pos)
 	}
-	return
+	return trackers, nil
 }
 
 // GetPositionsByFleet can be used to get tracker data by fleet id
