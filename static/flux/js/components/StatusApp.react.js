@@ -238,6 +238,8 @@ var StatusApp = React.createClass({
         if(loader !== null){
             loader.remove();
         }
+        $("#fleet_list_loader").hide();
+        $("#fleet_list").show();
     },
     _onAuth: function(){
         StatusStore.sendAjax();
