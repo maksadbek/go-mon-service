@@ -1,7 +1,6 @@
 package rcache
 
 import (
-	"encoding/json"
 	"errors"
 	"strconv"
 	"strings"
@@ -91,20 +90,7 @@ func (pos *Pos) SetLitrage(deviceTypeId int) error {
 
 		// set ignition
 		// if error then set ignition = 0
-		additionalsFromMU := make(map[string]string)
-		add := v.Additional
-		if err != nil {
-			logger.Log.Error(err)
-			pos.Ignition = 0
-		}
-
-		err = json.Unmarshal([]byte(add), &additionalsFromMU)
-		if err != nil {
-			logger.Log.Error(err)
-			pos.Ignition = 0
-		}
-
-		ignitionIndex := additionalsFromMU["param_port_ignition"]
+		ignitionIndex := v.Additional["param_port_ignition"]
 		ignition, ok := additionals[ignitionIndex]
 		if !ok {
 			pos.Ignition = 0

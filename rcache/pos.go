@@ -80,7 +80,8 @@ func GetPositions(trackerId []string) (map[string][]Pos, error) {
 			pos.Number = v.Number
 			pos.Name = v.Name
 			pos.Customization = v.Customization
-			pos.Additional = v.Additional
+			j, _ := json.Marshal(v.Additional)
+			pos.Additional = string(j)
 		} else {
 			err = json.Unmarshal([]byte(p), &pos)
 			if err != nil {

@@ -2,7 +2,6 @@ package datastore
 
 import (
 	"database/sql"
-	"encoding/json"
 	"fmt"
 	"strconv"
 	"strings"
@@ -96,12 +95,8 @@ func CacheTrackers() error {
 			container[fmt.Sprintf("%v", key)] = fmt.Sprintf("%v", val)
 		}
 
-		jAdditionals, err := json.Marshal(container)
-		if err != nil {
-			panic(err)
-		}
-
-		v.Additional = string(jAdditionals)
+		v.Additional = make(map[string]string)
+		v.Additional = container
 		v.ParamID = strconv.Itoa(int(paramId.Int64))
 		v.Pid = int(pid.Int64)
 		rcache.VehicleList.Put(strconv.Itoa(v.Id), v)
