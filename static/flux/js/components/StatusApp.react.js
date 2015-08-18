@@ -69,6 +69,7 @@ var StatusApp = React.createClass({
             ignitionButton,
             satButton,
             wifiButton,
+            batteryButton,
             fuelButton;
 
 
@@ -99,6 +100,11 @@ var StatusApp = React.createClass({
             fuelButton = <button style={{"width":"34px"}}>
                             <img title={"Уровень топлива"} src={"http://online.maxtrack.uz/i/monitoring/fuel-header-tr.png"} /> 
                          </button>
+        }
+        if(status_battery !== 0){
+            batteryButton = <button style={{"width":"34px"}}>
+                        <img title={"Уровень заряда батарейки"} src={"http://online.maxtrack.uz/i/monitoring/battery-plug.png"} /> 
+                     </button>
         }
         sPanelStyle = this.state.searchPanelStyle;
         var update = this.state.stats.update;
@@ -219,6 +225,7 @@ var StatusApp = React.createClass({
                                         {satButton}
                                         {ignitionButton}
                                         {fuelButton}
+                                        {batteryButton}
                                         </div>
                                     </td>
                                 </tr>

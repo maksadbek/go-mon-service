@@ -81,6 +81,7 @@ var CarStatus = React.createClass({
             timeStatus,
             ignitionStatus,
             satStatus,
+            batteryStatus,
             fuelStatus;
 
         if(monitoring_actual_time !== 0){
@@ -100,7 +101,7 @@ var CarStatus = React.createClass({
                     satIndicator = "http://"+host+"/i/monitoring/sat-3.png";
                 }
             }
-            satStatus = <td> <span className="hide_tooltip">{satTitle}</span><img  src={satIndicator} /></td>
+            satStatus = <td><span className="hide_tooltip">{satTitle}</span><img src={satIndicator}/></td>
         } 
 
         if (monitoring_speed !== 0) {
@@ -121,24 +122,25 @@ var CarStatus = React.createClass({
             // set time
             stat.time = stat.time.replace(/-/g, " ")
             var time = new Date(stat.time);
-            var now = new Date(Date.now());
-            var delta = Math.abs(now - time) / 1000000;
-            var rangeInMinutes = Math.floor(delta / 60)
+            var now = new Date();
+            var range = Math.floor((now.getTime() - time.getTime())/ 60000);
             var timeindicator;
             var timeMsg = "";
-            
-            if(rangeInMinutes >= 24*60) {
-            timeMsg = "Позиция определена 1 дней назад" 
+            if(range >= 24*60 && range < 2*24*60) {
+                timeMsg = "Позиция определена 1 дней назад" 
                 timeIndicator = "http://"+host+"/i/monitoring/gsm-4.png";
-            }else if(rangeInMinutes > 60 && rangeInMinutes < 24*60){
-            timeMsg = "Позиция определена " + Math.ceil((rangeInMinutes / 60)) + " час  назад" 
+            }else if(range > 60 && range < 24*60){
+                timeMsg = "Позиция определена " + Math.ceil((range / 60)) + " час  назад" 
                 timeIndicator = "http://"+host+"/i/monitoring/gsm-1.png";
-            }else if(rangeInMinutes > 20 && rangeInMinutes <= 60){
-            timeMsg = "Позиция определена 1 час  назад" 
+            }else if(range > 20 && range <= 60){
+                timeMsg = "Позиция определена 1 час  назад" 
                 timeIndicator = "http://"+host+"/i/monitoring/gsm-2.png";
-            }else if(rangeInMinutes >= 0 && rangeInMinutes <= 20){
-            timeMsg = "Позиция определена 20 минут  назад" 
+            }else if(range >= 0 && range <= 20){
+                timeMsg = "Позиция определена 20 минут  назад" 
                 timeIndicator = "http://"+host+"/i/monitoring/gsm-3.png";
+            }else {
+                timeMsg = "Позиция определена " + Math.floor(range/24/60) + " дней назад" 
+                timeIndicator = "http://"+host+"/i/monitoring/gsm-5.png";
             }
             timeStatus = <td><span className="hide_tooltip">{timeMsg}</span><img src={timeIndicator} /></td>
         } 
@@ -177,6 +179,19 @@ var CarStatus = React.createClass({
 
             fuelStatus = <td><span className="hide_tooltip">{fuelTitle}</span><img src={fuelIndicator} /></td>
         }
+
+        if(status_battery !== 0){
+            // set battery indicator
+            var batteryIndicator;
+            var battery = Math.ceil(stat.battery66 / 1000);
+            var batteryTitle = "Питание " + battery + " вольт"
+            if (battery > 0 ) {
+                batteryIndicator = "http://"+host+"/i/monitoring/battery-full.png";
+            } else {
+                batteryIndicator = "http://"+host+"/i/monitoring/battery-low.png";
+            }
+            batteryStatus = <td><span className="hide_tooltip">{batteryTitle}</span><img src={batteryIndicator} /></td>
+        }
         var toolTipStyle = this.state.toolTipStyle;
 
         return (
@@ -201,6 +216,7 @@ var CarStatus = React.createClass({
                             {satStatus}                    
                             {ignitionStatus}
                             {fuelStatus}
+                            {batteryStatus}
                           </tr>
                         </table>
                            <div className="hoverBlock" style={{display: toolTipStyle}}>
