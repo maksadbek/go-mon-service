@@ -30,7 +30,7 @@ var StatusStore = assign({}, EventEmitter.prototype, {
     groupNames: ["all"],
     groupIndex: 0,
     centerMarker: function(id){
-        if(_markersOnMap[id] !== undefined){
+        if(_markersOnMap[id].onMap){
             mon.setCenterObj(id);
         }
     },
@@ -155,6 +155,7 @@ var StatusStore = assign({}, EventEmitter.prototype, {
                 // the structure of info must be:
                 // { id: "1234", pos: { lat: "123", lng:...}}
                 _markersOnMap[action.info.id] = action.info.pos;
+                _markersOnMap[action.info.id].onMap = true;
                 mon.obj_array(_markersOnMap, true);
                 for(var i in my_sm){
                     if(my_sm[i] === action.info.id){
@@ -167,6 +168,7 @@ var StatusStore = assign({}, EventEmitter.prototype, {
                 break;
             case StatusConstants.DelMarker:
                 _markersOnMap[action.info.id].action = '-1';
+                _markersOnMap[action.info.id].onMap = false;
                 mon.obj_array(_markersOnMap, true);
                 for(var i in my_sm){
                     if(my_sm[i] == action.info.id){

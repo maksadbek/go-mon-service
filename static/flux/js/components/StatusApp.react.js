@@ -72,11 +72,9 @@ var StatusApp = React.createClass({
             batteryButton,
             fuelButton;
 
-
-
         if(monitoring_speed !== 0){
-            speedButton = <button style={{"width":"34px"}}>
-                            <img title="Скорость" src={"http://online.maxtrack.uz/i/monitoring/speed-header.png"}/> 
+        speedButton = <button style={{"width":"34px"}}>
+                        <img title="Скорость" src={"http://online.maxtrack.uz/i/monitoring/speed-header.png"}/> 
                         </button>
         }
         if(monitoring_actual_time !== 0){
@@ -159,6 +157,28 @@ var StatusApp = React.createClass({
                                 <table cellspacing={"0"} style={{"margin-top": "-7px", "float":"right"}}>
                                     <tbody>
                                         <tr>
+                                            <td className="x-toolbar-cell">
+                                                <span className="xtb-sep"></span>
+                                            </td>
+                                            <td className="x-toolbar-cell">
+                                                 <table cellspacin="0" className="x-btn x-btn-icon">
+                                                     <tbody className="x-btn-small x-btn-icon-small-left">
+                                                         <tr>
+                                                             <td className="x-btn-mc">
+                                                                 <em unselectable="on" className="">
+                                                                     <button onClick={this._onDispatcherClick} 
+                                                                        className=" x-btn-text"
+                                                                        id="ext-gen111"
+                                                                        type="button"
+                                                                        style={{"position":"relative", "top":"0px"}}>
+                                                                        <img src={"/i/monitoring/disp_center.png"} />
+                                                                     </button>
+                                                                 </em>
+                                                             </td>
+                                                        </tr>
+                                                 </tbody>
+                                             </table>
+                                         </td>
                                             <td className="x-toolbar-cell">
                                                 <span className="xtb-sep"></span>
                                             </td>
@@ -277,6 +297,10 @@ var StatusApp = React.createClass({
             this.setState({searchPanelStyle: ""})
         }
     },
+    _onDispatcherClick: function(){
+        window.open('/?module=disp&col='+my_sm.length+'&cars_id='+my_sm.join(',')+'&lang=ru');
+    }
+
 });
 
 module.exports = StatusApp;
