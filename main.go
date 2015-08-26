@@ -8,7 +8,6 @@ import (
 	"os"
 	"runtime"
 	"syscall"
-	"time"
 
 	"bitbucket.org/maksadbek/go-mon-service/conf"
 	"bitbucket.org/maksadbek/go-mon-service/datastore"
@@ -18,7 +17,6 @@ import (
 	"bitbucket.org/maksadbek/go-mon-service/route"
 	"bitbucket.org/maksadbek/go-mon-service/utils"
 	"github.com/Sirupsen/logrus"
-	"github.com/didip/tollbooth"
 	"github.com/rs/cors"
 	"github.com/sevlyar/go-daemon"
 )
@@ -130,10 +128,8 @@ func worker(app conf.App) {
 
 func webHandlers() http.Handler {
 	web := http.NewServeMux()
-	// setup rate limiter, 1 request per 5 seconds
-	limiter := tollbooth.NewLimiter(1, time.Second*5)
 	// web.Handle("/", http.FileServer(http.Dir("static/")))
-	web.Handle("/positions", tollbooth.LimitFuncHandler(limiter, route.GetPositionHandler))
+	web.HandleFunc("/positions", route.GetPositionHandler)
 	web.HandleFunc("/signup", route.SignupHandler)
 	web.HandleFunc("/logout", route.LogoutHandler)
 	web.HandleFunc("/debug/vars/", metrics.MetricsHandler)
