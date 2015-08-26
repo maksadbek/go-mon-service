@@ -33,7 +33,7 @@ type Tokens struct {
 	sync.RWMutex
 }
 
-var tokenList Tokens
+var TokenList Tokens
 
 func (t *Tokens) Put(token string, tk tokenKey) {
 	if len(t.Tokens) == 0 {
@@ -45,26 +45,20 @@ func (t *Tokens) Put(token string, tk tokenKey) {
 }
 
 func (t *Tokens) Get(token string) (tokenKey, bool) {
-	t.RLock()
 	tk, ok := t.Tokens[token]
 	if !ok {
-		t.RUnlock()
 		return tk, false
 	}
-	t.RUnlock()
 	return tk, true
 }
 
 // FindUid can be used to check whether uid with has already got token or not
 func (t *Tokens) FindUid(uid string) (string, bool) {
-	t.Lock()
 	for token, usr := range t.Tokens {
 		if usr.ID == uid {
-			t.Unlock()
 			return token, true
 		}
 	}
-	t.Unlock()
 	return "", false
 }
 
@@ -116,11 +110,15 @@ func LogoutHandler(w http.ResponseWriter, r *http.Request) {
 
 	// delete the token from tokens container
 	// lock it before deleting
-	tokenList.Del(token)
+	TokenList.Del(token)
 }
 
 // SignUpHandler handles user sign up request
 func SignupHandler(w http.ResponseWriter, r *http.Request) {
+	response := struct {
+		Message string `json:"message"`
+		Token   string `json:"token"`
+	}{}
 	key := make([]byte, 64)            // key for HMAC computation
 	decoder := json.NewDecoder(r.Body) // json decoder
 	req := make(map[string]string)     // request params
@@ -128,7 +126,9 @@ func SignupHandler(w http.ResponseWriter, r *http.Request) {
 	err := decoder.Decode(&req)
 	if err != nil {
 		logger.ReqWarn(r, conf.ErrReq)
-		http.Error(w, "invalid req body format", 500)
+		response.Message = "Body should be a JSON object"
+		message, _ := json.Marshal(response)
+		http.Error(w, string(message), 400)
 		return
 	}
 	// get login and hash
@@ -136,36 +136,49 @@ func SignupHandler(w http.ResponseWriter, r *http.Request) {
 	// validate for empty string
 	if user == "" || hash == "" || uid == "" {
 		logger.ReqWarn(r, conf.ErrReq)
-		http.Error(w, "Bad Request", 400)
+		response.Message = "Validation Failed - missing field"
+		message, _ := json.Marshal(response)
+		http.Error(w, string(message), 400)
 		return
 	}
-	// if user credentials are bad, then send 400 status
+	// if user credentials are bad, then send 401 status
 	if !datastore.CheckUser(user, hash) {
 		logger.ReqWarn(r, conf.ErrReq)
-		http.Error(w, "Bad User Credentials", 400)
+		response.Message = "Bad User Credentials"
+		message, _ := json.Marshal(response)
+		http.Error(w, string(message), 401)
 		return
 	}
 	// range over tokens, and
 	// if has already got token,
 	// then return old token
-	if token, ok := tokenList.FindUid(uid); ok {
-		w.Write([]byte(token))
+	if token, ok := TokenList.FindUid(uid); ok {
+		response.Message = "User has already logged in"
+		response.Token = token
+		message, _ := json.Marshal(response)
+		w.Write([]byte(message))
 		return
 	}
 	// else, generate random key
 	_, err = rand.Read(key)
 	if err != nil {
 		logger.ReqWarn(r, err.Error())
-		http.Error(w, "system error", 500)
+		response.Message = "System error, please try again"
+		message, _ := json.Marshal(response)
+		http.Error(w, string(message), 500)
 		return
 	}
 	// compute new token
 	token := base64.StdEncoding.EncodeToString(computeHMAC(user, base64.StdEncoding.EncodeToString(key)))
 	// put token into container
-	tokenList.Put(token, tokenKey{ID: uid, Key: base64.StdEncoding.EncodeToString(key)})
+	TokenList.Put(token, tokenKey{ID: uid, Key: base64.StdEncoding.EncodeToString(key)})
 	// write tokens into debug var
-	jtokens, _ := json.MarshalIndent(tokenList.Tokens, "\t", "")
+	jtokens, _ := json.MarshalIndent(TokenList.Tokens, "\t", "")
 	expTokens.Set(string(jtokens))
+	// setup respose
+	response.Message = "OK"
+	response.Token = token
+	message, _ := json.Marshal(response)
 	// and send computed token
-	w.Write([]byte(token))
+	w.Write([]byte(message))
 }
