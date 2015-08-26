@@ -30,10 +30,13 @@ var UserStore = assign({}, EventEmitter.prototype, {
         xhr.setRequestHeader('Content-Type', 'application/json');
         xhr.onload = function() {
             if (xhr.status === 200 ) {
-                UserStore.token = xhr.responseText;
+                resp = JSON.parse(xhr.responseText)
+                UserStore.token = resp.token;
                 UserStore.emitChange();
             }
             else if (xhr.status !== 200) {
+                resp = JSON.parse(xhr.responseText)
+                console.error(resp.message);
                 UserStore.emitChange();
                 return UserStore.token;
             }

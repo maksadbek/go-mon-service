@@ -27,7 +27,7 @@ var searchIdx = lunr(function(){
 
 var indexed = false;
 var StatusStore = assign({}, EventEmitter.prototype, {
-    groupNames: ["all"],
+    groupNames: ["все"],
     groupIndex: 0,
     centerMarker: function(id){
         if(_markersOnMap[id].onMap){
@@ -92,11 +92,10 @@ var StatusStore = assign({}, EventEmitter.prototype, {
             StatusStore.emitChange();
             return _carStatus;
         };
+        xhr.setRequestHeader("X-Access-Token", UserStore.token);
         xhr.send(JSON.stringify({
-            selectedFleetJs: go_mon_fleet, // TODO use UserStore.clientInfo.fleet,
-            user: UserStore.clientInfo.login,
-            groups: UserStore.clientInfo.groups,
-            token: UserStore.token,
+            fleetID: go_mon_fleet, // TODO use UserStore.clientInfo.fleet,
+            userName: UserStore.clientInfo.login,
             })
         );
     },
