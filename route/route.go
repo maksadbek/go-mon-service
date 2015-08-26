@@ -5,15 +5,21 @@ import (
 	"io"
 	"net/http"
 	"strings"
+	"time"
 
 	"bitbucket.org/maksadbek/go-mon-service/conf"
 	"bitbucket.org/maksadbek/go-mon-service/datastore"
 	"bitbucket.org/maksadbek/go-mon-service/logger"
 	"bitbucket.org/maksadbek/go-mon-service/rcache"
+	"github.com/didip/tollbooth"
+	tollboothConf "github.com/didip/tollbooth/config"
 	"github.com/garyburd/redigo/redis"
 )
 
 var config conf.App
+
+// setup rate limiter, 1 request per 5 seconds
+var Limiter *tollboothConf.Limiter
 
 type gzipResponseWriter struct {
 	io.Writer
@@ -51,6 +57,9 @@ func Initialize(c conf.App) error {
 	if err != nil {
 		return err
 	}
+	// setup rate limiter
+	Limiter = tollbooth.NewLimiter(1, time.Second*55)
+	Limiter.Methods = append(Limiter.Methods, "POST")
 	return err
 }
 
