@@ -58,8 +58,9 @@ func Initialize(c conf.App) error {
 		return err
 	}
 	// setup rate limiter
-	Limiter = tollbooth.NewLimiter(1, time.Second*55)
+	Limiter = tollbooth.NewLimiter(1, time.Second*5)
 	Limiter.Methods = append(Limiter.Methods, "POST")
+	//Limiter.IPLookups = []string{""}
 	return err
 }
 

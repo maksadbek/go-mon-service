@@ -112,7 +112,7 @@ func worker(app conf.App) {
 	c := cors.New(cors.Options{
 		AllowedOrigins:   []string{"*"},
 		AllowCredentials: true,
-		AllowedHeaders:   []string{"content-type", "x-requested-with"},
+		AllowedHeaders:   []string{"content-type", "x-requested-with", "X-Access-Token"},
 		AllowedMethods:   []string{"post"},
 	})
 	var err error
