@@ -69,6 +69,10 @@ var StatusStore = assign({}, EventEmitter.prototype, {
                 // then fill it and groups container by the way
                 if(!indexed){
                     for(var groupName in _carStatus.update){
+                        _carStatus.update[groupName].forEach(function(car){
+                            car.action = '-1';
+                            _markersOnMap[car.id] = car;
+                        })
                         StatusStore.groupNames.push(groupName);
                         _carStatus.update[groupName]
                         .forEach(function(v, index){
@@ -79,6 +83,7 @@ var StatusStore = assign({}, EventEmitter.prototype, {
                         });
                     }
                     indexed = true;
+                    mon.obj_array(_markersOnMap, false);
                 }
                 // if search is on, then filter incoming data 
                 // by criteria from _searchRes
@@ -135,6 +140,7 @@ var StatusStore = assign({}, EventEmitter.prototype, {
         }
         return _carStatus;
     },
+
     emitChange: function(){
         this.emit(CHANGE_EVENT);
     },
