@@ -26,6 +26,7 @@ var searchIdx = lunr(function(){
 });
 
 var indexed = false;
+var isFirstMarkerDrawed = false;
 var StatusStore = assign({}, EventEmitter.prototype, {
     groupNames: ["все"],
     groupIndex: 0,
@@ -72,6 +73,11 @@ var StatusStore = assign({}, EventEmitter.prototype, {
                         _carStatus.update[groupName].forEach(function(car){
                             car.action = '-1';
                             _markersOnMap[car.id] = car;
+                            // TODO, this is for test
+                            if(!isFirstMarkerDrawed){
+                                _markersOnMap[car.id] = '1';
+                                isFirstMarkerDrawd = true;
+                            }
                         })
                         StatusStore.groupNames.push(groupName);
                         _carStatus.update[groupName]
@@ -159,7 +165,7 @@ var StatusStore = assign({}, EventEmitter.prototype, {
             case StatusConstants.AddMarker:
                 // the structure of info must be:
                 // { id: "1234", pos: { lat: "123", lng:...}}
-                _markersOnMap[action.info.id] = action.info.pos;
+                _markersOnMap[action.info.id].action = '2';
                 _markersOnMap[action.info.id].onMap = true;
                 mon.obj_array(_markersOnMap, true);
                 for(var i in my_sm){
