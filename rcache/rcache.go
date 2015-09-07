@@ -96,6 +96,7 @@ func AddFleetTrackers(ftracker []FleetTracker) error {
 	defer rc.Close()
 	for _, tracker := range ftracker {
 		// range over tracker data
+		rc.Do("DEL", "fleet"+":"+tracker.Fleet)
 		for _, x := range tracker.Trackers {
 			// add tracker to list
 			rc.Do("SADD", "fleet"+":"+tracker.Fleet, x)
