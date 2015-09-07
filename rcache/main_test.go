@@ -15,11 +15,12 @@ func TestMain(m *testing.M) {
 	if err != nil {
 		panic(err)
 	}
-
-	err = rc.Start(app.DS.Redis.Host)
+	err = Initialize(app)
 	if err != nil {
 		panic(err)
 	}
+	rc := pool.Get()
+	defer rc.Close()
 
 	for _, x := range FleetTest.Trackers {
 		rc.Do("SADD", "fleet"+":"+FleetTest.FleetName, x)

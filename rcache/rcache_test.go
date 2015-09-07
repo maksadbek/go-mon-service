@@ -118,6 +118,8 @@ func TestSetUsrTrackers(t *testing.T) {
 	if err != nil {
 		t.Error(err)
 	}
+	rc := pool.Get()
+	defer rc.Close()
 	userb, err := rc.Do(
 		"GET",
 		config.DS.Redis.UPrefix+":"+testUsr[1].Login,
@@ -150,4 +152,12 @@ func TestGetPositions_NonExisting(t *testing.T) {
 			t.Errorf("got %v, want nothing", v["10"])
 		}
 	*/
+}
+
+func TestMarshalJsonFleet(t *testing.T) {
+	jfleet, err := json.MarshalIndent(testFleet, "", "    ")
+	if err != nil {
+		panic(err)
+	}
+	fmt.Println(string(jfleet))
 }

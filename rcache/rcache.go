@@ -22,6 +22,31 @@ type Fleet struct {
 	LastReq int64            `json:"last_request"` // current unix time
 }
 
+func (f Fleet) MarshalJSON() ([]byte, error) {
+	m := struct {
+		ID     string `json:"id"`
+		Update []struct {
+			GroupName string `json:"groupName"`
+			Data      []Pos  `json:"data"`
+		} `json:"update"`
+	}{
+		ID: f.Id,
+	}
+	for groupName, positions := range f.Update {
+		data := struct {
+			GroupName string `json:"groupName"`
+			Data      []Pos  `json:"data"`
+		}{
+			GroupName: groupName,
+		}
+		for _, position := range positions {
+			data.Data = append(data.Data, position)
+		}
+		m.Update = append(m.Update, data)
+	}
+	return json.Marshal(m)
+}
+
 // structure for fleet
 type FleetTracker struct {
 	Fleet    string
