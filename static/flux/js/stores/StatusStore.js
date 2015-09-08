@@ -73,11 +73,6 @@ var StatusStore = assign({}, EventEmitter.prototype, {
                         _carStatus.update[groupName].forEach(function(car){
                             car.action = '-1';
                             _markersOnMap[car.id] = car;
-                            // TODO, this is for test
-                            if(!isFirstMarkerDrawed){
-                                _markersOnMap[car.id] = '1';
-                                isFirstMarkerDrawd = true;
-                            }
                         })
                         StatusStore.groupNames.push(groupName);
                         _carStatus.update[groupName]
@@ -88,6 +83,8 @@ var StatusStore = assign({}, EventEmitter.prototype, {
                             });
                         });
                     }
+                    // TODO, this is for test
+                    _markersOnMap[Object.keys(_markersOnMap)[0]].action = '1';
                     indexed = true;
                     mon.obj_array(_markersOnMap, false);
                 }
