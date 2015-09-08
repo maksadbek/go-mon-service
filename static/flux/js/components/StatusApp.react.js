@@ -34,12 +34,10 @@ var StatusApp = React.createClass({
         return {
             stats: {
                 id: '',
-                update: {"":[]},
-                last_request: null
+                update: []
             },
             groupIndex: 0,
             searchPanelStyle: ""
-
         }
     },
 
@@ -105,13 +103,12 @@ var StatusApp = React.createClass({
                      </button>
         }
         sPanelStyle = this.state.searchPanelStyle;
-        var update = this.state.stats.update;
         StatusStore.groupNames.forEach(function(group, id){
-            groups.push(<option value={id}>{group}</option>);
+            groups.push(<option key={group} value={id}>{group}</option>);
         });
-        for(var i in update){
-            content.push(<Sidebar key={i} groupName={i} stats={update[i]}/>)
-        }
+        this.state.stats.update.forEach(function(group){
+            content.push(<Sidebar key={group.groupName} stats={group}/>)
+        });
         return (<div>   
                     <div className={"search_blocks x-menu x-menu-floating x-layer " + sPanelStyle} id="hide_serach">
                        <form onSubmit={this._onSearch} className="x-menu-list" style={{"height":"24px"}}>

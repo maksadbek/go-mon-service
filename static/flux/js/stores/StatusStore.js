@@ -69,27 +69,24 @@ var StatusStore = assign({}, EventEmitter.prototype, {
                 // if search index container is empty, 
                 // then fill it and groups container by the way
                 if(!indexed){
-                    for(var groupName in _carStatus.update){
-                        _carStatus.update[groupName].forEach(function(car){
+                    _carStatus.update.forEach(function(group){
+                        group.data.forEach(function(car){
                             car.action = '-1';
                             _markersOnMap[car.id] = car;
                         })
-                        StatusStore.groupNames.push(groupName);
-                        _carStatus.update[groupName]
-                        .forEach(function(v, index){
+                        StatusStore.groupNames.push(group.groupName);
+                        group.data.forEach(function(v){
                             searchIdx.add({
                                 id: v.id, 
                                 number: v.number
                             });
                         });
-                    }
-                    // TODO, this is for test
-                    _markersOnMap[Object.keys(_markersOnMap)[0]].action = '1';
+                    });
                     indexed = true;
                     mon.obj_array(_markersOnMap, false);
+                    // TODO, this is for test
+                    _markersOnMap[Object.keys(_markersOnMap)[0]].action = '2';
                 }
-                // if search is on, then filter incoming data 
-                // by criteria from _searchRes
                 StatusStore.emitChange();
                 return _carStatus;
             }
@@ -109,14 +106,13 @@ var StatusStore = assign({}, EventEmitter.prototype, {
     },
     getAll: function(){
         if(_search){
-            var m = {};
-            var foundCar;
+            var m = {};     // list of groups and its values
+            var foundCar;   // car with required criteria
             // iterate over all found items
-                // iterate over groups
-            for(var groups in _carStatus.update){
+            _carStatus.update.forEach(function(group){
                 // iterate over all items in the group
-                var res = [];
-                _carStatus.update[groups].forEach(function(car){
+                var res = []; // result
+                group.data.forEach(function(car){
                     _searchRes.forEach(function(foundRef){
                         if(car.id === parseInt(foundRef.ref)){
                             res.push(car);
@@ -124,18 +120,19 @@ var StatusStore = assign({}, EventEmitter.prototype, {
                     });
                 })
                 if(res.length !== 0){
-                    m[groups] = res;
+                    m[group] = res;
                 }
-            };
+            });
             return {
+                 // replace values of car list with a list that found items
                  id: _carStatus.id,
                  update: m 
             }
         }
+
         if(StatusStore.groupIndex !== 0){
-            var groupName = StatusStore.groupNames[StatusStore.groupIndex];
-            var filteredStatuses = {};
-            filteredStatuses[groupName] = _carStatus.update[groupName];
+            var filteredStatuses = [];
+            filteredStatuses.push(_carStatus.update[groupIndex]);
             return {
                  id: _carStatus.id,
                  update: filteredStatuses

@@ -5,8 +5,7 @@ var StatusStore = require('../stores/StatusStore');
 
 var Sidebar = React.createClass({
     propTypes:{
-        stats: React.PropTypes.array.isRequired,
-        groupName: React.PropTypes.string.isRequired
+        stats: React.PropTypes.object.isRequired
     },
     getInitialState: function(){
         return { 
@@ -16,15 +15,14 @@ var Sidebar = React.createClass({
         }
     },
     render: function(){
-        count = 0;
+        var count = 0;
         var statuses = [];
-        var stat = this.props.stats;
         var checked = this.state.isChildChecked;
-        stat.forEach(function(k){
+        this.props.stats.data.forEach(function(k){
             count++;
             statuses.push(<Status key={k.id} stat={k} isChecked={checked} />);
-        })
-        var group = this.props.groupName + " (" + count + ")";
+        });
+        var group = this.props.stats.groupName + " (" + count + ")";
         return (
             <div className={"body_monitoring"}>
                 <div className={"show_panel "+ this.state.style + " " + this.state.styleCheckAll}> 
@@ -59,8 +57,6 @@ var Sidebar = React.createClass({
                 styleCheckAll: style,
                 isChildChecked: event.target.checked
         });
-    },
-    componentDidMount: function(){
     }
 });
 
