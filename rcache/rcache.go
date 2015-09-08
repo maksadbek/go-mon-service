@@ -2,6 +2,7 @@ package rcache
 
 import (
 	"encoding/json"
+	"sort"
 	"strconv"
 	"time"
 
@@ -32,14 +33,20 @@ func (f Fleet) MarshalJSON() ([]byte, error) {
 	}{
 		ID: f.Id,
 	}
-	for groupName, positions := range f.Update {
+	keys := make([]string, 0)
+	for groupName := range f.Update {
+		keys = append(keys, groupName)
+	}
+
+	sort.Strings(keys)
+	for _, groupName := range keys {
 		data := struct {
 			GroupName string `json:"groupName"`
 			Data      []Pos  `json:"data"`
 		}{
 			GroupName: groupName,
 		}
-		for _, position := range positions {
+		for _, position := range f.Update[groupName] {
 			data.Data = append(data.Data, position)
 		}
 		m.Update = append(m.Update, data)
