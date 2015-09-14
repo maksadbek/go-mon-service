@@ -51,7 +51,8 @@ var StatusStore = assign({}, EventEmitter.prototype, {
     redrawMap: function(zoom){
         // mon is global object
         // can be used to control the Map
-        if(typeof(mon) !== "undefined"){
+        // mapLoaded is global variable, true if the google maps was loaded
+        if(typeof(mon) !== "undefined" && mapLoaded){
             mon.obj_array(_markersOnMap, zoom);
         }
         
@@ -70,10 +71,6 @@ var StatusStore = assign({}, EventEmitter.prototype, {
                 // then fill it and groups container by the way
                 if(!indexed){
                     _carStatus.update.forEach(function(group){
-                        group.data.forEach(function(car){
-                            car.action = '-1';
-                            _markersOnMap[car.id] = car;
-                        })
                         StatusStore.groupNames.push(group.groupName);
                         group.data.forEach(function(v){
                             searchIdx.add({
@@ -83,9 +80,9 @@ var StatusStore = assign({}, EventEmitter.prototype, {
                         });
                     });
                     indexed = true;
-                    mon.obj_array(_markersOnMap, false);
                     // TODO, this is for test
-                    _markersOnMap[Object.keys(_markersOnMap)[0]].action = '2';
+                    // _markersOnMap[Object.keys(_markersOnMap)[0]].action = '2';
+                    // StatusStore.redrawMap(false);
                 }
                 StatusStore.emitChange();
                 return _carStatus;
@@ -105,34 +102,36 @@ var StatusStore = assign({}, EventEmitter.prototype, {
         );
     },
     getAll: function(){
+        // if user filtered
         if(_search){
-            var m = {};     // list of groups and its values
+            var filteredData = [];     // list of groups and its values
             var foundCar;   // car with required criteria
             // iterate over all found items
             _carStatus.update.forEach(function(group){
                 // iterate over all items in the group
-                var res = []; // result
+                var res = {groupName: group.groupName, data: []}; // result
                 group.data.forEach(function(car){
                     _searchRes.forEach(function(foundRef){
                         if(car.id === parseInt(foundRef.ref)){
-                            res.push(car);
+                            res.data.push(car);
                         }
                     });
                 })
-                if(res.length !== 0){
-                    m[group] = res;
+                if(res.data.length !== 0){
+                    filteredData.push(res);
                 }
             });
             return {
                  // replace values of car list with a list that found items
                  id: _carStatus.id,
-                 update: m 
+                 update: filteredData 
             }
         }
 
+        // if user filtered by group, the return only that group
         if(StatusStore.groupIndex !== 0){
             var filteredStatuses = [];
-            filteredStatuses.push(_carStatus.update[groupIndex]);
+            filteredStatuses.push(_carStatus.update[StatusStore.groupIndex]);
             return {
                  id: _carStatus.id,
                  update: filteredStatuses
@@ -159,27 +158,35 @@ var StatusStore = assign({}, EventEmitter.prototype, {
             case StatusConstants.AddMarker:
                 // the structure of info must be:
                 // { id: "1234", pos: { lat: "123", lng:...}}
-                _markersOnMap[action.info.id].action = '2';
-                _markersOnMap[action.info.id].onMap = true;
-                mon.obj_array(_markersOnMap, true);
-                for(var i in my_sm){
-                    if(my_sm[i] === action.info.id){
-                        return;
-                    }
+                _markersOnMap[action.info.id] = {
+                    id: action.info.id,
+                    latitude: action.info.stat.latitude,
+                    longitude: action.info.stat.longitude,
+                    direction: action.info.stat.direction,
+                    speed: action.info.stat.speed,
+                    sat: action.info.stat.sat,
+                    owner: action.info.stat.owner,
+                    formatted_time: action.info.stat.time,
+                    addparams: action.info.stat.additional,
+                    car_name: action.info.stat.number,
+                    action: '2',
+                    onMap: true
                 }
-                my_sm.push(action.info.id);
+                // check for existence of id in my_sm
+                // if it does not exist the push it
+                id = parseInt(action.info.id);
+                if(my_sm.indexOf(id) === -1){
+                    my_sm.push(id);
+                }
                 // pass true to zoom the map
                 StatusStore.redrawMap(true);
                 break;
             case StatusConstants.DelMarker:
                 _markersOnMap[action.info.id].action = '-1';
                 _markersOnMap[action.info.id].onMap = false;
-                mon.obj_array(_markersOnMap, true);
-                for(var i in my_sm){
-                    if(my_sm[i] == action.info.id){
-                        my_sm.pop(i);
-                    }
-                }
+                // remove car id from my_sm array
+                my_sm.remove(parseInt(action.info.id))
+                StatusStore.redrawMap(true);
                 break;
             case StatusConstants.SearchCar:
                 var number = action.info.name;

@@ -16,8 +16,7 @@ var CarStatus = React.createClass({
     _addMarker: function(){
         StatusActions.AddMarkerToMap({
             id: this.props.stat.id,
-            pos: {
-                id: this.props.stat.id,
+            stat:{
                 latitude: this.props.stat.latitude,
                 longitude: this.props.stat.longitude,
                 direction: this.props.stat.direction,
@@ -26,9 +25,9 @@ var CarStatus = React.createClass({
                 owner: this.props.stat.owner,
                 formatted_time: this.props.stat.time,
                 addparams: this.props.stat.additional,
-                car_name: this.props.stat.number,
-                action: '2'
+                car_name: this.props.stat.number
             }
+
         });
     },
     _delMarker: function(){
@@ -68,9 +67,11 @@ var CarStatus = React.createClass({
     },
     render: function(){
         var stat = this.props.stat;
-
-        StatusStore.updateMarker(stat);
-        StatusStore.redrawMap(false);
+        
+       if(mapLoaded){
+           StatusStore.updateMarker(stat);
+           StatusStore.redrawMap(false);
+       }
 
         var host = "beta.maxtrack.uz";
         if(typeof(go_mon_site) !== "undefined"){

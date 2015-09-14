@@ -107,7 +107,7 @@ var StatusApp = React.createClass({
             groups.push(<option key={group} value={id}>{group}</option>);
         });
         this.state.stats.update.forEach(function(group){
-            content.push(<Sidebar key={group.groupName} stats={group}/>)
+            content.push(<Sidebar key={group.groupName} groupName={group.groupName} stats={group.data}/>)
         });
         return (<div>   
                     <div className={"search_blocks x-menu x-menu-floating x-layer " + sPanelStyle} id="hide_serach">
@@ -257,7 +257,8 @@ var StatusApp = React.createClass({
     _onChange: function(){
         // if MonReqToggler is false,
         // then, stop sending requests
-        this.setState({stats: getAllStatuses()});
+        var stats =  getAllStatuses()
+        this.setState({stats: stats});
         var loader = document.getElementById("gomon-loader");
         if(loader !== null){
             loader.remove();
