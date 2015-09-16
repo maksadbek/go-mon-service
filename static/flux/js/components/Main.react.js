@@ -1,13 +1,14 @@
 var React = require('react');
-var StatusStore = require('../stores/StatusStore');
+
+var Sidebar = require('./Sidebar.react');
+
 var CarActions = require('../actions/StatusActions');
 var UserActions = require('../actions/UserActions');
-var Sidebar = require('./Sidebar.react');
-var UserStore = require('../stores/UserStore');
 
-function getAllStatuses(){
-    return StatusStore.getAll()
-}
+var UserStore = require('../stores/UserStore');
+var StatusStore = require('../stores/StatusStore');
+
+
 var userLogin   = "";
 var userUID     = "";
 var userHash    = "";
@@ -71,34 +72,34 @@ var StatusApp = React.createClass({
             fuelButton;
 
         if(monitoring_speed !== 0){
-        speedButton = <button style={{"width":"34px"}}>
-                        <img title="Скорость" src={"http://online.maxtrack.uz/i/monitoring/speed-header.png"}/> 
-                        </button>
+            speedButton = <button style={{width:"34px"}}>
+                            <img title="Скорость" src={"http://online.maxtrack.uz/i/monitoring/speed-header.png"}/> 
+                          </button>
         }
         if(monitoring_actual_time !== 0){
-            satButton =  <button style={{"width":"34px"}}>
+            satButton =  <button style={{width:"34px"}}>
                             <img src={"http://online.maxtrack.uz/i/monitoring/gsm-header.png"}/> 
                         </button>
         }
         if(status_ignition_object !== 0){
-            ignitionButton = <button style={{"width":"34px"}}>
+            ignitionButton = <button style={{width:"34px"}}>
                                 <img    title={"Статус зажигании объекта"} 
                                         src={"http://online.maxtrack.uz/i/monitoring/key-solid.png"} /> 
                              </button>
         } 
         if(monitoring_gprs_condition !== 0){
-            wifiButton = <button style={{"width":"34px"}}>
+            wifiButton = <button style={{width:"34px"}}>
                             <img title={"Актуальность позиции во времени и пространстве"} 
                                  src={"http://online.maxtrack.uz/i/monitoring/sat-header.png"} /> 
                         </button>
         }
         if(status_fuel !== 0){
-            fuelButton = <button style={{"width":"34px"}}>
+            fuelButton = <button style={{width:"34px"}}>
                             <img title={"Уровень топлива"} src={"http://online.maxtrack.uz/i/monitoring/fuel-header-tr.png"} /> 
                          </button>
         }
         if(status_battery !== 0){
-            batteryButton = <button style={{"width":"34px"}}>
+            batteryButton = <button style={{width:"34px"}}>
                         <img title={"Уровень заряда батарейки"} src={"http://online.maxtrack.uz/i/monitoring/battery-plug.png"} /> 
                      </button>
         }
@@ -119,7 +120,7 @@ var StatusApp = React.createClass({
                                             placeholder="Поиск обектов" 
                                             className="x-form-text x-form-field">
                                        <img src="/e/resources/images/default/s.gif" 
-                                           style={{"position":"absolute", "right":"23px"}}
+                                             style={{"position":"absolute", "right":"23px"}}
                                              onClick={this._onEmptySearch}
                                              className="x-form-trigger x-form-clear-trigger x-form-trigger-click" />
                                        <button style={{"background": "none", 
@@ -257,7 +258,7 @@ var StatusApp = React.createClass({
     _onChange: function(){
         // if MonReqToggler is false,
         // then, stop sending requests
-        var stats =  getAllStatuses()
+        var stats =  this._getAllStatuses()
         this.setState({stats: stats});
         var loader = document.getElementById("gomon-loader");
         if(loader !== null){
@@ -297,8 +298,10 @@ var StatusApp = React.createClass({
     },
     _onDispatcherClick: function(){
         window.open('/?module=disp&col='+my_sm.length+'&cars_id='+my_sm.join(',')+'&lang=ru');
+    },
+    _getAllStatuses: function(){
+        return StatusStore.getAll()
     }
-
 });
 
 module.exports = StatusApp;

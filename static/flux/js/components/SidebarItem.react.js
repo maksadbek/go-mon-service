@@ -2,7 +2,7 @@ var React = require('react');
 var StatusActions = require('../actions/StatusActions');
 var StatusStore = require('../stores/StatusStore');
 
-var CarStatus = React.createClass({
+var SidebarItem = React.createClass({
     propTypes:{
         stat: React.PropTypes.object.isRequired,
         isChecked: React.PropTypes.bool
@@ -10,7 +10,7 @@ var CarStatus = React.createClass({
     getInitialState: function(){
         return { 
                 isChecked: this.props.isChecked,
-                toolTipStyle: "none"
+                toolTipCSS: "none"
                }
     },
     _addMarker: function(){
@@ -60,18 +60,18 @@ var CarStatus = React.createClass({
         StatusStore.centerMarker(this.props.stat.id);
     },
     _onTitleMouseOver: function(){
-        this.setState({toolTipStyle: "block"})
+        this.setState({toolTipCSS: "block"})
     },
     _onTitleMouseOut: function(){
-        this.setState({toolTipStyle: "none"})
+        this.setState({toolTipCSS: "none"})
     },
     render: function(){
         var stat = this.props.stat;
         
-       if(mapLoaded){
+        if(mapLoaded){
            StatusStore.updateMarker(stat);
            StatusStore.redrawMap(false);
-       }
+        }
 
         var host = "beta.maxtrack.uz";
         if(typeof(go_mon_site) !== "undefined"){
@@ -88,7 +88,7 @@ var CarStatus = React.createClass({
         if(monitoring_actual_time !== 0){
             // set satellite indicator
             var satIndicator;
-            var satTitle = "количество спутников" + stat.sat
+            var satTitle = "количество спутников " + stat.sat
             if (stat.sat==6767) {
                     satIndicator = "http://"+host+"/i/monitoring/shield.png";
             } else {
@@ -193,7 +193,7 @@ var CarStatus = React.createClass({
             }
             batteryStatus = <td><span className="hide_tooltip">{batteryTitle}</span><img src={batteryIndicator} /></td>
         }
-        var toolTipStyle = this.state.toolTipStyle;
+        var toolTipCSS = this.state.toolTipCSS;
 
         return (
             <div className="bottom_side">
@@ -220,7 +220,7 @@ var CarStatus = React.createClass({
                             {batteryStatus}
                           </tr>
                         </table>
-                           <div className="hoverBlock" style={{display: toolTipStyle}}>
+                           <div className="hoverBlock" style={{display: toolTipCSS}}>
                                 <table   cellspacing="0">
                                     <tr>
                                         <td><strong>Объект</strong></td>
@@ -265,4 +265,4 @@ var CarStatus = React.createClass({
     }
 });
 
-module.exports = CarStatus;
+module.exports = SidebarItem;

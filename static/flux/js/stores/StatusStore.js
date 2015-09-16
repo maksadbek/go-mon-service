@@ -7,6 +7,7 @@ var assign = require('object-assign');
 var lunr = require('lunr');
 
 var CHANGE_EVENT = 'change';
+var UNCHECK_EVENT = 'uncheck_event';
 
 var _carStatus = {};
 var _markersOnMap = {};
@@ -34,6 +35,9 @@ var StatusStore = assign({}, EventEmitter.prototype, {
         if(_markersOnMap[id].onMap){
             mon.setCenterObj(id);
         }
+    },
+    uncheckAllMarkers: function(){
+        StatusStore.emitUncheckChange();
     },
     updateMarker: function(info){
         if(_markersOnMap[info.id] !== undefined){
@@ -70,6 +74,7 @@ var StatusStore = assign({}, EventEmitter.prototype, {
                 // if search index container is empty, 
                 // then fill it and groups container by the way
                 if(!indexed){
+                    window.uncheckAllMarkers = StatusStore.uncheckAllMarkers;
                     _carStatus.update.forEach(function(group){
                         StatusStore.groupNames.push(group.groupName);
                         group.data.forEach(function(v){
@@ -148,6 +153,16 @@ var StatusStore = assign({}, EventEmitter.prototype, {
     },
     removeChangeListener: function(callback){
         this.removeListener(CHANGE_EVENT, callback);
+    },
+    // uncheck listeners
+    emitUncheckChange: function(){
+        this.emit(UNCHECK_EVENT);
+    },
+    addUncheckListener: function(callback){
+        this.on(UNCHECK_EVENT, callback);
+    },
+    removeUncheckListener: function(callback){
+        this.removeListener(UNCHECK_EVENT, callback);
     },
     dispatcherIndex: AppDispatcher.register(function(action){
         switch(action.actionType){
